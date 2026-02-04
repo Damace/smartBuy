@@ -27,12 +27,11 @@ class ProfileController extends GetxController {
   }
 
   void editProfile() {
-    // Navigate to edit profile or show edit dialog
-    print('Edit profile tapped');
+    Get.toNamed(Routes.BUYER_EDIT_PERSONAL_INFORMATION);
   }
 
   void navigateToOrders() {
-    Get.toNamed(Routes.ORDERS);
+    Get.toNamed(Routes.BUYER_ORDERS);
   }
 
   void navigateToWishlist() {
@@ -50,21 +49,19 @@ class ProfileController extends GetxController {
   }
 
   void navigateToPersonalInfo() {
-    // Navigate to personal information screen
-    print('Navigate to personal info');
+    Get.toNamed(Routes.BUYER_EDIT_PERSONAL_INFORMATION);
   }
 
   void navigateToAddresses() {
-    Get.toNamed(Routes.ADDRESS);
+    Get.toNamed(Routes.BUYER_SAVED_ADDRESS);
   }
 
   void navigateToPaymentMethods() {
-    Get.toNamed(Routes.PAYMENT);
+    Get.toNamed(Routes.BUYER_SAVED_PAYMENT);
   }
 
   void navigateToNotificationPreferences() {
-    // Navigate to notification preferences
-    print('Navigate to notification preferences');
+    Get.toNamed(Routes.BUYER_NOTIFICATION_PREFERENCES);
   }
 
   void performLogout() {

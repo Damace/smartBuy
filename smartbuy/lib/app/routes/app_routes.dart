@@ -26,6 +26,10 @@ abstract class Routes {
   static const VENDOR_STORE_PREVIEW = _Paths.VENDOR_STORE_PREVIEW;
   static const HOME = _Paths.HOME;
   static const PROFILE = _Paths.PROFILE;
+  static const BUYER_EDIT_PERSONAL_INFORMATION = _Paths.BUYER_EDIT_PERSONAL_INFORMATION;
+  static const BUYER_ORDERS = _Paths.BUYER_ORDERS;
+  static const BUYER_ORDER_DETAILS = _Paths.BUYER_ORDER_DETAILS;
+  static const BUYER_TRACK_ORDER = _Paths.BUYER_TRACK_ORDER;
   static const CART = _Paths.CART;
   static const CHECKOUT = _Paths.CHECKOUT;
   static const PRODUCT_DETAILS = _Paths.PRODUCT_DETAILS;
@@ -37,6 +41,12 @@ abstract class Routes {
   static const SETTINGS = _Paths.SETTINGS;
   static const ADDRESS = _Paths.ADDRESS;
   static const PAYMENT = _Paths.PAYMENT;
+  static const BUYER_SAVED_ADDRESS = _Paths.BUYER_SAVED_ADDRESS;
+  static const BUYER_EDIT_ADDRESS = _Paths.BUYER_EDIT_ADDRESS;
+  static const BUYER_SAVED_PAYMENT = _Paths.BUYER_SAVED_PAYMENT;
+  static const BUYER_EDIT_PAYMENT = _Paths.BUYER_EDIT_PAYMENT;
+  static const BUYER_NOTIFICATION_PREFERENCES = _Paths.BUYER_NOTIFICATION_PREFERENCES;
+  static const NETWORK_CONNECTION = _Paths.NETWORK_CONNECTION;
 }
 
 abstract class _Paths {
@@ -65,6 +75,10 @@ abstract class _Paths {
   static const VENDOR_STORE_PREVIEW = '/vendor-store-preview';
   static const HOME = '/home';
   static const PROFILE = '/profile';
+  static const BUYER_EDIT_PERSONAL_INFORMATION = '/buyer-edit-personal-information';
+  static const BUYER_ORDERS = '/buyer-orders';
+  static const BUYER_ORDER_DETAILS = '/buyer-order-details';
+  static const BUYER_TRACK_ORDER = '/buyer-track-order';
   static const CART = '/cart';
   static const CHECKOUT = '/checkout';
   static const PRODUCT_DETAILS = '/product-details';
@@ -76,4 +90,10 @@ abstract class _Paths {
   static const SETTINGS = '/settings';
   static const ADDRESS = '/address';
   static const PAYMENT = '/payment';
+  static const BUYER_SAVED_ADDRESS = '/buyer-saved-address';
+  static const BUYER_EDIT_ADDRESS = '/buyer-edit-address';
+  static const BUYER_SAVED_PAYMENT = '/buyer-saved-payment';
+  static const BUYER_EDIT_PAYMENT = '/buyer-edit-payment';
+  static const BUYER_NOTIFICATION_PREFERENCES = '/buyer-notification-preferences';
+  static const NETWORK_CONNECTION = '/network-connection';
 }

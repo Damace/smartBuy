@@ -45,6 +45,28 @@ import '../modules/settings/settings_binding.dart';
 import '../modules/settings/settings_view.dart';
 import '../modules/cart/cart_binding.dart';
 import '../modules/cart/cart_view.dart';
+import '../modules/buyer_edit_personal_information/buyer_edit_personal_information_binding.dart';
+import '../modules/buyer_edit_personal_information/buyer_edit_personal_information_view.dart';
+import '../modules/buyer_orders/buyer_orders_binding.dart';
+import '../modules/buyer_orders/buyer_orders_view.dart';
+import '../modules/buyer_order_details/buyer_order_details_binding.dart';
+import '../modules/buyer_order_details/buyer_order_details_view.dart';
+import '../modules/buyer_track_order/buyer_track_order_binding.dart';
+import '../modules/buyer_track_order/buyer_track_order_view.dart';
+import '../modules/wishlist/wishlist_binding.dart';
+import '../modules/wishlist/wishlist_view.dart';
+import '../modules/buyer_saved_address/buyer_saved_address_binding.dart';
+import '../modules/buyer_saved_address/buyer_saved_address_view.dart';
+import '../modules/buyer_edit_address/buyer_edit_address_binding.dart';
+import '../modules/buyer_edit_address/buyer_edit_address_view.dart';
+import '../modules/buyer_saved_payment/buyer_saved_payment_binding.dart';
+import '../modules/buyer_saved_payment/buyer_saved_payment_view.dart';
+import '../modules/buyer_edit_payment/buyer_edit_payment_binding.dart';
+import '../modules/buyer_edit_payment/buyer_edit_payment_view.dart';
+import '../modules/buyer_notification_preferences/buyer_notification_preferences_binding.dart';
+import '../modules/buyer_notification_preferences/buyer_notification_preferences_view.dart';
+import '../modules/network_connection/network_connection_binding.dart';
+import '../modules/network_connection/network_connection_view.dart';
 import '../modules/main_navigation/main_navigation_binding.dart';
 import '../modules/main_navigation/main_navigation_view.dart';
 
@@ -215,6 +237,83 @@ class AppPages {
       page: () => const CartView(),
       binding: CartBinding(),
       transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_EDIT_PERSONAL_INFORMATION,
+      page: () => const BuyerEditPersonalInformationView(),
+      binding: BuyerEditPersonalInformationBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_ORDERS,
+      page: () => const BuyerOrdersView(),
+      binding: BuyerOrdersBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_ORDER_DETAILS,
+      page: () => const BuyerOrderDetailsView(),
+      binding: BuyerOrderDetailsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_TRACK_ORDER,
+      page: () => const BuyerTrackOrderView(),
+      binding: BuyerTrackOrderBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.WISHLIST,
+      page: () => const WishlistView(),
+      binding: WishlistBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_SAVED_ADDRESS,
+      page: () => const BuyerSavedAddressView(),
+      binding: BuyerSavedAddressBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_EDIT_ADDRESS,
+      page: () => const BuyerEditAddressView(),
+      binding: BuyerEditAddressBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_SAVED_PAYMENT,
+      page: () => const BuyerSavedPaymentView(),
+      binding: BuyerSavedPaymentBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_EDIT_PAYMENT,
+      page: () => const BuyerEditPaymentView(),
+      binding: BuyerEditPaymentBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_NOTIFICATION_PREFERENCES,
+      page: () => const BuyerNotificationPreferencesView(),
+      binding: BuyerNotificationPreferencesBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.NETWORK_CONNECTION,
+      page: () => const NetworkConnectionView(),
+      binding: NetworkConnectionBinding(),
+      transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
