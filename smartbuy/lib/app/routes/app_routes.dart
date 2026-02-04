@@ -13,6 +13,7 @@ abstract class Routes {
   static const VENDOR_STATUS = _Paths.VENDOR_STATUS;
   static const VENDOR_HOME = _Paths.VENDOR_HOME;
   static const VENDOR_ADD_PRODUCT = _Paths.VENDOR_ADD_PRODUCT;
+  static const VENDOR_EDIT_PRODUCT = _Paths.VENDOR_EDIT_PRODUCT;
   static const VENDOR_ORDER_DETAILS = _Paths.VENDOR_ORDER_DETAILS;
   static const VENDOR_BUSINESS_DETAILS = _Paths.VENDOR_BUSINESS_DETAILS;
   static const VENDOR_BANK_ACCOUNT_DETAILS = _Paths.VENDOR_BANK_ACCOUNT_DETAILS;
@@ -20,6 +21,9 @@ abstract class Routes {
   static const VENDOR_SHIPPING_PARTNERS = _Paths.VENDOR_SHIPPING_PARTNERS;
   static const VENDOR_STOCK_INVENTORY = _Paths.VENDOR_STOCK_INVENTORY;
   static const VENDOR_INVENTORY_ALERTS = _Paths.VENDOR_INVENTORY_ALERTS;
+  static const VENDOR_EDIT_BUSINESS_DETAILS = _Paths.VENDOR_EDIT_BUSINESS_DETAILS;
+  static const VENDOR_EDIT_BANK_ACCOUNT_DETAILS = _Paths.VENDOR_EDIT_BANK_ACCOUNT_DETAILS;
+  static const VENDOR_STORE_PREVIEW = _Paths.VENDOR_STORE_PREVIEW;
   static const HOME = _Paths.HOME;
   static const PROFILE = _Paths.PROFILE;
   static const CART = _Paths.CART;
@@ -48,6 +52,7 @@ abstract class _Paths {
   static const VENDOR_STATUS = '/vendor-status';
   static const VENDOR_HOME = '/vendor-home';
   static const VENDOR_ADD_PRODUCT = '/vendor-add-product';
+  static const VENDOR_EDIT_PRODUCT = '/vendor-edit-product';
   static const VENDOR_ORDER_DETAILS = '/vendor-order-details';
   static const VENDOR_BUSINESS_DETAILS = '/vendor-business-details';
   static const VENDOR_BANK_ACCOUNT_DETAILS = '/vendor-bank-account-details';
@@ -55,6 +60,9 @@ abstract class _Paths {
   static const VENDOR_SHIPPING_PARTNERS = '/vendor-shipping-partners';
   static const VENDOR_STOCK_INVENTORY = '/vendor-stock-inventory';
   static const VENDOR_INVENTORY_ALERTS = '/vendor-inventory-alerts';
+  static const VENDOR_EDIT_BUSINESS_DETAILS = '/vendor-edit-business-details';
+  static const VENDOR_EDIT_BANK_ACCOUNT_DETAILS = '/vendor-edit-bank-account-details';
+  static const VENDOR_STORE_PREVIEW = '/vendor-store-preview';
   static const HOME = '/home';
   static const PROFILE = '/profile';
   static const CART = '/cart';

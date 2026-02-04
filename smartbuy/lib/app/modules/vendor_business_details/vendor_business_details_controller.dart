@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../core/utils/helpers.dart';
+import '../../routes/app_pages.dart';
 
 class VendorBusinessDetailsController extends GetxController {
   // Business information
@@ -10,7 +11,7 @@ class VendorBusinessDetailsController extends GetxController {
   final RxString officeAddress = '102 Business Plaza, Market District\nSan Francisco, CA 94105\nUnited States'.obs;
 
   void editDetails() {
-    Helpers.showInfo('edit_business_details_info'.tr);
+    Get.toNamed(Routes.VENDOR_EDIT_BUSINESS_DETAILS);
   }
 
   void viewCertificate() {

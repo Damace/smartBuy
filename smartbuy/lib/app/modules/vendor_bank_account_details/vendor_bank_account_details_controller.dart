@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../core/utils/helpers.dart';
+import '../../routes/app_pages.dart';
 
 class VendorBankAccountDetailsController extends GetxController {
   // Bank account information
@@ -10,7 +11,7 @@ class VendorBankAccountDetailsController extends GetxController {
   final RxString swiftCode = 'GTB0001234'.obs;
 
   void changeBankAccount() {
-    Helpers.showInfo('change_bank_account_info'.tr);
+    Get.toNamed(Routes.VENDOR_EDIT_BANK_ACCOUNT_DETAILS);
   }
 
   String getAccountNumberMasked() {

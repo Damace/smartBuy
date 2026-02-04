@@ -106,34 +106,103 @@ class VendorProductsController extends GetxController {
   }
 
   void editProduct(Map<String, dynamic> product) {
-    // Navigate to edit product screen (placeholder for now)
-    Get.snackbar(
-      'edit_product'.tr,
-      '${'editing'.tr}: ${product['name']}',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+    // Navigate to edit product screen
+    Get.toNamed(Routes.VENDOR_EDIT_PRODUCT, arguments: product);
   }
 
   void deleteProduct(Map<String, dynamic> product) {
     Get.defaultDialog(
-      title: 'delete_product'.tr,
-      middleText: '${'delete_product_confirmation'.tr}\n\n${product['name']}',
-      textConfirm: 'delete'.tr,
-      textCancel: 'cancel'.tr,
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.red,
-      cancelTextColor: Get.isDarkMode ? Colors.white : Colors.black87,
-      onConfirm: () {
-        products.removeWhere((p) => p['id'] == product['id']);
-        Get.back();
-        Get.snackbar(
-          'success'.tr,
-          'product_deleted'.tr,
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
-        );
-      },
+      title: '',
+      titlePadding: EdgeInsets.zero,
+      contentPadding: const EdgeInsets.all(24),
+      content: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.warning_rounded,
+              color: Colors.red.shade600,
+              size: 48,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'delete_product'.tr,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'delete_product_confirmation_message'.tr,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Get.isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                products.removeWhere((p) => p['id'] == product['id']);
+                Get.back();
+                Get.snackbar(
+                  'success'.tr,
+                  'product_deleted_successfully'.tr,
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'delete_product'.tr,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => Get.back(),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Get.isDarkMode ? Colors.white : Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                side: BorderSide(
+                  color: Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                ),
+              ),
+              child: Text(
+                'cancel'.tr,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

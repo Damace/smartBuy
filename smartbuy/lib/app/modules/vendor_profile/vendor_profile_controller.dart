@@ -61,13 +61,7 @@ class VendorProfileController extends GetxController {
   }
 
   void viewStoreAsBuyer() {
-    // Navigate to store preview as buyer
-    print('View Store as Buyer');
-    Get.snackbar(
-      'Store Preview',
-      'Opening your store in buyer view...',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    Get.toNamed(Routes.VENDOR_STORE_PREVIEW);
   }
 
   void signOut() {

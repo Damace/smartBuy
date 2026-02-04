@@ -619,7 +619,8 @@ const Map<String, String> enUS = {
   'healthy': 'Healthy',
   'auto_mark_out_of_stock': 'Auto-mark out of stock',
   'add_new_inventory_item': 'Add New Inventory Item',
-  'add_inventory_item_feature_coming_soon': 'Add inventory item feature coming soon',
+  'add_inventory_item_feature_coming_soon':
+      'Add inventory item feature coming soon',
   'item_options_coming_soon': 'Item options coming soon',
 
   // Vendor Inventory Alerts
@@ -627,15 +628,84 @@ const Map<String, String> enUS = {
   'stock_notifications_settings': 'Stock notifications & settings',
   'stock_notifications': 'Stock Notifications',
   'enable_low_stock_alerts': 'Enable Low Stock Alerts',
-  'get_notified_when_products_running_low': 'Get notified when products are running low',
+  'get_notified_when_products_running_low':
+      'Get notified when products are running low',
   'notify_me_when_units_below': 'Notify me when units are below',
   'reordering_automation': 'Reordering & Automation',
   'automated_reorder': 'Automated Reorder...',
   'remind_me_to_restock_email_push': 'Remind me to restock via email & push',
   'auto_hide_out_of_stock_items': 'Auto-hide Out of Stock Items',
-  'hide_products_from_buyers_when_zero': 'Hide products from buyers when units reach 0',
+  'hide_products_from_buyers_when_zero':
+      'Hide products from buyers when units reach 0',
   'notification_channels': 'Notification Channels',
   'save_settings': 'Save Settings',
   'invalid_threshold_value': 'Invalid threshold value',
-  'inventory_alert_settings_saved': 'Inventory alert settings saved successfully',
+  'inventory_alert_settings_saved':
+      'Inventory alert settings saved successfully',
+
+  // Vendor Edit Business Details
+  'edit_business_details': 'Edit Business Details',
+  'general_information': 'General Information',
+  'registered_office_address': 'Registered Office Address',
+  'enter_office_address': 'Enter office address',
+  'upload_updated_business_certificate': 'Upload Updated Business Certificate',
+  'click_to_upload_or_drag_and_drop': 'Click to upload or drag and drop',
+  'pdf_png_or_jpeg_max_10mb': 'PDF, PNG or JPEG (max 10MB)',
+  'browse_files': 'Browse Files',
+  'certificate_uploaded_successfully': 'Certificate uploaded successfully',
+  'business_details_updated_successfully':
+      'Business details updated successfully',
+
+  // Vendor Edit Bank Account Details
+  'edit_bank_account': 'Edit Bank Account',
+  'enter_bank_details_securely': 'Enter your bank details securely',
+  'account_holder_name': 'Account Holder Name',
+  'bank_name': 'Bank Name',
+  'enable_weekly_payouts': 'Enable Weekly Payouts',
+  'receive_earnings_every_monday': 'Receive earnings every Monday',
+  'update_account': 'Update Account',
+  'your_financial_data_is_encrypted_and_secure':
+      'Your financial data is encrypted and secure',
+  'account_holder_name_required': 'Account holder name is required',
+  'bank_account_updated_successfully': 'Bank account updated successfully',
+
+  // Vendor Store Preview
+  'edit_storefront': 'Edit Storefront',
+  'collections': 'Collections',
+  'search_in_this_store': 'Search in this store...',
+
+  // Vendor Edit Product
+  'general': 'General',
+  'add_up_to_10_images_or_videos': 'Add up to 10 images or videos',
+  'basic_information': 'Basic Information',
+  'product_title': 'Product Title',
+  'enter_product_description': 'Enter product description',
+  'product_title_required': 'Product title is required',
+  'product_price_required': 'Product price is required',
+  'product_stock_required': 'Product stock is required',
+  'product_updated_successfully': 'Product updated successfully',
+  'image_upload_feature_coming_soon': 'Image upload feature coming soon',
+  'image_removed': 'Image removed',
+  'at_least_one_image_required': 'At least one image is required',
+  'basic_pricing': 'Basic Pricing',
+  'base_price': 'Base Price',
+  'sale_price': 'Sale Price',
+  'update_inventory': 'Update Inventory',
+  'inventory_updated_successfully': 'Inventory updated successfully',
+  'base_price_required': 'Base price is required',
+  'sku_required': 'SKU is required',
+  'add_variant_feature_coming_soon': 'Add variant feature coming soon',
+  'edit_variants_feature_coming_soon': 'Edit variants feature coming soon',
+  'logistics_details': 'Logistics Details',
+  'product_weight': 'Product Weight',
+  'width': 'Width',
+  'height': 'Height',
+  'shipping_method': 'Shipping Method',
+  'shipping_class': 'Shipping Class',
+  'enable_return_policy': 'Enable Return Policy',
+  'remove_update_product': 'Remove & Update Product',
+  'product_weight_required': 'Product weight is required',
+  'delete_product_confirmation_message':
+      'This action cannot be undone. All product data, reviews, and history will be permanently removed.',
+  'product_deleted_successfully': 'Product deleted successfully',
 };

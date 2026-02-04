@@ -19,6 +19,8 @@ import '../modules/vendor_main_navigation/vendor_main_navigation_binding.dart';
 import '../modules/vendor_main_navigation/vendor_main_navigation_view.dart';
 import '../modules/vendor_add_product/vendor_add_product_binding.dart';
 import '../modules/vendor_add_product/vendor_add_product_view.dart';
+import '../modules/vendor_edit_product/vendor_edit_product_binding.dart';
+import '../modules/vendor_edit_product/vendor_edit_product_view.dart';
 import '../modules/vendor_order_details/vendor_order_details_binding.dart';
 import '../modules/vendor_order_details/vendor_order_details_view.dart';
 import '../modules/vendor_business_details/vendor_business_details_binding.dart';
@@ -33,6 +35,12 @@ import '../modules/vendor_stock_inventory/vendor_stock_inventory_binding.dart';
 import '../modules/vendor_stock_inventory/vendor_stock_inventory_view.dart';
 import '../modules/vendor_inventory_alerts/vendor_inventory_alerts_binding.dart';
 import '../modules/vendor_inventory_alerts/vendor_inventory_alerts_view.dart';
+import '../modules/vendor_edit_business_details/vendor_edit_business_details_binding.dart';
+import '../modules/vendor_edit_business_details/vendor_edit_business_details_view.dart';
+import '../modules/vendor_edit_bank_account_details/vendor_edit_bank_account_details_binding.dart';
+import '../modules/vendor_edit_bank_account_details/vendor_edit_bank_account_details_view.dart';
+import '../modules/vendor_store_preview/vendor_store_preview_binding.dart';
+import '../modules/vendor_store_preview/vendor_store_preview_view.dart';
 import '../modules/settings/settings_binding.dart';
 import '../modules/settings/settings_view.dart';
 import '../modules/cart/cart_binding.dart';
@@ -119,6 +127,13 @@ class AppPages {
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
+      name: _Paths.VENDOR_EDIT_PRODUCT,
+      page: () => const VendorEditProductView(),
+      binding: VendorEditProductBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
       name: _Paths.VENDOR_ORDER_DETAILS,
       page: () => const VendorOrderDetailsView(),
       binding: VendorOrderDetailsBinding(),
@@ -164,6 +179,27 @@ class AppPages {
       name: _Paths.VENDOR_INVENTORY_ALERTS,
       page: () => const VendorInventoryAlertsView(),
       binding: VendorInventoryAlertsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_EDIT_BUSINESS_DETAILS,
+      page: () => const VendorEditBusinessDetailsView(),
+      binding: VendorEditBusinessDetailsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_EDIT_BANK_ACCOUNT_DETAILS,
+      page: () => const VendorEditBankAccountDetailsView(),
+      binding: VendorEditBankAccountDetailsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_STORE_PREVIEW,
+      page: () => const VendorStorePreviewView(),
+      binding: VendorStorePreviewBinding(),
       transition: Transition.rightToLeftWithFade,
       transitionDuration: const Duration(milliseconds: 300),
     ),
