@@ -25,7 +25,7 @@ class VendorLoginController extends GetxController {
     isLoading.value = false;
 
     Helpers.showSuccess('Vendor login successful!');
-    Get.offAllNamed(Routes.HOME);
+    Get.offAllNamed(Routes.VENDOR_HOME);
   }
 
   bool _validateForm() {

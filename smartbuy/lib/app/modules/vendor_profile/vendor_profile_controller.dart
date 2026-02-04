@@ -33,27 +33,27 @@ class VendorProfileController extends GetxController {
   }
 
   void navigateToBusinessProfile() {
-    print('Navigate to Business Profile');
+    Get.toNamed(Routes.VENDOR_BUSINESS_DETAILS);
   }
 
   void navigateToBankDetails() {
-    print('Navigate to Bank Account Details');
+    Get.toNamed(Routes.VENDOR_BANK_ACCOUNT_DETAILS);
   }
 
   void navigateToStorePolicies() {
-    print('Navigate to Store Policies');
+    Get.toNamed(Routes.VENDOR_STORE_POLICIES);
   }
 
-  void navigateToTaxInfo() {
-    print('Navigate to Tax & GST Information');
+  void navigateToStockInventory() {
+    Get.toNamed(Routes.VENDOR_STOCK_INVENTORY);
   }
 
   void navigateToShippingPartners() {
-    print('Navigate to Shipping Partners');
+    Get.toNamed(Routes.VENDOR_SHIPPING_PARTNERS);
   }
 
-  void navigateToStoreCustomization() {
-    print('Navigate to Store Customization');
+  void navigateToInventoryAlerts() {
+    Get.toNamed(Routes.VENDOR_INVENTORY_ALERTS);
   }
 
   void navigateToSettings() {

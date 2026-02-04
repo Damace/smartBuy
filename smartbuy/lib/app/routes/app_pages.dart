@@ -17,6 +17,22 @@ import '../modules/vendor_status/vendor_status_binding.dart';
 import '../modules/vendor_status/vendor_status_view.dart';
 import '../modules/vendor_main_navigation/vendor_main_navigation_binding.dart';
 import '../modules/vendor_main_navigation/vendor_main_navigation_view.dart';
+import '../modules/vendor_add_product/vendor_add_product_binding.dart';
+import '../modules/vendor_add_product/vendor_add_product_view.dart';
+import '../modules/vendor_order_details/vendor_order_details_binding.dart';
+import '../modules/vendor_order_details/vendor_order_details_view.dart';
+import '../modules/vendor_business_details/vendor_business_details_binding.dart';
+import '../modules/vendor_business_details/vendor_business_details_view.dart';
+import '../modules/vendor_bank_account_details/vendor_bank_account_details_binding.dart';
+import '../modules/vendor_bank_account_details/vendor_bank_account_details_view.dart';
+import '../modules/vendor_store_policies/vendor_store_policies_binding.dart';
+import '../modules/vendor_store_policies/vendor_store_policies_view.dart';
+import '../modules/vendor_shipping_partners/vendor_shipping_partners_binding.dart';
+import '../modules/vendor_shipping_partners/vendor_shipping_partners_view.dart';
+import '../modules/vendor_stock_inventory/vendor_stock_inventory_binding.dart';
+import '../modules/vendor_stock_inventory/vendor_stock_inventory_view.dart';
+import '../modules/vendor_inventory_alerts/vendor_inventory_alerts_binding.dart';
+import '../modules/vendor_inventory_alerts/vendor_inventory_alerts_view.dart';
 import '../modules/settings/settings_binding.dart';
 import '../modules/settings/settings_view.dart';
 import '../modules/cart/cart_binding.dart';
@@ -94,6 +110,62 @@ class AppPages {
       binding: VendorMainNavigationBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_ADD_PRODUCT,
+      page: () => const VendorAddProductView(),
+      binding: VendorAddProductBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_ORDER_DETAILS,
+      page: () => const VendorOrderDetailsView(),
+      binding: VendorOrderDetailsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_BUSINESS_DETAILS,
+      page: () => const VendorBusinessDetailsView(),
+      binding: VendorBusinessDetailsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_BANK_ACCOUNT_DETAILS,
+      page: () => const VendorBankAccountDetailsView(),
+      binding: VendorBankAccountDetailsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_STORE_POLICIES,
+      page: () => const VendorStorePoliciesView(),
+      binding: VendorStorePoliciesBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_SHIPPING_PARTNERS,
+      page: () => const VendorShippingPartnersView(),
+      binding: VendorShippingPartnersBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_STOCK_INVENTORY,
+      page: () => const VendorStockInventoryView(),
+      binding: VendorStockInventoryBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.VENDOR_INVENTORY_ALERTS,
+      page: () => const VendorInventoryAlertsView(),
+      binding: VendorInventoryAlertsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: _Paths.SETTINGS,

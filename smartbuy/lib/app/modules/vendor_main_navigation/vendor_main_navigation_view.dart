@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'vendor_main_navigation_controller.dart';
+import '../vendor_home/vendor_home_view.dart';
+import '../vendor_orders/vendor_orders_view.dart';
+import '../vendor_products/vendor_products_view.dart';
 import '../vendor_profile/vendor_profile_view.dart';
 import '../../core/themes/app_theme.dart';
 
@@ -10,9 +13,9 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      _buildPlaceholderPage('vendor_home'.tr, Icons.dashboard),
-      _buildPlaceholderPage('vendor_orders'.tr, Icons.shopping_bag),
-      _buildPlaceholderPage('vendor_products'.tr, Icons.inventory_2),
+      const VendorHomeView(),
+      const VendorOrdersView(),
+      const VendorProductsView(),
       const VendorProfileView(),
     ];
 
