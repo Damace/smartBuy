@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/models/cart_item_model.dart';
 import '../../data/models/product_model.dart';
+import '../../routes/app_pages.dart';
 
 class CartController extends GetxController {
   final RxList<CartItemModel> cartItems = <CartItemModel>[].obs;
@@ -268,7 +269,7 @@ class CartController extends GetxController {
       return;
     }
     // Navigate to checkout screen
-    Get.toNamed('/checkout');
+    Get.toNamed(Routes.BUYER_CHECKOUT);
   }
 
   double get subtotal {

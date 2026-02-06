@@ -860,4 +860,51 @@ const Map<String, String> swKE = {
   'still_no_connection': 'Bado hakuna muunganisho. Tafadhali angalia mipangilio yako ya mtandao.',
   'connection_check_failed': 'Imeshindwa kuangalia muunganisho. Tafadhali jaribu tena.',
   'open_settings_manually': 'Tafadhali fungua mipangilio ya kifaa chako kuangalia muunganisho wa mtandao.',
+
+  // Messages Inbox
+  'messages': 'Ujumbe',
+  'search_messages': 'Tafuta ujumbe...',
+  'no_conversations': 'Hakuna Mazungumzo',
+  'start_shopping': 'Anza ununuzi ili kuzungumza na maduka na msaada',
+  'online': 'Mtandaoni',
+  'offline': 'Nje ya Mtandao',
+  'active_now': 'Hai sasa',
+  'just_now': 'Sasa hivi',
+
+  // Chat Interface
+  'calling_store': 'Inapiga simu duka...',
+  'block_user': 'Zuia Mtumiaji',
+  'report_conversation': 'Ripoti Mazungumzo',
+  'delete_conversation': 'Futa Mazungumzo',
+  'user_blocked': 'Mtumiaji amezuiwa kwa mafanikio',
+  'conversation_reported': 'Mazungumzo yameripotiwa kwa mafanikio',
+  'conversation_deleted': 'Mazungumzo yamefutwa kwa mafanikio',
+  'view_items': 'ANGALIA VITU',
+  'view_items_feature_coming_soon': 'Kipengele cha kuangalia vitu kinakuja hivi karibuni',
+  'messages_are_encrypted': 'Ujumbe umesimbwa kwa usalama',
+  'type_message': 'Andika ujumbe...',
+  'attachment_feature_coming_soon': 'Kipengele cha viambatanisho kinakuja hivi karibuni',
+  'emoji_picker_coming_soon': 'Kichaguzi cha emoji kinakuja hivi karibuni',
+
+  // Checkout Screen
+  'secure_checkout': 'Malipo Salama',
+  'payment': 'Malipo',
+  'review': 'Kagua',
+  'delivery_address': 'Anwani ya Utoaji',
+  'change': 'Badilisha',
+  'delivery_speed': 'Kasi ya Utoaji',
+  'express': 'Haraka',
+  'order_summary': 'Muhtasari wa Agizo',
+  'qty_count': 'Kiasi: @count',
+  'estimated_tax': 'Kodi Inayokadiriwa',
+  'promo_code': 'Msimbo wa Matangazo',
+  'pay_and_place_order': 'Lipa na Weka Agizo',
+  'promo_code_required': 'Tafadhali weka msimbo wa matangazo',
+  'promo_code_applied': 'Msimbo wa matangazo umetumika kwa mafanikio',
+  'invalid_promo_code': 'Msimbo wa matangazo si sahihi',
+
+  // Order Success Screen
+  'order_placed_successfully': 'Agizo Limewekwa Kwa Mafanikio!',
+  'thank_you_for_shopping': 'Asante kwa kununua na SmartBuy. Agizo lako linashughulikiwa!',
+  'order_id_label': 'Nambari ya Agizo',
 };

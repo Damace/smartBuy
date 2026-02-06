@@ -47,6 +47,10 @@ abstract class Routes {
   static const BUYER_EDIT_PAYMENT = _Paths.BUYER_EDIT_PAYMENT;
   static const BUYER_NOTIFICATION_PREFERENCES = _Paths.BUYER_NOTIFICATION_PREFERENCES;
   static const NETWORK_CONNECTION = _Paths.NETWORK_CONNECTION;
+  static const BUYER_MESSAGES_INBOX = _Paths.BUYER_MESSAGES_INBOX;
+  static const BUYER_CHAT_INTERFACE = _Paths.BUYER_CHAT_INTERFACE;
+  static const BUYER_CHECKOUT = _Paths.BUYER_CHECKOUT;
+  static const BUYER_ORDER_SUCCESS = _Paths.BUYER_ORDER_SUCCESS;
 }
 
 abstract class _Paths {
@@ -96,4 +100,8 @@ abstract class _Paths {
   static const BUYER_EDIT_PAYMENT = '/buyer-edit-payment';
   static const BUYER_NOTIFICATION_PREFERENCES = '/buyer-notification-preferences';
   static const NETWORK_CONNECTION = '/network-connection';
+  static const BUYER_MESSAGES_INBOX = '/buyer-messages-inbox';
+  static const BUYER_CHAT_INTERFACE = '/buyer-chat-interface';
+  static const BUYER_CHECKOUT = '/buyer-checkout';
+  static const BUYER_ORDER_SUCCESS = '/buyer-order-success';
 }

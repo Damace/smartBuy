@@ -867,4 +867,51 @@ const Map<String, String> enUS = {
   'still_no_connection': 'Still no connection. Please check your network settings.',
   'connection_check_failed': 'Failed to check connection. Please try again.',
   'open_settings_manually': 'Please open your device settings to check network connection.',
+
+  // Messages Inbox
+  'messages': 'Messages',
+  'search_messages': 'Search messages...',
+  'no_conversations': 'No Conversations',
+  'start_shopping': 'Start shopping to chat with stores and support',
+  'online': 'Online',
+  'offline': 'Offline',
+  'active_now': 'Active now',
+  'just_now': 'Just now',
+
+  // Chat Interface
+  'calling_store': 'Calling store...',
+  'block_user': 'Block User',
+  'report_conversation': 'Report Conversation',
+  'delete_conversation': 'Delete Conversation',
+  'user_blocked': 'User blocked successfully',
+  'conversation_reported': 'Conversation reported successfully',
+  'conversation_deleted': 'Conversation deleted successfully',
+  'view_items': 'VIEW ITEMS',
+  'view_items_feature_coming_soon': 'View items feature coming soon',
+  'messages_are_encrypted': 'Messages are end-to-end encrypted',
+  'type_message': 'Type a message...',
+  'attachment_feature_coming_soon': 'Attachment feature coming soon',
+  'emoji_picker_coming_soon': 'Emoji picker coming soon',
+
+  // Checkout Screen
+  'secure_checkout': 'Secure Checkout',
+  'payment': 'Payment',
+  'review': 'Review',
+  'delivery_address': 'Delivery Address',
+  'change': 'Change',
+  'delivery_speed': 'Delivery Speed',
+  'express': 'Express',
+  'order_summary': 'Order Summary',
+  'qty_count': 'Qty: @count',
+  'estimated_tax': 'Estimated Tax',
+  'promo_code': 'Promo Code',
+  'pay_and_place_order': 'Pay & Place Order',
+  'promo_code_required': 'Please enter a promo code',
+  'promo_code_applied': 'Promo code applied successfully',
+  'invalid_promo_code': 'Invalid promo code',
+
+  // Order Success Screen
+  'order_placed_successfully': 'Order Placed Successfully!',
+  'thank_you_for_shopping': 'Thank you for shopping with SmartBuy. Your order is being processed!',
+  'order_id_label': 'Order ID',
 };

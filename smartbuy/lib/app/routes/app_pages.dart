@@ -67,6 +67,14 @@ import '../modules/buyer_notification_preferences/buyer_notification_preferences
 import '../modules/buyer_notification_preferences/buyer_notification_preferences_view.dart';
 import '../modules/network_connection/network_connection_binding.dart';
 import '../modules/network_connection/network_connection_view.dart';
+import '../modules/buyer_messages_inbox/buyer_messages_inbox_binding.dart';
+import '../modules/buyer_messages_inbox/buyer_messages_inbox_view.dart';
+import '../modules/buyer_chat_interface/buyer_chat_interface_binding.dart';
+import '../modules/buyer_chat_interface/buyer_chat_interface_view.dart';
+import '../modules/buyer_checkout/buyer_checkout_binding.dart';
+import '../modules/buyer_checkout/buyer_checkout_view.dart';
+import '../modules/buyer_order_success/buyer_order_success_binding.dart';
+import '../modules/buyer_order_success/buyer_order_success_view.dart';
 import '../modules/main_navigation/main_navigation_binding.dart';
 import '../modules/main_navigation/main_navigation_view.dart';
 
@@ -315,6 +323,34 @@ class AppPages {
       binding: NetworkConnectionBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_MESSAGES_INBOX,
+      page: () => const BuyerMessagesInboxView(),
+      binding: BuyerMessagesInboxBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_CHAT_INTERFACE,
+      page: () => const BuyerChatInterfaceView(),
+      binding: BuyerChatInterfaceBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_CHECKOUT,
+      page: () => const BuyerCheckoutView(),
+      binding: BuyerCheckoutBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: _Paths.BUYER_ORDER_SUCCESS,
+      page: () => const BuyerOrderSuccessView(),
+      binding: BuyerOrderSuccessBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 400),
     ),
     GetPage(
       name: _Paths.HOME,

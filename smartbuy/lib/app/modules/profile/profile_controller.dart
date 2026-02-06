@@ -38,6 +38,10 @@ class ProfileController extends GetxController {
     Get.toNamed(Routes.WISHLIST);
   }
 
+  void navigateToMessages() {
+    Get.toNamed(Routes.BUYER_MESSAGES_INBOX);
+  }
+
   void navigateToCoupons() {
     // Navigate to coupons screen
     print('Navigate to coupons');
