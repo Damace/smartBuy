@@ -2,7 +2,7 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URL - Will be configured for Laravel backend
-  static const String baseUrl = 'http://localhost:8000/api';
+  static const String baseUrl = 'http://192.168.1.181:8000/api';
 
   // Auth Endpoints
   static const String login = '/auth/login';
@@ -85,4 +85,12 @@ class ApiConstants {
 
   // Settings Endpoints
   static const String appSettings = '/settings';
+
+  // Vendor Auth Endpoints
+  static const String vendorRegister = '/vendor/register';
+  static const String vendorLogin = '/vendor/login';
+  static const String vendorLogout = '/vendor/logout';
+
+  // Vendor Product Endpoints
+  static const String vendorProducts = '/vendor/products';
 }

@@ -9,9 +9,7 @@ class LoginView extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-      ),
+      appBar: AppBar(automaticallyImplyLeading: false),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -38,16 +36,16 @@ class LoginView extends GetView<LoginController> {
               // Title
               Text(
                 'welcome_back'.tr,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'login_to_manage_account'.tr,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
               ),
               const SizedBox(height: 32),
               // Tabs
@@ -64,7 +62,9 @@ class LoginView extends GetView<LoginController> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   labelColor: AppTheme.primaryColor,
-                  unselectedLabelColor: Theme.of(context).textTheme.bodySmall?.color,
+                  unselectedLabelColor: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.color,
                   dividerColor: Colors.transparent,
                   tabs: [
                     Tab(text: 'buyer'.tr),
@@ -76,9 +76,9 @@ class LoginView extends GetView<LoginController> {
               // Email/Phone Field
               Text(
                 'email_or_phone'.tr,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
               TextField(
@@ -92,9 +92,9 @@ class LoginView extends GetView<LoginController> {
               // Password Field
               Text(
                 'password'.tr,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
               Obx(
@@ -136,14 +136,18 @@ class LoginView extends GetView<LoginController> {
                 () => SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: controller.isLoading.value ? null : controller.login,
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : controller.login,
                     child: controller.isLoading.value
                         ? const SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : Text('login'.tr),
@@ -175,7 +179,9 @@ class LoginView extends GetView<LoginController> {
                       icon: const Icon(Icons.g_mobiledata, size: 24),
                       label: Text('google'.tr),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).textTheme.bodyLarge?.color,
                         side: BorderSide(color: AppTheme.borderColor),
                       ),
                     ),
@@ -187,7 +193,9 @@ class LoginView extends GetView<LoginController> {
                       icon: const Icon(Icons.apple, size: 20),
                       label: Text('apple'.tr),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).textTheme.bodyLarge?.color,
                         side: BorderSide(color: AppTheme.borderColor),
                       ),
                     ),

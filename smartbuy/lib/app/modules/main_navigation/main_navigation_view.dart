@@ -27,10 +27,7 @@ class MainNavigationView extends GetView<MainNavigationController> {
           switchInCurve: Curves.easeInOut,
           switchOutCurve: Curves.easeInOut,
           transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
           child: KeyedSubtree(
             key: ValueKey<int>(controller.currentIndex.value),
@@ -38,72 +35,122 @@ class MainNavigationView extends GetView<MainNavigationController> {
           ),
         ),
       ),
-      bottomNavigationBar: Obx(
-        () => BottomNavigationBar(
-          currentIndex: controller.currentIndex.value,
-          onTap: controller.changePage,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: AppTheme.primaryColor,
-          unselectedItemColor: Get.isDarkMode
-              ? AppTheme.darkTextSecondary
-              : AppTheme.textSecondary,
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 12,
-          ),
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home_outlined),
-              activeIcon: const Icon(Icons.home),
-              label: 'home'.tr,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.category_outlined),
-              activeIcon: const Icon(Icons.category),
-              label: 'category'.tr,
-            ),
-            BottomNavigationBarItem(
-              icon: Obx(
-                () => badges.Badge(
-                  badgeContent: Text(
-                    controller.cartItemCount.value.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+      extendBody: true,
+      bottomNavigationBar: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          Obx(
+            () => BottomNavigationBar(
+              currentIndex: _mapToNavIndex(controller.currentIndex.value),
+              onTap: (index) {
+                if (index == 2) return;
+                controller.changePage(_mapToPageIndex(index));
+              },
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: AppTheme.primaryColor,
+              unselectedItemColor: Get.isDarkMode
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
+              selectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+              unselectedLabelStyle: const TextStyle(fontSize: 12),
+              items: [
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.home_outlined),
+                  activeIcon: const Icon(Icons.home),
+                  label: 'home'.tr,
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.category_outlined),
+                  activeIcon: const Icon(Icons.category),
+                  label: 'category'.tr,
+                ),
+                // Spacer for center button
+                const BottomNavigationBarItem(
+                  icon: SizedBox(height: 24),
+                  label: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Obx(
+                    () => badges.Badge(
+                      badgeContent: Text(
+                        controller.cartItemCount.value.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      showBadge: controller.cartItemCount.value > 0,
+                      position: badges.BadgePosition.topEnd(top: -8, end: -8),
+                      child: const Icon(Icons.shopping_cart_outlined),
                     ),
                   ),
-                  showBadge: controller.cartItemCount.value > 0,
-                  position: badges.BadgePosition.topEnd(top: -8, end: -8),
-                  child: const Icon(Icons.shopping_cart_outlined),
-                ),
-              ),
-              activeIcon: Obx(
-                () => badges.Badge(
-                  badgeContent: Text(
-                    controller.cartItemCount.value.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                  activeIcon: Obx(
+                    () => badges.Badge(
+                      badgeContent: Text(
+                        controller.cartItemCount.value.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      showBadge: controller.cartItemCount.value > 0,
+                      position: badges.BadgePosition.topEnd(top: -8, end: -8),
+                      child: const Icon(Icons.shopping_cart),
                     ),
                   ),
-                  showBadge: controller.cartItemCount.value > 0,
-                  position: badges.BadgePosition.topEnd(top: -8, end: -8),
-                  child: const Icon(Icons.shopping_cart),
+                  label: 'cart'.tr,
                 ),
-              ),
-              label: 'cart'.tr,
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.person_outline),
+                  activeIcon: const Icon(Icons.person),
+                  label: 'profile'.tr,
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline),
-              activeIcon: const Icon(Icons.person),
-              label: 'profile'.tr,
+          ),
+          Positioned(top: -22, child: _centerButton()),
+        ],
+      ),
+    );
+  }
+
+  int _mapToNavIndex(int pageIndex) {
+    if (pageIndex >= 2) return pageIndex + 1;
+    return pageIndex;
+  }
+
+  int _mapToPageIndex(int navIndex) {
+    if (navIndex > 2) return navIndex - 1;
+    return navIndex;
+  }
+
+  Widget _centerButton() {
+    return GestureDetector(
+      onTap: () => controller.currentIndex,
+      child: Container(
+        height: 54,
+        width: 54,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppTheme.primaryColor,
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryColor.withOpacity(0.6),
+              blurRadius: 15,
+              spreadRadius: 1,
             ),
           ],
+        ),
+        child: Icon(
+          Icons.notifications_outlined,
+          color: Colors.white,
+          size: 26,
         ),
       ),
     );

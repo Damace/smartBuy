@@ -77,6 +77,8 @@ import '../modules/buyer_order_success/buyer_order_success_binding.dart';
 import '../modules/buyer_order_success/buyer_order_success_view.dart';
 import '../modules/main_navigation/main_navigation_binding.dart';
 import '../modules/main_navigation/main_navigation_view.dart';
+import '../modules/product_details/product_details_binding.dart';
+import '../modules/product_details/product_details_view.dart';
 
 part 'app_routes.dart';
 
@@ -358,6 +360,13 @@ class AppPages {
       binding: MainNavigationBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: _Paths.PRODUCT_DETAILS,
+      page: () => const ProductDetailsView(),
+      binding: ProductDetailsBinding(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
   ];
 }

@@ -11,8 +11,9 @@ class CartView extends GetView<CartController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Get.isDarkMode ? AppTheme.darkBackgroundColor : AppTheme.backgroundColor,
+      backgroundColor: Get.isDarkMode
+          ? AppTheme.darkBackgroundColor
+          : AppTheme.backgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -34,22 +35,25 @@ class CartView extends GetView<CartController> {
                         children: [
                           // Cart items count
                           Text(
-                            'items_in_cart'.trParams({'count': controller.cartItemCount.toString()}),
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            'items_in_cart'.trParams({
+                              'count': controller.cartItemCount.toString(),
+                            }),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 16),
 
                           // Cart items list
-                          ...controller.cartItems.map((item) => _buildCartItem(context, item)),
+                          ...controller.cartItems.map(
+                            (item) => _buildCartItem(context, item),
+                          ),
 
                           const SizedBox(height: 24),
 
-                          // Coupon code section
-                          _buildCouponSection(context),
+                          // // Coupon code section
+                          // _buildCouponSection(context),
 
-                          const SizedBox(height: 24),
+                          // const SizedBox(height: 24),
 
                           // Saved for later section
                           if (controller.savedForLater.isNotEmpty) ...[
@@ -60,7 +64,9 @@ class CartView extends GetView<CartController> {
                           // Summary section
                           _buildSummarySection(context),
 
-                          const SizedBox(height: 100), // Space for checkout button
+                          const SizedBox(
+                            height: 100,
+                          ), // Space for checkout button
                         ],
                       ),
                     ),
@@ -82,21 +88,25 @@ class CartView extends GetView<CartController> {
           Icon(
             Icons.shopping_cart_outlined,
             size: 100,
-            color: Get.isDarkMode ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextSecondary
+                : AppTheme.textSecondary,
           ),
           const SizedBox(height: 24),
           Text(
             'cart_is_empty'.tr,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           Text(
             'add_items_to_cart'.tr,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Get.isDarkMode ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
-                ),
+              color: Get.isDarkMode
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -159,9 +169,9 @@ class CartView extends GetView<CartController> {
               children: [
                 Text(
                   product.name,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -169,18 +179,18 @@ class CartView extends GetView<CartController> {
                 Text(
                   '\$${item.finalPrice.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${'vendor'.tr}: ${product.categoryName ?? 'SmartBuy'}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Get.isDarkMode
-                            ? AppTheme.darkTextSecondary
-                            : AppTheme.textSecondary,
-                      ),
+                    color: Get.isDarkMode
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 12),
 
@@ -196,8 +206,8 @@ class CartView extends GetView<CartController> {
                       child: Text(
                         item.quantity.toString(),
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     _buildQuantityButton(
@@ -229,7 +239,10 @@ class CartView extends GetView<CartController> {
     );
   }
 
-  Widget _buildQuantityButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildQuantityButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
@@ -238,15 +251,13 @@ class CartView extends GetView<CartController> {
         height: 32,
         decoration: BoxDecoration(
           border: Border.all(
-            color: Get.isDarkMode ? AppTheme.darkBorderColor : AppTheme.borderColor,
+            color: Get.isDarkMode
+                ? AppTheme.darkBorderColor
+                : AppTheme.borderColor,
           ),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(
-          icon,
-          size: 16,
-          color: AppTheme.primaryColor,
-        ),
+        child: Icon(icon, size: 16, color: AppTheme.primaryColor),
       ),
     );
   }
@@ -259,7 +270,10 @@ class CartView extends GetView<CartController> {
             controller: controller.couponController,
             decoration: InputDecoration(
               hintText: 'coupon_code'.tr,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -289,9 +303,9 @@ class CartView extends GetView<CartController> {
           children: [
             Text(
               'saved_for_later'.tr,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             TextButton(
               onPressed: () {},
@@ -363,9 +377,9 @@ class CartView extends GetView<CartController> {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 product.name,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -405,7 +419,9 @@ class CartView extends GetView<CartController> {
           _buildSummaryRow(
             context,
             'shipping'.tr,
-            controller.shipping == 0 ? 'free'.tr : '\$${controller.shipping.toStringAsFixed(2)}',
+            controller.shipping == 0
+                ? 'free'.tr
+                : '\$${controller.shipping.toStringAsFixed(2)}',
             false,
           ),
           if (controller.discount.value > 0) ...[
@@ -443,17 +459,17 @@ class CartView extends GetView<CartController> {
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
-                color: color,
-              ),
+            fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+            color: color,
+          ),
         ),
         Text(
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-                fontSize: isBold ? 18 : null,
-                color: color,
-              ),
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            fontSize: isBold ? 18 : null,
+            color: color,
+          ),
         ),
       ],
     );
@@ -538,17 +554,17 @@ class CartView extends GetView<CartController> {
                     Text(
                       'remove_item'.tr,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'remove_item_confirmation'.tr,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Get.isDarkMode
-                                ? AppTheme.darkTextSecondary
-                                : AppTheme.textSecondary,
-                          ),
+                        color: Get.isDarkMode
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.textSecondary,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -627,19 +643,15 @@ class CartView extends GetView<CartController> {
                 color: iconColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 22,
-              ),
+              child: Icon(icon, color: iconColor, size: 22),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
               ),
             ),
             Icon(

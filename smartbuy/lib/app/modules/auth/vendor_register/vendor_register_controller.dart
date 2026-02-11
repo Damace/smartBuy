@@ -1,6 +1,12 @@
+import 'package:dio/dio.dart' hide Response;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
+import 'package:get_storage/get_storage.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/helpers.dart';
+import '../../../data/providers/api_provider.dart';
 import '../../../routes/app_pages.dart';
 
 class VendorRegisterController extends GetxController {
@@ -25,10 +31,13 @@ class VendorRegisterController extends GetxController {
   final TextEditingController storeDisplayNameController = TextEditingController();
   final TextEditingController businessAddressController = TextEditingController();
 
-  // Step 3 - Verification
+  // Step 3 - Verification (file name for display, file path for upload)
   final RxString taxDocument = ''.obs;
+  final RxString taxDocumentPath = ''.obs;
   final RxString businessProofDocument = ''.obs;
+  final RxString businessProofDocumentPath = ''.obs;
   final RxString nationalIdDocument = ''.obs;
+  final RxString nationalIdDocumentPath = ''.obs;
 
   // Payout Details
   final TextEditingController accountNameController = TextEditingController();
@@ -110,24 +119,39 @@ class VendorRegisterController extends GetxController {
   }
 
   Future<void> pickTaxDocument() async {
-    // Simulate file picker
-    await Future.delayed(const Duration(milliseconds: 500));
-    taxDocument.value = 'tax_certificate.pdf';
-    Helpers.showSuccess('document_uploaded'.tr);
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+    );
+    if (result != null && result.files.single.path != null) {
+      taxDocument.value = result.files.single.name;
+      taxDocumentPath.value = result.files.single.path!;
+      Helpers.showSuccess('document_uploaded'.tr);
+    }
   }
 
   Future<void> pickBusinessProofDocument() async {
-    // Simulate file picker
-    await Future.delayed(const Duration(milliseconds: 500));
-    businessProofDocument.value = 'business_license.pdf';
-    Helpers.showSuccess('document_uploaded'.tr);
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+    );
+    if (result != null && result.files.single.path != null) {
+      businessProofDocument.value = result.files.single.name;
+      businessProofDocumentPath.value = result.files.single.path!;
+      Helpers.showSuccess('document_uploaded'.tr);
+    }
   }
 
   Future<void> pickNationalIdDocument() async {
-    // Simulate file picker
-    await Future.delayed(const Duration(milliseconds: 500));
-    nationalIdDocument.value = 'passport.pdf';
-    Helpers.showSuccess('document_uploaded'.tr);
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+    );
+    if (result != null && result.files.single.path != null) {
+      nationalIdDocument.value = result.files.single.name;
+      nationalIdDocumentPath.value = result.files.single.path!;
+      Helpers.showSuccess('document_uploaded'.tr);
+    }
   }
 
   void nextStep() {
@@ -239,16 +263,59 @@ class VendorRegisterController extends GetxController {
     return true;
   }
 
+  final ApiProvider _apiProvider = ApiProvider();
+  final GetStorage _storage = GetStorage();
+
   Future<void> submitRegistration() async {
     isLoading.value = true;
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final formMap = <String, dynamic>{
+        'contact_person_name': fullNameController.text.trim(),
+        'email': businessEmailController.text.trim(),
+        'business_phone': phoneNumberController.text.trim(),
+        'password': passwordController.text,
+        'password_confirmation': passwordController.text,
+        'business_name': legalBusinessNameController.text.trim(),
+        'store_display_name': storeDisplayNameController.text.trim(),
+        'business_type': selectedBusinessType.value,
+        'business_address': businessAddressController.text.trim(),
+        'bank_name': accountNameController.text.trim(),
+        'bank_account_number': accountNumberController.text.trim(),
+        'bank_routing_number': ifscCodeController.text.trim(),
+      };
 
-    isLoading.value = false;
+      // Attach document files
+      if (taxDocumentPath.value.isNotEmpty) {
+        formMap['tax_document'] =
+            await MultipartFile.fromFile(taxDocumentPath.value, filename: taxDocument.value);
+      }
+      if (businessProofDocumentPath.value.isNotEmpty) {
+        formMap['business_proof_document'] =
+            await MultipartFile.fromFile(businessProofDocumentPath.value, filename: businessProofDocument.value);
+      }
+      if (nationalIdDocumentPath.value.isNotEmpty) {
+        formMap['national_id_document'] =
+            await MultipartFile.fromFile(nationalIdDocumentPath.value, filename: nationalIdDocument.value);
+      }
 
-    Helpers.showSuccess('vendor_registration_submitted'.tr);
-    Get.offAllNamed(Routes.VENDOR_STATUS);
+      final formData = FormData.fromMap(formMap);
+
+      final response = await _apiProvider.post(
+        ApiConstants.vendorRegister,
+        data: formData,
+      );
+
+      _storage.write(AppConstants.storageKeyToken, response.data['token']);
+      _storage.write(AppConstants.storageKeyUser, response.data['vendor']);
+
+      Helpers.showSuccess('vendor_registration_submitted'.tr);
+      Get.offAllNamed(Routes.VENDOR_STATUS);
+    } catch (e) {
+      Helpers.showError(Helpers.parseErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void navigateToLogin() {

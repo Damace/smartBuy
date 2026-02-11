@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/helpers.dart';
+import '../../../data/providers/api_provider.dart';
 import '../../../routes/app_pages.dart';
 
 class RegisterController extends GetxController {
@@ -12,6 +16,9 @@ class RegisterController extends GetxController {
   final RxBool isPasswordVisible = false.obs;
   final RxBool agreeToTerms = false.obs;
   final RxBool isLoading = false.obs;
+
+  final ApiProvider _apiProvider = ApiProvider();
+  final GetStorage _storage = GetStorage();
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -31,16 +38,31 @@ class RegisterController extends GetxController {
 
     isLoading.value = true;
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final response = await _apiProvider.post(
+        ApiConstants.register,
+        data: {
+          'name': nameController.text.trim(),
+          'email': emailController.text.trim(),
+          'phone': phoneController.text.trim(),
+          'password': passwordController.text,
+          'password_confirmation': passwordController.text,
+        },
+      );
 
-    isLoading.value = false;
+      _storage.write(AppConstants.storageKeyToken, response.data['token']);
+      _storage.write(AppConstants.storageKeyUser, response.data['buyer']);
 
-    // Navigate to OTP verification
-    Get.toNamed(Routes.OTP, arguments: {
-      'phone': phoneController.text,
-      'email': emailController.text,
-    });
+      Helpers.showSuccessSheet(
+        'Your account has been created successfully.',
+        title: 'Welcome!',
+        onClose: () => Get.offAllNamed(Routes.HOME),
+      );
+    } catch (e) {
+      Helpers.showErrorSheet(Helpers.parseErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   bool _validateForm() {

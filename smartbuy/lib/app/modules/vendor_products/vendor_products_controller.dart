@@ -1,55 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/constants/api_constants.dart';
+import '../../core/utils/helpers.dart';
+import '../../data/providers/api_provider.dart';
 import '../../routes/app_pages.dart';
 
 class VendorProductsController extends GetxController {
   final RxString selectedFilter = 'all'.obs;
   final RxString searchQuery = ''.obs;
   final TextEditingController searchController = TextEditingController();
+  final RxBool isLoading = false.obs;
+
+  final ApiProvider _apiProvider = ApiProvider();
 
   // Product list
-  final RxList<Map<String, dynamic>> products = <Map<String, dynamic>>[
-    {
-      'id': 'prod_001',
-      'name': 'Organic Wildflower Honey',
-      'price': 24.99,
-      'stock': 42,
-      'status': 'in_stock',
-      'image': 'honey',
-    },
-    {
-      'id': 'prod_002',
-      'name': 'Pro Wireless Headphones',
-      'price': 89.00,
-      'stock': 0,
-      'status': 'out_of_stock',
-      'image': 'headphones',
-    },
-    {
-      'id': 'prod_003',
-      'name': 'Smartwatch Series 7',
-      'price': 199.00,
-      'stock': 0,
-      'status': 'draft',
-      'image': 'watch',
-    },
-    {
-      'id': 'prod_004',
-      'name': 'Glass Water Bottle 1L',
-      'price': 15.50,
-      'stock': 156,
-      'status': 'in_stock',
-      'image': 'bottle',
-    },
-    {
-      'id': 'prod_005',
-      'name': 'Minimalist Desk Lamp',
-      'price': 45.00,
-      'stock': 8,
-      'status': 'in_stock',
-      'image': 'lamp',
-    },
-  ].obs;
+  final RxList<Map<String, dynamic>> products = <Map<String, dynamic>>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    isLoading.value = true;
+    try {
+      final response = await _apiProvider.get(ApiConstants.vendorProducts);
+      final data = response.data['data'] ?? response.data;
+      if (data is List) {
+        products.value = data.map((p) {
+          final images = p['images'] as List? ?? [];
+          final primaryImage = images.isNotEmpty
+              ? images.firstWhere((i) => i['is_primary'] == true, orElse: () => images.first)
+              : null;
+          return <String, dynamic>{
+            'id': p['id'].toString(),
+            'name': p['name'] ?? '',
+            'price': (p['price'] is String ? double.tryParse(p['price']) : p['price'] ?? 0).toDouble(),
+            'stock': p['quantity'] ?? 0,
+            'status': _mapStatus(p['status'], p['quantity']),
+            'image': primaryImage?['image_path'] ?? 'default',
+            'images': images,
+            'video_path': p['video_path'],
+            'description': p['description'] ?? '',
+            'category': p['category']?['name'] ?? '',
+            'sale_price': p['sale_price'],
+            'sku': p['sku'] ?? '',
+            'weight': p['weight'],
+            'dimensions': p['dimensions'],
+          };
+        }).toList().cast<Map<String, dynamic>>();
+      }
+    } catch (e) {
+      _loadMockProducts();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  String _mapStatus(String? status, dynamic quantity) {
+    if (status == 'draft' || status == 'pending') return 'draft';
+    final qty = quantity is int ? quantity : int.tryParse(quantity.toString()) ?? 0;
+    if (qty <= 0) return 'out_of_stock';
+    return 'in_stock';
+  }
+
+  void _loadMockProducts() {
+    products.value = [
+      {'id': 'prod_001', 'name': 'Organic Wildflower Honey', 'price': 24.99, 'stock': 42, 'status': 'in_stock', 'image': 'honey'},
+      {'id': 'prod_002', 'name': 'Pro Wireless Headphones', 'price': 89.00, 'stock': 0, 'status': 'out_of_stock', 'image': 'headphones'},
+      {'id': 'prod_003', 'name': 'Smartwatch Series 7', 'price': 199.00, 'stock': 0, 'status': 'draft', 'image': 'watch'},
+      {'id': 'prod_004', 'name': 'Glass Water Bottle 1L', 'price': 15.50, 'stock': 156, 'status': 'in_stock', 'image': 'bottle'},
+      {'id': 'prod_005', 'name': 'Minimalist Desk Lamp', 'price': 45.00, 'stock': 8, 'status': 'in_stock', 'image': 'lamp'},
+    ];
+  }
 
   // Filtered products based on selected filter and search
   List<Map<String, dynamic>> get filteredProducts {
@@ -102,12 +126,11 @@ class VendorProductsController extends GetxController {
   }
 
   void addNewProduct() {
-    Get.toNamed(Routes.VENDOR_ADD_PRODUCT);
+    Get.toNamed(Routes.VENDOR_ADD_PRODUCT)?.then((_) => fetchProducts());
   }
 
   void editProduct(Map<String, dynamic> product) {
-    // Navigate to edit product screen
-    Get.toNamed(Routes.VENDOR_EDIT_PRODUCT, arguments: product);
+    Get.toNamed(Routes.VENDOR_EDIT_PRODUCT, arguments: product)?.then((_) => fetchProducts());
   }
 
   void deleteProduct(Map<String, dynamic> product) {
@@ -150,16 +173,7 @@ class VendorProductsController extends GetxController {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                products.removeWhere((p) => p['id'] == product['id']);
-                Get.back();
-                Get.snackbar(
-                  'success'.tr,
-                  'product_deleted_successfully'.tr,
-                  snackPosition: SnackPosition.BOTTOM,
-                  duration: const Duration(seconds: 2),
-                );
-              },
+              onPressed: () => _confirmDelete(product),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
@@ -204,6 +218,17 @@ class VendorProductsController extends GetxController {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDelete(Map<String, dynamic> product) async {
+    Get.back(); // Close dialog
+    try {
+      await _apiProvider.delete('${ApiConstants.vendorProducts}/${product['id']}');
+      products.removeWhere((p) => p['id'] == product['id']);
+      Helpers.showSuccess('product_deleted_successfully'.tr);
+    } catch (e) {
+      Helpers.showError(Helpers.parseErrorMessage(e));
+    }
   }
 
   @override

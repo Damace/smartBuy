@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/helpers.dart';
+import '../../../data/providers/api_provider.dart';
 import '../../../routes/app_pages.dart';
 
 class LoginController extends GetxController with GetSingleTickerProviderStateMixin {
@@ -12,6 +16,9 @@ class LoginController extends GetxController with GetSingleTickerProviderStateMi
   final RxBool isPasswordVisible = false.obs;
   final RxBool isLoading = false.obs;
   final RxInt currentTab = 0.obs;
+
+  final ApiProvider _apiProvider = ApiProvider();
+  final GetStorage _storage = GetStorage();
 
   @override
   void onInit() {
@@ -35,16 +42,28 @@ class LoginController extends GetxController with GetSingleTickerProviderStateMi
 
     isLoading.value = true;
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final response = await _apiProvider.post(
+        ApiConstants.login,
+        data: {
+          'email': emailController.text.trim(),
+          'password': passwordController.text,
+        },
+      );
 
-    isLoading.value = false;
+      _storage.write(AppConstants.storageKeyToken, response.data['token']);
+      _storage.write(AppConstants.storageKeyUser, response.data['buyer']);
 
-    Helpers.showSuccessSheet(
-      'You\'re all set to continue shopping for the best deals.',
-      title: 'Login Successful!',
-      onClose: () => Get.offAllNamed(Routes.HOME),
-    );
+      Helpers.showSuccessSheet(
+        'You\'re all set to continue shopping for the best deals.',
+        title: 'Login Successful!',
+        onClose: () => Get.offAllNamed(Routes.HOME),
+      );
+    } catch (e) {
+      Helpers.showErrorSheet(Helpers.parseErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   bool _validateForm() {

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'vendor_edit_product_controller.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/themes/app_theme.dart';
 
 class VendorEditProductView extends GetView<VendorEditProductController> {
@@ -551,83 +554,286 @@ class VendorEditProductView extends GetView<VendorEditProductController> {
     );
   }
 
-  Widget _buildProductImages() {
-    return Obx(
-      () => SizedBox(
-        height: 100,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: controller.productImages.length + 1,
-          itemBuilder: (context, index) {
-            if (index == controller.productImages.length) {
-              // Add image button
-              return GestureDetector(
-                onTap: controller.addProductImage,
-                child: Container(
-                  width: 100,
-                  margin: const EdgeInsets.only(right: 12),
-                  decoration: BoxDecoration(
-                    color: Get.isDarkMode
-                        ? Colors.grey.shade800
-                        : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Get.isDarkMode
-                          ? Colors.grey.shade700
-                          : Colors.grey.shade300,
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.grey,
-                    size: 32,
-                  ),
-                ),
-              );
-            }
+  String get _storageBaseUrl {
+    const base = ApiConstants.baseUrl; // e.g. http://192.168.1.181:8000/api
+    return '${base.replaceAll('/api', '')}/storage/';
+  }
 
-            // Product image
-            return Container(
+  Widget _buildProductImages() {
+    return Obx(() {
+      final serverImgs = controller.serverImages;
+      final newImgs = controller.newImages;
+      final hasVideo = controller.serverVideoPath.value.isNotEmpty ||
+          controller.newVideoFile.value != null;
+      final totalItems =
+          serverImgs.length + newImgs.length + (hasVideo ? 1 : 0);
+
+      return Column(
+        children: [
+          SizedBox(
+            height: 100,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: totalItems + 2, // +1 add images, +1 add video
+              itemBuilder: (context, index) {
+                // --- Server images ---
+                if (index < serverImgs.length) {
+                  return _buildServerImageTile(serverImgs[index], index);
+                }
+
+                // --- New local images ---
+                final newIdx = index - serverImgs.length;
+                if (newIdx < newImgs.length) {
+                  return _buildLocalImageTile(newImgs[newIdx], newIdx);
+                }
+
+                // --- Video tile ---
+                final videoIdx = index - serverImgs.length - newImgs.length;
+                if (hasVideo && videoIdx == 0) {
+                  return _buildVideoTile();
+                }
+
+                // --- Add images button ---
+                final btnIdx = videoIdx - (hasVideo ? 1 : 0);
+                if (btnIdx == 0) {
+                  return _buildAddMediaButton(
+                    icon: Icons.add_photo_alternate_outlined,
+                    label: 'add_images'.tr,
+                    onTap: controller.pickImages,
+                  );
+                }
+
+                // --- Add video button ---
+                return _buildAddMediaButton(
+                  icon: Icons.videocam_outlined,
+                  label: 'video'.tr,
+                  onTap: controller.pickVideo,
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${controller.totalMediaCount}/${VendorEditProductController.maxTotalMedia} ${'images'.tr}',
+            style: TextStyle(
+              fontSize: 11,
+              color: Get.isDarkMode
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildServerImageTile(String path, int index) {
+    return Container(
+      width: 100,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color:
+              Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+        ),
+      ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(7),
+            child: Image.network(
+              '$_storageBaseUrl$path',
               width: 100,
-              margin: const EdgeInsets.only(right: 12),
+              height: 100,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const Center(
+                child: Icon(Icons.broken_image, color: Colors.grey),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () => controller.removeServerImage(index),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 14),
+              ),
+            ),
+          ),
+          if (index == 0)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(7)),
+                ),
+                child: Text(
+                  'cover'.tr,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: Colors.white, fontSize: 10),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocalImageTile(File file, int index) {
+    return Container(
+      width: 100,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color:
+              Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+        ),
+      ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(7),
+            child: Image.file(
+              file,
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () => controller.removeNewImage(index),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 14),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 2),
               decoration: BoxDecoration(
-                color: Get.isDarkMode
-                    ? Colors.grey.shade800
-                    : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
+                color: Colors.orange.withValues(alpha: 0.8),
+                borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(7)),
               ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Text(
-                      controller.productImages[index],
-                      style: const TextStyle(fontSize: 48),
-                    ),
-                  ),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: GestureDetector(
-                      onTap: () => controller.removeProductImage(index),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              child: Text(
+                'new'.tr,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(color: Colors.white, fontSize: 10),
               ),
-            );
-          },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVideoTile() {
+    return Container(
+      width: 100,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color:
+              Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+        ),
+      ),
+      child: Stack(
+        children: [
+          const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.videocam, size: 32, color: Colors.orange),
+                SizedBox(height: 4),
+                Text(
+                  'Video',
+                  style: TextStyle(fontSize: 11, color: Colors.orange),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: controller.removeVideo,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddMediaButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 100,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: Get.isDarkMode
+              ? Colors.grey.shade800
+              : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.orange,
+            style: BorderStyle.solid,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.orange, size: 28),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.orange,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -701,37 +907,39 @@ class VendorEditProductView extends GetView<VendorEditProductController> {
         ),
         const SizedBox(height: 8),
         Obx(
-          () => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            decoration: BoxDecoration(
-              color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Get.isDarkMode
-                    ? Colors.grey.shade700
-                    : Colors.grey.shade300,
-              ),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: controller.selectedCategory.value,
-                isExpanded: true,
-                icon: const Icon(Icons.keyboard_arrow_down),
-                style: TextStyle(
-                  fontSize: 14,
+          () => GestureDetector(
+            onTap: controller.selectCategory,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
                   color: Get.isDarkMode
-                      ? AppTheme.darkTextPrimary
-                      : AppTheme.textPrimary,
+                      ? Colors.grey.shade700
+                      : Colors.grey.shade300,
                 ),
-                dropdownColor:
-                    Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
-                items: controller.categories
-                    .map((category) => DropdownMenuItem<String>(
-                          value: category,
-                          child: Text(category),
-                        ))
-                    .toList(),
-                onChanged: controller.setCategory,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    controller.selectedCategory.value.isEmpty
+                        ? 'select_category'.tr
+                        : controller.selectedCategory.value,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: controller.selectedCategory.value.isEmpty
+                          ? (Get.isDarkMode
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.textSecondary)
+                          : (Get.isDarkMode
+                              ? AppTheme.darkTextPrimary
+                              : AppTheme.textPrimary),
+                    ),
+                  ),
+                  const Icon(Icons.keyboard_arrow_down),
+                ],
               ),
             ),
           ),

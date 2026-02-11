@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'vendor_products_controller.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/themes/app_theme.dart';
 
 class VendorProductsView extends GetView<VendorProductsController> {
@@ -198,10 +199,25 @@ class VendorProductsView extends GetView<VendorProductsController> {
               color: AppTheme.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              _getProductIcon(product['image']),
-              color: AppTheme.primaryColor,
-              size: 28,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: product['image'] != null && product['image'] != 'default'
+                  ? Image.network(
+                      '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/${product['image']}',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(
+                        _getProductIcon(product['image']),
+                        color: AppTheme.primaryColor,
+                        size: 28,
+                      ),
+                    )
+                  : Icon(
+                      _getProductIcon(product['image'] ?? ''),
+                      color: AppTheme.primaryColor,
+                      size: 28,
+                    ),
             ),
           ),
           const SizedBox(width: 12),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'vendor_add_product_controller.dart';
@@ -288,7 +290,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                 ),
               ),
               Text(
-                'media_limit'.tr,
+                '1 ${'cover'.tr} + 1 ${'video'.tr} (5s) + 4 ${'images'.tr}',
                 style: TextStyle(
                   fontSize: 11,
                   color: Get.isDarkMode
@@ -299,58 +301,66 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
+
+          // Cover Image + Video row
+          Obx(() => Row(
             children: [
+              // Cover Image
               Expanded(
-                child: _buildMediaUploadBox(
-                  icon: Icons.photo_camera,
-                  label: 'cover'.tr,
-                  onTap: controller.uploadCoverImage,
-                ),
+                child: controller.coverImage.value != null
+                    ? _buildMediaPreview(
+                        file: controller.coverImage.value!,
+                        label: 'cover'.tr,
+                        onRemove: controller.removeCoverImage,
+                      )
+                    : _buildMediaUploadBox(
+                        icon: Icons.photo_camera,
+                        label: 'cover'.tr,
+                        subtitle: 'required'.tr,
+                        onTap: controller.uploadCoverImage,
+                      ),
               ),
               const SizedBox(width: 12),
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Get.isDarkMode
-                      ? AppTheme.darkCardColor
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.add, color: Colors.grey),
-              ),
-              const SizedBox(width: 12),
+              // Video
               Expanded(
-                child: _buildMediaUploadBox(
-                  icon: Icons.videocam,
-                  label: 'video'.tr,
-                  videoMaxNote: true,
-                  onTap: controller.uploadVideo,
-                ),
+                child: controller.videoFile.value != null
+                    ? _buildMediaPreview(
+                        file: controller.videoFile.value!,
+                        label: 'video'.tr,
+                        isVideo: true,
+                        onRemove: controller.removeVideo,
+                      )
+                    : _buildMediaUploadBox(
+                        icon: Icons.videocam,
+                        label: 'video'.tr,
+                        subtitle: 'max_5s'.tr,
+                        onTap: controller.uploadVideo,
+                      ),
               ),
             ],
-          ),
+          )),
           const SizedBox(height: 12),
-          Row(
-            children: List.generate(3, (index) {
+
+          // Product Images (4 slots)
+          Obx(() => Row(
+            children: List.generate(4, (index) {
+              final hasImage = index < controller.productImages.length;
               return Expanded(
-                child: Container(
-                  height: 80,
-                  margin: EdgeInsets.only(
-                    right: index < 2 ? 12 : 0,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Get.isDarkMode
-                        ? AppTheme.darkCardColor
-                        : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.add, color: Colors.grey),
+                child: Padding(
+                  padding: EdgeInsets.only(right: index < 3 ? 8 : 0),
+                  child: hasImage
+                      ? _buildSmallMediaPreview(
+                          file: controller.productImages[index],
+                          onRemove: () => controller.removeProductImage(index),
+                        )
+                      : _buildSmallUploadBox(
+                          onTap: controller.addProductImage,
+                          showLabel: index == controller.productImages.length,
+                        ),
                 ),
               );
             }),
-          ),
+          )),
           const SizedBox(height: 40),
 
           // Next Button
@@ -390,42 +400,186 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
   Widget _buildMediaUploadBox({
     required IconData icon,
     required String label,
-    bool videoMaxNote = false,
+    String? subtitle,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 80,
+        height: 120,
         decoration: BoxDecoration(
           border: Border.all(
             color: AppTheme.primaryColor,
             width: 2,
             style: BorderStyle.solid,
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           color: AppTheme.primaryColor.withValues(alpha: 0.05),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: AppTheme.primaryColor, size: 28),
-            const SizedBox(height: 4),
+            Icon(icon, color: AppTheme.primaryColor, size: 32),
+            const SizedBox(height: 6),
             Text(
               label,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.primaryColor,
               ),
             ),
-            if (videoMaxNote)
+            if (subtitle != null)
               Text(
-                'video_max_30s'.tr,
+                subtitle,
                 style: TextStyle(
-                  fontSize: 9,
+                  fontSize: 10,
                   color: AppTheme.primaryColor.withValues(alpha: 0.7),
                 ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediaPreview({
+    required File file,
+    required String label,
+    bool isVideo = false,
+    required VoidCallback onRemove,
+  }) {
+    return Stack(
+      children: [
+        Container(
+          height: 120,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            child: isVideo
+                ? Container(
+                    color: Get.isDarkMode
+                        ? AppTheme.darkCardColor
+                        : Colors.grey.shade200,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.videocam, size: 32, color: AppTheme.primaryColor),
+                          const SizedBox(height: 4),
+                          Text(
+                            label,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Image.file(
+                    file,
+                    width: double.infinity,
+                    height: 120,
+                    fit: BoxFit.cover,
+                  ),
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 14, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSmallMediaPreview({
+    required File file,
+    required VoidCallback onRemove,
+  }) {
+    return Stack(
+      children: [
+        Container(
+          height: 80,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(7),
+            child: Image.file(
+              file,
+              width: double.infinity,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 12, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSmallUploadBox({
+    required VoidCallback onTap,
+    bool showLabel = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 80,
+        decoration: BoxDecoration(
+          color: Get.isDarkMode
+              ? AppTheme.darkCardColor
+              : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+            style: BorderStyle.solid,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add_photo_alternate_outlined, color: Colors.grey, size: 24),
+            if (showLabel)
+              Text(
+                'add'.tr,
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
               ),
           ],
         ),

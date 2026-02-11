@@ -571,6 +571,7 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
               title: 'tax_id_gst'.tr,
               subtitle: 'pdf_jpg_5mb'.tr,
               isUploaded: controller.taxDocument.value.isNotEmpty,
+              fileName: controller.taxDocument.value,
               onTap: controller.pickTaxDocument,
             ),
           ),
@@ -584,6 +585,7 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
               title: 'business_proof'.tr,
               subtitle: 'certified_business_proof'.tr,
               isUploaded: controller.businessProofDocument.value.isNotEmpty,
+              fileName: controller.businessProofDocument.value,
               onTap: controller.pickBusinessProofDocument,
             ),
           ),
@@ -597,6 +599,7 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
               title: 'national_id'.tr,
               subtitle: 'passport_govt_id'.tr,
               isUploaded: controller.nationalIdDocument.value.isNotEmpty,
+              fileName: controller.nationalIdDocument.value,
               onTap: controller.pickNationalIdDocument,
             ),
           ),
@@ -745,6 +748,7 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
     required String subtitle,
     required bool isUploaded,
     required VoidCallback onTap,
+    String fileName = '',
   }) {
     return InkWell(
       onTap: onTap,
@@ -755,9 +759,11 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
           color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Get.isDarkMode
-                ? AppTheme.darkTextSecondary.withValues(alpha: 0.3)
-                : AppTheme.borderColor,
+            color: isUploaded
+                ? AppTheme.successColor.withValues(alpha: 0.5)
+                : Get.isDarkMode
+                    ? AppTheme.darkTextSecondary.withValues(alpha: 0.3)
+                    : AppTheme.borderColor,
           ),
         ),
         child: Row(
@@ -766,12 +772,14 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                color: isUploaded
+                    ? AppTheme.successColor.withValues(alpha: 0.1)
+                    : AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
-                icon,
-                color: AppTheme.primaryColor,
+                isUploaded ? Icons.check_circle_outline : icon,
+                color: isUploaded ? AppTheme.successColor : AppTheme.primaryColor,
                 size: 24,
               ),
             ),
@@ -788,12 +796,16 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    subtitle,
+                    isUploaded ? fileName : subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Get.isDarkMode
-                              ? AppTheme.darkTextSecondary
-                              : AppTheme.textSecondary,
+                          color: isUploaded
+                              ? AppTheme.successColor
+                              : Get.isDarkMode
+                                  ? AppTheme.darkTextSecondary
+                                  : AppTheme.textSecondary,
                         ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -807,7 +819,7 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                isUploaded ? '✓' : 'upload'.tr,
+                isUploaded ? 'change'.tr : 'browse'.tr,
                 style: TextStyle(
                   color: isUploaded ? AppTheme.successColor : Colors.white,
                   fontWeight: FontWeight.w600,
