@@ -677,6 +677,10 @@ const Map<String, String> enUS = {
       'Your financial data is encrypted and secure',
   'account_holder_name_required': 'Account holder name is required',
   'bank_account_updated_successfully': 'Bank account updated successfully',
+  'delete_bank_account': 'Delete Bank Account',
+  'delete_bank_account_confirmation':
+      'Are you sure you want to delete your bank account details? This action cannot be undone.',
+  'bank_account_deleted_successfully': 'Bank account deleted successfully',
 
   // Vendor Store Preview
   'edit_storefront': 'Edit Storefront',
@@ -937,4 +941,5 @@ const Map<String, String> enUS = {
   'description': 'Description',
   'proceeding_to_checkout': 'Proceeding to checkout...',
   'video_playback_coming_soon': 'Video playback coming soon',
+  'show_less': 'Show Less',
 };

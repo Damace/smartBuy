@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/utils/helpers.dart';
+import '../../data/providers/api_provider.dart';
 
 class InventoryItem {
   final String id;
@@ -9,14 +11,14 @@ class InventoryItem {
   final String warehouse;
   final String image;
   final RxInt quantity;
-  final String status;
+  String status;
   final RxBool autoMarkOutOfStock;
 
   InventoryItem({
     required this.id,
     required this.name,
     required this.sku,
-    required this.warehouse,
+    this.warehouse = '',
     required this.image,
     required int quantity,
     required this.status,
@@ -26,117 +28,155 @@ class InventoryItem {
 }
 
 class VendorStockInventoryController extends GetxController {
+  final ApiProvider _apiProvider = ApiProvider();
+
   final RxString selectedFilter = 'low_stock'.obs;
   final RxString searchQuery = ''.obs;
   final TextEditingController searchController = TextEditingController();
+  final RxBool isLoading = false.obs;
 
   // Inventory items
-  final RxList<InventoryItem> inventory = <InventoryItem>[
-    InventoryItem(
-      id: '1',
-      name: 'Wireless Headphones G5',
-      sku: 'SM-8829',
-      warehouse: 'NORTH A1',
-      image: '🎧',
-      quantity: 3,
-      status: 'low_stock',
-      autoMark: true,
-    ),
-    InventoryItem(
-      id: '2',
-      name: 'Pro-Fit Mouse X1',
-      sku: 'MS-4412',
-      warehouse: 'WEST B2',
-      image: '🖱️',
-      quantity: 12,
-      status: 'healthy',
-      autoMark: false,
-    ),
-    InventoryItem(
-      id: '3',
-      name: 'RGB Mech Keyboard K1',
-      sku: 'KB-1109',
-      warehouse: 'NORTH A4',
-      image: '⌨️',
-      quantity: 0,
-      status: 'out_of_stock',
-      autoMark: true,
-    ),
-  ].obs;
+  final RxList<InventoryItem> inventory = <InventoryItem>[].obs;
 
-  // Filtered inventory based on selected filter and search
-  List<InventoryItem> get filteredInventory {
-    var filtered = inventory.where((item) {
-      // Filter by status
-      bool matchesFilter = selectedFilter.value == 'low_stock'
-          ? item.status == 'low_stock'
-          : item.status == 'out_of_stock';
+  // Counts from API
+  final RxInt _lowStockCount = 0.obs;
+  final RxInt _outOfStockCount = 0.obs;
 
-      // Filter by search query
+  @override
+  void onInit() {
+    super.onInit();
+    fetchInventory();
+  }
+
+  Future<void> fetchInventory() async {
+    isLoading.value = true;
+    try {
+      final queryParams = <String, dynamic>{
+        'status': selectedFilter.value,
+      };
       if (searchQuery.value.isNotEmpty) {
-        final query = searchQuery.value.toLowerCase();
-        return matchesFilter &&
-            (item.name.toLowerCase().contains(query) ||
-                item.sku.toLowerCase().contains(query));
+        queryParams['search'] = searchQuery.value;
       }
 
-      return matchesFilter;
-    }).toList();
+      final response = await _apiProvider.get(
+        ApiConstants.vendorInventory,
+        queryParameters: queryParams,
+      );
 
-    return filtered;
+      final data = response.data;
+      final items = data['inventory'] as List? ?? [];
+      final counts = data['counts'] as Map<String, dynamic>? ?? {};
+
+      _lowStockCount.value = counts['low_stock'] ?? 0;
+      _outOfStockCount.value = counts['out_of_stock'] ?? 0;
+
+      inventory.value = items.map((item) {
+        return InventoryItem(
+          id: item['id'].toString(),
+          name: item['name'] ?? '',
+          sku: item['sku'] ?? '',
+          image: item['image'] ?? '',
+          quantity: item['quantity'] ?? 0,
+          status: item['status'] ?? 'healthy',
+        );
+      }).toList();
+    } catch (e) {
+      _loadMockData();
+      Helpers.showError(Helpers.parseErrorMessage(e));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void _loadMockData() {
+    inventory.value = [
+      InventoryItem(
+        id: '1',
+        name: 'Wireless Headphones G5',
+        sku: 'SM-8829',
+        warehouse: 'NORTH A1',
+        image: '',
+        quantity: 3,
+        status: 'low_stock',
+        autoMark: true,
+      ),
+      InventoryItem(
+        id: '2',
+        name: 'Pro-Fit Mouse X1',
+        sku: 'MS-4412',
+        warehouse: 'WEST B2',
+        image: '',
+        quantity: 12,
+        status: 'healthy',
+      ),
+      InventoryItem(
+        id: '3',
+        name: 'RGB Mech Keyboard K1',
+        sku: 'KB-1109',
+        warehouse: 'NORTH A4',
+        image: '',
+        quantity: 0,
+        status: 'out_of_stock',
+        autoMark: true,
+      ),
+    ];
+    _lowStockCount.value = 1;
+    _outOfStockCount.value = 1;
+  }
+
+  // Filtered inventory — API already returns filtered results
+  List<InventoryItem> get filteredInventory {
+    return inventory.toList();
   }
 
   // Get counts
-  int get lowStockCount =>
-      inventory.where((item) => item.status == 'low_stock').length;
-  int get outOfStockCount =>
-      inventory.where((item) => item.status == 'out_of_stock').length;
+  int get lowStockCount => _lowStockCount.value;
+  int get outOfStockCount => _outOfStockCount.value;
 
   void changeFilter(String filter) {
     selectedFilter.value = filter;
+    fetchInventory();
   }
 
   void onSearchChanged(String value) {
     searchQuery.value = value;
+    fetchInventory();
+  }
+
+  Future<void> _updateStockOnServer(InventoryItem item) async {
+    try {
+      await _apiProvider.put(
+        '${ApiConstants.vendorInventory}/${item.id}',
+        data: {'quantity': item.quantity.value},
+      );
+    } catch (e) {
+      Helpers.showError(Helpers.parseErrorMessage(e));
+    }
   }
 
   void incrementQuantity(InventoryItem item) {
     item.quantity.value++;
-    updateItemStatus(item);
+    _updateLocalStatus(item);
+    _updateStockOnServer(item);
   }
 
   void decrementQuantity(InventoryItem item) {
     if (item.quantity.value > 0) {
       item.quantity.value--;
-      updateItemStatus(item);
+      _updateLocalStatus(item);
+      _updateStockOnServer(item);
     }
   }
 
-  void updateItemStatus(InventoryItem item) {
-    // Update status based on quantity
-    final index = inventory.indexWhere((i) => i.id == item.id);
-    if (index != -1) {
-      String newStatus;
-      if (item.quantity.value == 0) {
-        newStatus = 'out_of_stock';
-      } else if (item.quantity.value <= 5) {
-        newStatus = 'low_stock';
-      } else {
-        newStatus = 'healthy';
-      }
-
-      // Update the item
-      inventory[index] = InventoryItem(
-        id: item.id,
-        name: item.name,
-        sku: item.sku,
-        warehouse: item.warehouse,
-        image: item.image,
-        quantity: item.quantity.value,
-        status: newStatus,
-        autoMark: item.autoMarkOutOfStock.value,
-      );
+  void _updateLocalStatus(InventoryItem item) {
+    if (item.quantity.value == 0) {
+      item.status = 'out_of_stock';
+    } else if (item.quantity.value <= 5) {
+      item.status = 'low_stock';
+    } else {
+      item.status = 'healthy';
     }
+    inventory.refresh();
   }
 
   void toggleAutoMark(InventoryItem item) {
@@ -148,7 +188,6 @@ class VendorStockInventoryController extends GetxController {
   }
 
   void showItemOptions(InventoryItem item) {
-    // Show options menu
     Helpers.showInfo('item_options_coming_soon'.tr);
   }
 

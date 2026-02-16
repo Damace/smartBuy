@@ -14,19 +14,29 @@ class SplashController extends GetxController {
   }
 
   Future<void> _initializeApp() async {
-    // Simulate initialization process
-    for (int i = 0; i <= 100; i++) {
-      await Future.delayed(const Duration(milliseconds: 5));
+    // Quick progress animation (total ~800ms for branding visibility)
+    for (int i = 0; i <= 100; i += 5) {
+      await Future.delayed(const Duration(milliseconds: 8));
       progress.value = i / 100;
     }
+    progress.value = 1.0;
 
     // Check if user is logged in
     final token = storage.read(AppConstants.storageKeyToken);
+    final isFirstTime = storage.read(AppConstants.storageKeyIsFirstTime);
+
     if (token != null) {
-      // Navigate to home
-      Get.offNamed(Routes.HOME);
+      // Check user data for type
+      final userData = storage.read(AppConstants.storageKeyUser);
+      final userType = (userData is Map) ? userData['role'] : null;
+      if (userType == 'vendor') {
+        Get.offNamed(Routes.VENDOR_HOME);
+      } else {
+        Get.offNamed(Routes.HOME);
+      }
+    } else if (isFirstTime != false) {
+      Get.offNamed(Routes.ONBOARDING);
     } else {
-      // Navigate to login
       Get.offNamed(Routes.LOGIN);
     }
   }

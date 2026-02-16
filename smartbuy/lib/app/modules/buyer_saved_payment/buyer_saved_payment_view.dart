@@ -354,7 +354,9 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
             color: Get.isDarkMode
                 ? AppTheme.darkTextSecondary
                 : AppTheme.textSecondary,
-            onPressed: () {},
+            onPressed: () {
+              Get.toNamed('/buyer-edit-payment');
+            },
           ),
         ],
       ),

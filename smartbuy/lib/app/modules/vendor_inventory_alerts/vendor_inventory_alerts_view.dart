@@ -15,27 +15,31 @@ class VendorInventoryAlertsView extends GetView<VendorInventoryAlertsController>
       appBar: AppBar(
         title: Text('inventory_alerts'.tr),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Stock Notifications
-            _buildStockNotifications(),
-            const SizedBox(height: 24),
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Stock Notifications
+                    _buildStockNotifications(),
+                    const SizedBox(height: 24),
 
-            // Reordering & Automation
-            _buildReorderingAutomation(),
-            const SizedBox(height: 24),
+                    // Reordering & Automation
+                    _buildReorderingAutomation(),
+                    const SizedBox(height: 24),
 
-            // Notification Channels
-            _buildNotificationChannels(),
-            const SizedBox(height: 24),
+                    // Notification Channels
+                    _buildNotificationChannels(),
+                    const SizedBox(height: 24),
 
-            // Save Settings Button
-            _buildSaveButton(),
-          ],
-        ),
+                    // Save Settings Button
+                    _buildSaveButton(),
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -405,24 +409,36 @@ class VendorInventoryAlertsView extends GetView<VendorInventoryAlertsController>
   }
 
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: controller.saveSettings,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+    return Obx(
+      () => SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed:
+              controller.isSaving.value ? null : controller.saveSettings,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-        child: Text(
-          'save_settings'.tr,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          child: controller.isSaving.value
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  'save_settings'.tr,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
       ),
     );

@@ -120,7 +120,14 @@ class LoginView extends GetView<LoginController> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.snackbar(
+                      'forgot_password'.tr,
+                      'feature_coming_soon'.tr,
+                      snackPosition: SnackPosition.BOTTOM,
+                      duration: const Duration(seconds: 2),
+                    );
+                  },
                   child: Text(
                     'forgot_password'.tr,
                     style: const TextStyle(

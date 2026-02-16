@@ -15,45 +15,53 @@ class VendorBankAccountDetailsView extends GetView<VendorBankAccountDetailsContr
       appBar: AppBar(
         title: Text('bank_account_details'.tr),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Verified Account Banner
-            _buildVerifiedBanner(),
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: controller.fetchBankAccountDetails,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Verified Account Banner
+                      _buildVerifiedBanner(),
 
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Current Bank Account Section
-                  Text(
-                    'current_bank_account'.tr,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Get.isDarkMode
-                          ? AppTheme.darkTextPrimary
-                          : AppTheme.textPrimary,
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Current Bank Account Section
+                            Text(
+                              'current_bank_account'.tr,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Get.isDarkMode
+                                    ? AppTheme.darkTextPrimary
+                                    : AppTheme.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+
+                            _buildBankAccountInfo(),
+                            const SizedBox(height: 20),
+
+                            // Change Bank Account Button
+                            _buildChangeAccountButton(),
+                            const SizedBox(height: 24),
+
+                            // Important Information
+                            _buildImportantInformation(),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-
-                  _buildBankAccountInfo(),
-                  const SizedBox(height: 20),
-
-                  // Change Bank Account Button
-                  _buildChangeAccountButton(),
-                  const SizedBox(height: 24),
-
-                  // Important Information
-                  _buildImportantInformation(),
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

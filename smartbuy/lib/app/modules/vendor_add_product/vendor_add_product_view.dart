@@ -23,7 +23,15 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
         actions: [
           if (controller.currentStep.value > 0)
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Get.snackbar(
+                  'draft'.tr,
+                  'product_saved_draft'.tr,
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                );
+                Get.back();
+              },
               child: Text(
                 'draft'.tr,
                 style: const TextStyle(

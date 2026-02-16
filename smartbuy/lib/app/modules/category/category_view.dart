@@ -17,9 +17,15 @@ class CategoryView extends GetView<CategoryController> {
         ),
         title: Text('categories'.tr),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            onSelected: (value) {
+              Get.snackbar(value, 'feature_coming_soon'.tr, snackPosition: SnackPosition.BOTTOM);
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'Sort A-Z', child: Text('Sort A-Z')),
+              const PopupMenuItem(value: 'Sort by Popular', child: Text('Sort by Popular')),
+            ],
           ),
         ],
       ),

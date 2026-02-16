@@ -13,10 +13,9 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      const VendorHomeView(),
+      const VendorProfileView(),
       const VendorOrdersView(),
       const VendorProductsView(),
-      const VendorProfileView(),
     ];
 
     return Scaffold(
@@ -26,10 +25,7 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
           switchInCurve: Curves.easeInOut,
           switchOutCurve: Curves.easeInOut,
           transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
           child: KeyedSubtree(
             key: ValueKey<int>(controller.currentIndex.value),
@@ -50,15 +46,14 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
             fontWeight: FontWeight.w600,
             fontSize: 12,
           ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 12,
-          ),
+          unselectedLabelStyle: const TextStyle(fontSize: 12),
           items: [
             BottomNavigationBarItem(
-              icon: const Icon(Icons.dashboard_outlined),
-              activeIcon: const Icon(Icons.dashboard),
-              label: 'vendor_home'.tr,
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: 'vendor_profile'.tr,
             ),
+
             BottomNavigationBarItem(
               icon: const Icon(Icons.shopping_bag_outlined),
               activeIcon: const Icon(Icons.shopping_bag),
@@ -68,11 +63,6 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
               icon: const Icon(Icons.inventory_2_outlined),
               activeIcon: const Icon(Icons.inventory_2),
               label: 'vendor_products'.tr,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline),
-              activeIcon: const Icon(Icons.person),
-              label: 'vendor_profile'.tr,
             ),
           ],
         ),
@@ -85,9 +75,7 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
       backgroundColor: Get.isDarkMode
           ? AppTheme.darkBackgroundColor
           : AppTheme.backgroundColor,
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

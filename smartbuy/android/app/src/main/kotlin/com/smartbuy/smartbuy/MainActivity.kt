@@ -1,4 +1,4 @@
-package com.example.smartbuy
+package com.smartbuy.smartbuy
 
 import io.flutter.embedding.android.FlutterActivity
 

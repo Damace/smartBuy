@@ -295,7 +295,7 @@ class HomeView extends GetView<HomeController> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: controller.onSeeAllCategories,
               child: Text(
                 'see_all'.tr,
                 style: const TextStyle(
@@ -394,7 +394,7 @@ class HomeView extends GetView<HomeController> {
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: controller.onSeeAllNewArrivals,
                 child: Text(
                   'see_all'.tr,
                   style: const TextStyle(
@@ -574,7 +574,7 @@ class HomeView extends GetView<HomeController> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () => controller.onWishlistTapped(product['id']),
                         child: Icon(
                           Icons.favorite_border,
                           size: 20,
@@ -585,7 +585,7 @@ class HomeView extends GetView<HomeController> {
                       ),
                       const SizedBox(width: 8),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () => controller.onAddToCartTapped(product['id']),
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(

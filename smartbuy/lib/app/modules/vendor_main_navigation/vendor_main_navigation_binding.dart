@@ -11,17 +11,9 @@ class VendorMainNavigationBinding extends Bindings {
     Get.lazyPut<VendorMainNavigationController>(
       () => VendorMainNavigationController(),
     );
-    Get.lazyPut<VendorHomeController>(
-      () => VendorHomeController(),
-    );
-    Get.lazyPut<VendorOrdersController>(
-      () => VendorOrdersController(),
-    );
-    Get.lazyPut<VendorProductsController>(
-      () => VendorProductsController(),
-    );
-    Get.lazyPut<VendorProfileController>(
-      () => VendorProfileController(),
-    );
+    Get.lazyPut<VendorProfileController>(() => VendorProfileController());
+    Get.lazyPut<VendorOrdersController>(() => VendorOrdersController());
+    Get.lazyPut<VendorProductsController>(() => VendorProductsController());
+    Get.lazyPut<VendorProfileController>(() => VendorProfileController());
   }
 }

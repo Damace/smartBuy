@@ -85,8 +85,9 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.SPLASH;
+  //static const INITIAL = Routes.SPLASH;
 
+  static const INITIAL = Routes.VENDOR_HOME;
   static final routes = [
     GetPage(
       name: _Paths.SPLASH,

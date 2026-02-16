@@ -17,7 +17,14 @@ class VendorOrdersView extends GetView<VendorOrdersController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Get.snackbar(
+                'notifications'.tr,
+                'feature_coming_soon'.tr,
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 2),
+              );
+            },
           ),
         ],
       ),

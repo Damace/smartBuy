@@ -144,14 +144,15 @@ class VendorAddProductController extends GetxController {
               ),
             ),
             const SizedBox(height: 20),
-            ...['Electronics', 'Fashion', 'Home', 'Beauty', 'Sports']
-                .map((category) => ListTile(
-                      title: Text(category),
-                      onTap: () {
-                        selectedCategory.value = category;
-                        Get.back();
-                      },
-                    )),
+            ...['Electronics', 'Fashion', 'Home', 'Beauty', 'Sports'].map(
+              (category) => ListTile(
+                title: Text(category),
+                onTap: () {
+                  selectedCategory.value = category;
+                  Get.back();
+                },
+              ),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -273,34 +274,36 @@ class VendorAddProductController extends GetxController {
               'DHL',
               'FedEx',
               'UPS',
-              'Custom Shipping'
-            ].map((partner) => ListTile(
-                  title: Text(partner),
-                  trailing: partner == 'SmartBuy Express'
-                      ? Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
+              'Custom Shipping',
+            ].map(
+              (partner) => ListTile(
+                title: Text(partner),
+                trailing: partner == 'SmartBuy Express'
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'recommended'.tr,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.green.shade700,
+                            fontWeight: FontWeight.w600,
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade100,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'recommended'.tr,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.green.shade700,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        )
-                      : null,
-                  onTap: () {
-                    shippingPartner.value = partner;
-                    Get.back();
-                  },
-                )),
+                        ),
+                      )
+                    : null,
+                onTap: () {
+                  shippingPartner.value = partner;
+                  Get.back();
+                },
+              ),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -339,14 +342,15 @@ class VendorAddProductController extends GetxController {
               ),
             ),
             const SizedBox(height: 20),
-            ...['7_days', '14_days', '30_days', '60_days', '90_days']
-                .map((window) => ListTile(
-                      title: Text('${window.split('_')[0]} ${'days'.tr}'),
-                      onTap: () {
-                        returnWindow.value = window;
-                        Get.back();
-                      },
-                    )),
+            ...['7_days', '14_days', '30_days', '60_days', '90_days'].map(
+              (window) => ListTile(
+                title: Text('${window.split('_')[0]} ${'days'.tr}'),
+                onTap: () {
+                  returnWindow.value = window;
+                  Get.back();
+                },
+              ),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -370,8 +374,7 @@ class VendorAddProductController extends GetxController {
             'description': descriptionController.text.trim(),
             'category': selectedCategory.value,
             'price': double.tryParse(regularPriceController.text) ?? 0,
-            'sale_price':
-                double.tryParse(discountedPriceController.text) ?? 0,
+            'sale_price': double.tryParse(discountedPriceController.text) ?? 0,
             'sku': skuController.text.trim(),
             'quantity': quantityInStock.value,
             'weight': double.tryParse(weightController.text) ?? 0,
@@ -382,28 +385,28 @@ class VendorAddProductController extends GetxController {
 
           // Cover image
           if (coverImage.value != null) {
-            formMap['cover_image'] =
-                await dio.MultipartFile.fromFile(coverImage.value!.path);
+            formMap['cover_image'] = await dio.MultipartFile.fromFile(
+              coverImage.value!.path,
+            );
           }
 
           // Video (5s max)
           if (videoFile.value != null) {
-            formMap['video'] =
-                await dio.MultipartFile.fromFile(videoFile.value!.path);
+            formMap['video'] = await dio.MultipartFile.fromFile(
+              videoFile.value!.path,
+            );
           }
 
           // Product images (up to 4)
           for (int i = 0; i < productImages.length; i++) {
-            formMap['images[$i]'] =
-                await dio.MultipartFile.fromFile(productImages[i].path);
+            formMap['images[$i]'] = await dio.MultipartFile.fromFile(
+              productImages[i].path,
+            );
           }
 
           final formData = dio.FormData.fromMap(formMap);
 
-          await _apiProvider.post(
-            ApiConstants.vendorProducts,
-            data: formData,
-          );
+          await _apiProvider.post(ApiConstants.vendorProducts, data: formData);
           Get.back();
           Helpers.showSuccess('product_published'.tr);
         } catch (e) {

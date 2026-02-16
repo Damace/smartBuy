@@ -308,7 +308,9 @@ class CartView extends GetView<CartController> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Get.toNamed('/wishlist');
+              },
               child: Text(
                 'view_all'.tr,
                 style: const TextStyle(

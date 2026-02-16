@@ -22,7 +22,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined),
-            onPressed: () {},
+            onPressed: controller.shareProduct,
           ),
         ],
       ),
@@ -444,23 +444,29 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Get.isDarkMode
-                  ? AppTheme.darkTextSecondary
-                  : AppTheme.textSecondary,
-            ),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              'read_more'.tr,
-              style: const TextStyle(color: AppTheme.primaryColor),
-            ),
-          ),
+          Obx(() => Text(
+                description,
+                maxLines: controller.isDescriptionExpanded.value ? null : 3,
+                overflow: controller.isDescriptionExpanded.value
+                    ? null
+                    : TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: Get.isDarkMode
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary,
+                ),
+              )),
+          Obx(() => TextButton(
+                onPressed: controller.toggleDescription,
+                child: Text(
+                  controller.isDescriptionExpanded.value
+                      ? 'show_less'.tr
+                      : 'read_more'.tr,
+                  style: const TextStyle(color: AppTheme.primaryColor),
+                ),
+              )),
         ],
       ),
     );
@@ -487,7 +493,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                 ),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: controller.viewAllReviews,
                 child: Text(
                   'view_all'.tr,
                   style: const TextStyle(color: AppTheme.primaryColor),

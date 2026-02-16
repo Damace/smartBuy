@@ -670,6 +670,10 @@ const Map<String, String> swKE = {
       'Taarifa zako za kifedha zimefungwa na salama',
   'account_holder_name_required': 'Jina la mmiliki wa akaunti linahitajika',
   'bank_account_updated_successfully': 'Akaunti ya benki imebadilishwa kwa mafanikio',
+  'delete_bank_account': 'Futa Akaunti ya Benki',
+  'delete_bank_account_confirmation':
+      'Una uhakika unataka kufuta maelezo ya akaunti yako ya benki? Hatua hii haiwezi kutenduliwa.',
+  'bank_account_deleted_successfully': 'Akaunti ya benki imefutwa kwa mafanikio',
 
   // Vendor Store Preview
   'edit_storefront': 'Hariri Duka',
@@ -930,4 +934,5 @@ const Map<String, String> swKE = {
   'description': 'Maelezo',
   'proceeding_to_checkout': 'Inaendelea na malipo...',
   'video_playback_coming_soon': 'Kucheza video kutapatikana hivi karibuni',
+  'show_less': 'Onyesha Kidogo',
 };

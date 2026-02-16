@@ -225,8 +225,15 @@ class HomeController extends GetxController {
   }
 
   void onCategoryTapped(String categoryId) {
-    // Navigate to category details or filter products
-    Get.snackbar('Category', 'Category $categoryId tapped');
+    // Navigate to category tab via MainNavigationController
+    try {
+      final navController = Get.find<dynamic>();
+      if (navController.runtimeType.toString().contains('MainNavigation')) {
+        navController.changePage(1);
+      }
+    } catch (_) {
+      // Fallback: category is already visible in bottom nav
+    }
   }
 
   void onProductTapped(String productId) {
@@ -234,22 +241,66 @@ class HomeController extends GetxController {
   }
 
   void onNotificationTapped() {
-    // Switch to notification tab
-    // This will be handled by MainNavigationController
+    Get.toNamed(Routes.BUYER_MESSAGES_INBOX);
   }
 
   void onCartTapped() {
-    // Navigate to cart
-    Get.snackbar('Cart', 'Cart tapped');
+    Get.toNamed(Routes.CART);
   }
 
   void onSearchTapped() {
-    // Navigate to search screen
-    Get.snackbar('Search', 'Search tapped');
+    // Navigate to category tab (which has search)
+    try {
+      final navController = Get.find<dynamic>();
+      if (navController.runtimeType.toString().contains('MainNavigation')) {
+        navController.changePage(1);
+      }
+    } catch (_) {}
   }
 
   void onBannerTapped() {
-    // Navigate to offer details
-    Get.snackbar('Offer', 'Limited time offer tapped');
+    // Navigate to category tab for deals
+    try {
+      final navController = Get.find<dynamic>();
+      if (navController.runtimeType.toString().contains('MainNavigation')) {
+        navController.changePage(1);
+      }
+    } catch (_) {}
+  }
+
+  void onSeeAllCategories() {
+    try {
+      final navController = Get.find<dynamic>();
+      if (navController.runtimeType.toString().contains('MainNavigation')) {
+        navController.changePage(1);
+      }
+    } catch (_) {}
+  }
+
+  void onSeeAllNewArrivals() {
+    try {
+      final navController = Get.find<dynamic>();
+      if (navController.runtimeType.toString().contains('MainNavigation')) {
+        navController.changePage(1);
+      }
+    } catch (_) {}
+  }
+
+  void onWishlistTapped(String productId) {
+    Get.snackbar(
+      'wishlist'.tr,
+      'item_saved'.tr,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  void onAddToCartTapped(String productId) {
+    Get.snackbar(
+      'cart'.tr,
+      'item_added'.tr,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
   }
 }

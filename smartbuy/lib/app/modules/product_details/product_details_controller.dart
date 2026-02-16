@@ -13,6 +13,7 @@ class ProductDetailsController extends GetxController {
   final RxString selectedColor = ''.obs;
   final RxString selectedSize = ''.obs;
   final RxInt quantity = 1.obs;
+  final RxBool isDescriptionExpanded = false.obs;
 
   String get storageBaseUrl =>
       '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/';
@@ -75,6 +76,29 @@ class ProductDetailsController extends GetxController {
     if (quantity.value > 1) {
       quantity.value--;
     }
+  }
+
+  void toggleDescription() {
+    isDescriptionExpanded.value = !isDescriptionExpanded.value;
+  }
+
+  void shareProduct() {
+    final name = product['name'] ?? 'Product';
+    Get.snackbar(
+      'share'.tr,
+      'Sharing "$name"...',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  void viewAllReviews() {
+    Get.snackbar(
+      'customer_reviews'.tr,
+      'coming_soon'.tr,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+    );
   }
 
   void addToCart() {
