@@ -517,8 +517,10 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
             ),
           ),
           const SizedBox(width: 12),
-          ElevatedButton(
-            onPressed: controller.applyPromoCode,
+          Obx(() => ElevatedButton(
+            onPressed: controller.isApplyingPromo.value
+                ? null
+                : controller.applyPromoCode,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
               foregroundColor: Colors.white,
@@ -527,8 +529,17 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text('apply'.tr),
-          ),
+            child: controller.isApplyingPromo.value
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text('apply'.tr),
+          )),
         ],
       ),
     );
@@ -570,10 +581,12 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
             ),
           ),
           const SizedBox(height: 16),
-          SizedBox(
+          Obx(() => SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: controller.placeOrder,
+              onPressed: controller.isPlacingOrder.value
+                  ? null
+                  : controller.placeOrder,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 foregroundColor: Colors.white,
@@ -582,15 +595,26 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text(
-                'pay_and_place_order'.tr,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: controller.isPlacingOrder.value
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
+                      ),
+                    )
+                  : Text(
+                      'pay_and_place_order'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
-          ),
+          )),
         ],
       ),
     );

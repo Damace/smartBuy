@@ -20,7 +20,11 @@ class BuyerNotificationPreferencesView
           onPressed: () => Get.back(),
         ),
       ),
-      body: Column(
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return Column(
         children: [
           Expanded(
             child: ListView(
@@ -165,8 +169,10 @@ class BuyerNotificationPreferencesView
               children: [
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: controller.saveAllChanges,
+                  child: Obx(() => ElevatedButton(
+                    onPressed: controller.isSaving.value
+                        ? null
+                        : controller.saveAllChanges,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,
                       foregroundColor: Colors.white,
@@ -175,8 +181,19 @@ class BuyerNotificationPreferencesView
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text('save_all_changes'.tr),
-                  ),
+                    child: controller.isSaving.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text('save_all_changes'.tr),
+                  )),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -193,7 +210,8 @@ class BuyerNotificationPreferencesView
             ),
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 

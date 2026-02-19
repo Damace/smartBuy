@@ -19,74 +19,92 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Saved Cards Section
-                _buildSectionHeader('saved_cards'.tr, () => controller.addNewCard()),
-                const SizedBox(height: 12),
-                Obx(() => Column(
-                      children: controller.savedCards
-                          .map((card) => _buildCardItem(card))
-                          .toList(),
-                    )),
-                const SizedBox(height: 24),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-                // Mobile Money Section
-                _buildSectionHeader('mobile_money_tanzania'.tr, null),
-                const SizedBox(height: 12),
-                Obx(() => Column(
-                      children: controller.mobileMoney
-                          .map((money) => _buildMobileMoneyItem(money))
-                          .toList(),
-                    )),
-                const SizedBox(height: 24),
+        return Column(
+          children: [
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.fetchPaymentMethods,
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // Saved Cards Section
+                    _buildSectionHeader(
+                        'saved_cards'.tr, () => controller.addNewCard()),
+                    const SizedBox(height: 12),
+                    ...controller.savedCards
+                        .map((card) => _buildCardItem(card)),
+                    if (controller.savedCards.isEmpty)
+                      _buildEmptyHint('no_saved_cards'.tr),
+                    const SizedBox(height: 24),
 
-                // UPI IDs Section
-                _buildSectionHeader('upi_ids'.tr, () => controller.addNewUpiId()),
-                const SizedBox(height: 12),
-                Obx(() => Column(
-                      children: controller.upiIds
-                          .map((upi) => _buildUpiItem(upi))
-                          .toList(),
-                    )),
-                const SizedBox(height: 24),
+                    // Mobile Money Section
+                    _buildSectionHeader('mobile_money_tanzania'.tr, null),
+                    const SizedBox(height: 12),
+                    ...controller.mobileMoney
+                        .map((money) => _buildMobileMoneyItem(money)),
+                    const SizedBox(height: 24),
 
-                // Linked Wallets Section
-                _buildSectionHeader('linked_wallets'.tr, () => controller.showLinkWalletDialog()),
-                const SizedBox(height: 12),
-                Obx(() => Column(
-                      children: controller.linkedWallets
-                          .map((wallet) => _buildWalletItem(wallet))
-                          .toList(),
-                    )),
-              ],
+                    // UPI IDs Section
+                    _buildSectionHeader(
+                        'upi_ids'.tr, () => controller.addNewUpiId()),
+                    const SizedBox(height: 12),
+                    ...controller.upiIds
+                        .map((upi) => _buildUpiItem(upi)),
+                    if (controller.upiIds.isEmpty)
+                      _buildEmptyHint('no_upi_ids'.tr),
+                    const SizedBox(height: 24),
+
+                    // Linked Wallets Section
+                    _buildSectionHeader('linked_wallets'.tr,
+                        () => controller.showLinkWalletDialog()),
+                    const SizedBox(height: 12),
+                    ...controller.linkedWallets
+                        .map((wallet) => _buildWalletItem(wallet)),
+                  ],
+                ),
+              ),
             ),
-          ),
-          // Add New Payment Method Button
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: controller.addNewPaymentMethod,
-                icon: const Icon(Icons.add_card, size: 20),
-                label: Text('add_new_payment_method'.tr),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            // Add New Payment Method Button
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: controller.addNewPaymentMethod,
+                  icon: const Icon(Icons.add_card, size: 20),
+                  label: Text('add_new_payment_method'.tr),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildEmptyHint(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Get.isDarkMode ? Colors.grey[500] : Colors.grey[400],
+          fontSize: 13,
+          fontStyle: FontStyle.italic,
+        ),
       ),
     );
   }
@@ -121,6 +139,8 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
   }
 
   Widget _buildCardItem(Map<String, dynamic> card) {
+    final int? cardId = card['id'];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -186,7 +206,7 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'expires'.tr + ' ${card['expiryDate']}',
+                  '${'expires'.tr} ${card['expiryDate']}',
                   style: TextStyle(
                     color: Get.isDarkMode
                         ? AppTheme.darkTextSecondary
@@ -197,13 +217,23 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            color: Get.isDarkMode
-                ? AppTheme.darkTextSecondary
-                : AppTheme.textSecondary,
-            onPressed: () => controller.editCard(card),
-          ),
+          if (cardId != null)
+            Obx(() {
+              final isRemoving = controller.removingIds.contains(cardId);
+              return isRemoving
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.chevron_right),
+                      color: Get.isDarkMode
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textSecondary,
+                      onPressed: () => controller.editCard(card),
+                    );
+            }),
         ],
       ),
     );
@@ -211,6 +241,8 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
 
   Widget _buildMobileMoneyItem(Map<String, dynamic> money) {
     final bool isConnected = money['isConnected'] == true;
+    final String name = money['name'] ?? '';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -245,7 +277,7 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  money['name'],
+                  name,
                   style: TextStyle(
                     color: Get.isDarkMode ? Colors.white : Colors.black,
                     fontSize: 14,
@@ -268,21 +300,35 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
             ),
           ),
           if (!isConnected)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                'link'.tr.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            )
+            Obx(() {
+              final isConnecting =
+                  controller.connectingNames.contains(name);
+              return isConnecting
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : GestureDetector(
+                      onTap: () => controller.linkMobileMoney(money),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'link'.tr.toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    );
+            })
           else
             IconButton(
               icon: const Icon(Icons.chevron_right),
@@ -297,6 +343,8 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
   }
 
   Widget _buildUpiItem(Map<String, dynamic> upi) {
+    final int? upiItemId = upi['id'];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -331,7 +379,7 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  upi['upiId'],
+                  upi['upiId'] ?? '',
                   style: TextStyle(
                     color: Get.isDarkMode ? Colors.white : Colors.black,
                     fontSize: 14,
@@ -341,7 +389,7 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
                 const SizedBox(height: 4),
                 Text(
                   'verified'.tr,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.successColor,
                     fontSize: 12,
                   ),
@@ -349,15 +397,44 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            color: Get.isDarkMode
-                ? AppTheme.darkTextSecondary
-                : AppTheme.textSecondary,
-            onPressed: () {
-              Get.toNamed('/buyer-edit-payment');
-            },
-          ),
+          if (upiItemId != null)
+            Obx(() {
+              final isRemoving =
+                  controller.removingIds.contains(upiItemId);
+              return PopupMenuButton<String>(
+                icon: isRemoving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        Icons.more_vert,
+                        color: Get.isDarkMode
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.textSecondary,
+                      ),
+                enabled: !isRemoving,
+                onSelected: (value) {
+                  if (value == 'remove') {
+                    controller.removePaymentMethod(upiItemId);
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'remove',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.delete_outline,
+                            color: AppTheme.errorColor, size: 18),
+                        const SizedBox(width: 8),
+                        Text('remove'.tr),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }),
         ],
       ),
     );
@@ -365,6 +442,8 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
 
   Widget _buildWalletItem(Map<String, dynamic> wallet) {
     final bool isLinked = wallet['isLinked'] == true;
+    final String name = wallet['name'] ?? '';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -399,7 +478,7 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  wallet['name'],
+                  name,
                   style: TextStyle(
                     color: Get.isDarkMode ? Colors.white : Colors.black,
                     fontSize: 14,
@@ -422,21 +501,35 @@ class BuyerSavedPaymentView extends GetView<BuyerSavedPaymentController> {
             ),
           ),
           if (!isLinked)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                'connect'.tr.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            )
+            Obx(() {
+              final isConnecting =
+                  controller.connectingNames.contains(name);
+              return isConnecting
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : GestureDetector(
+                      onTap: () => controller.linkWallet(wallet),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'connect'.tr.toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    );
+            })
           else
             IconButton(
               icon: const Icon(Icons.chevron_right),

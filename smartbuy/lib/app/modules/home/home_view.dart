@@ -35,6 +35,8 @@ class HomeView extends GetView<HomeController> {
                     child: _buildCategoriesSection(context),
                   ),
                   const SizedBox(height: 24),
+                  _buildVendorProductsSection(context),
+                  const SizedBox(height: 24),
                   _buildNewArrivalSection(context),
                   const SizedBox(height: 16),
                 ],
@@ -379,6 +381,206 @@ class HomeView extends GetView<HomeController> {
     }
   }
 
+  Widget _buildVendorProductsSection(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoadingVendorProducts.value) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+      if (controller.vendorProducts.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'vendor_products'.tr,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...controller.vendorProducts.map((vendor) {
+            final products = vendor['products'] as List<Map<String, dynamic>>;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.store,
+                          color: AppTheme.primaryColor,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          vendor['vendorName'] ?? '',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        '${products.length} ${'products_count'.tr}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Get.isDarkMode
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 220,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: products.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return _buildVendorProductCard(context, product);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            );
+          }),
+        ],
+      );
+    });
+  }
+
+  Widget _buildVendorProductCard(
+    BuildContext context,
+    Map<String, dynamic> product,
+  ) {
+    final hasDiscount = product['originalPrice'] != null;
+
+    return GestureDetector(
+      onTap: () => controller.onProductTapped(product['id']),
+      child: Container(
+        width: 160,
+        decoration: BoxDecoration(
+          color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Get.isDarkMode
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.15),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product Image
+            Container(
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Get.isDarkMode
+                    ? AppTheme.darkCardColor
+                    : Colors.grey[100],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                child: _buildProductImage(product['image'], 120, 40),
+              ),
+            ),
+            // Product Details
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product['name'],
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, size: 12, color: Colors.amber),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${product['rating']}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '\$${product['price'].toStringAsFixed(2)}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ),
+                      if (hasDiscount) ...[
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            '\$${product['originalPrice'].toStringAsFixed(2)}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              decoration: TextDecoration.lineThrough,
+                              color: Get.isDarkMode
+                                  ? AppTheme.darkTextSecondary
+                                  : AppTheme.textSecondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildNewArrivalSection(BuildContext context) {
     return Column(
       children: [
@@ -463,27 +665,7 @@ class HomeView extends GetView<HomeController> {
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
                     ),
-                    child: product['image'] != null && product['image'] != 'default'
-                        ? Image.network(
-                            '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/${product['image']}',
-                            width: double.infinity,
-                            height: imageHeight,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
-                              child: Icon(
-                                _getProductIcon(product['image']),
-                                size: 60,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ),
-                          )
-                        : Center(
-                            child: Icon(
-                              _getProductIcon(product['image'] ?? ''),
-                              size: 60,
-                              color: AppTheme.primaryColor,
-                            ),
-                          ),
+                    child: _buildProductImage(product['image'], imageHeight, 60),
                   ),
                 ),
                 if (product['badge'] != null)
@@ -524,6 +706,39 @@ class HomeView extends GetView<HomeController> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (product['vendorName'] != null &&
+                      product['vendorName'].toString().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.store,
+                            size: 12,
+                            color: Get.isDarkMode
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              product['vendorName'],
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    fontSize: 11,
+                                    color: Get.isDarkMode
+                                        ? AppTheme.darkTextSecondary
+                                        : AppTheme.textSecondary,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
@@ -610,18 +825,36 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  IconData _getProductIcon(String imageName) {
-    switch (imageName) {
-      case 'headphones':
-        return Icons.headphones;
-      case 'jacket':
-        return Icons.checkroom;
-      case 'coffee':
-        return Icons.coffee;
-      case 'shoes':
-        return Icons.directions_run;
-      default:
-        return Icons.shopping_bag;
+  Widget _buildProductImage(String? imagePath, double height, double iconSize) {
+    if (imagePath != null &&
+        imagePath != 'default' &&
+        imagePath.contains('/')) {
+      return Image.network(
+        '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/$imagePath',
+        width: double.infinity,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => SizedBox(
+          height: height,
+          child: Center(
+            child: Icon(
+              Icons.image_not_supported,
+              size: iconSize,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
     }
+    return SizedBox(
+      height: height,
+      child: Center(
+        child: Icon(
+          Icons.shopping_bag,
+          size: iconSize,
+          color: AppTheme.primaryColor,
+        ),
+      ),
+    );
   }
 }

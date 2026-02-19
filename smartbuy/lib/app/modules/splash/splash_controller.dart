@@ -35,7 +35,8 @@ class SplashController extends GetxController {
         Get.offNamed(Routes.HOME);
       }
     } else if (isFirstTime != false) {
-      Get.offNamed(Routes.ONBOARDING);
+      // Get.offNamed(Routes.ONBOARDING); Remind me to edit here
+      Get.offNamed(Routes.LOGIN);
     } else {
       Get.offNamed(Routes.LOGIN);
     }

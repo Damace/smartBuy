@@ -37,20 +37,12 @@ class Helpers {
 
   // Show Error Message
   static void showError(String message) {
-    showSnackbar(
-      title: 'Error',
-      message: message,
-      backgroundColor: Colors.red,
-    );
+    showSnackbar(title: 'Error', message: message, backgroundColor: Colors.red);
   }
 
   // Show Info Message
   static void showInfo(String message) {
-    showSnackbar(
-      title: 'Info',
-      message: message,
-      backgroundColor: Colors.blue,
-    );
+    showSnackbar(title: 'Info', message: message, backgroundColor: Colors.blue);
   }
 
   // Show Warning Message
@@ -102,11 +94,7 @@ class Helpers {
                 color: iconColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 40,
-                color: iconColor,
-              ),
+              child: Icon(icon, size: 40, color: iconColor),
             ),
             const SizedBox(height: 24),
             // Title
@@ -115,7 +103,9 @@ class Helpers {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Get.isDarkMode ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+                color: Get.isDarkMode
+                    ? AppTheme.darkTextPrimary
+                    : AppTheme.textPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -125,7 +115,9 @@ class Helpers {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Get.isDarkMode ? AppTheme.darkTextSecondary : AppTheme.textSecondary,
+                color: Get.isDarkMode
+                    ? AppTheme.darkTextSecondary
+                    : AppTheme.textSecondary,
               ),
             ),
             const SizedBox(height: 32),
@@ -149,7 +141,11 @@ class Helpers {
   }
 
   // Show Success Bottom Sheet
-  static void showSuccessSheet(String message, {String? title, VoidCallback? onClose}) {
+  static void showSuccessSheet(
+    String message, {
+    String? title,
+    VoidCallback? onClose,
+  }) {
     showBottomSheet(
       title: title ?? 'Success!',
       message: message,
@@ -161,7 +157,27 @@ class Helpers {
   }
 
   // Show Error Bottom Sheet
-  static void showErrorSheet(String message, {String? title, VoidCallback? onClose}) {
+  static void showErrorSheet(
+    String message, {
+    String? title,
+    VoidCallback? onClose,
+  }) {
+    showBottomSheet(
+      title: title ?? 'Error!',
+      message: message,
+      icon: Icons.error,
+      iconColor: AppTheme.errorColor,
+      buttonText: 'Okay',
+      onButtonPressed: onClose,
+    );
+  }
+
+  // Show Error Bottom Sheet
+  static void showErrorSheetLogin(
+    String message, {
+    String? title,
+    VoidCallback? onClose,
+  }) {
     showBottomSheet(
       title: title ?? 'Error!',
       message: message,
@@ -173,7 +189,11 @@ class Helpers {
   }
 
   // Show Info Bottom Sheet
-  static void showInfoSheet(String message, {String? title, VoidCallback? onClose}) {
+  static void showInfoSheet(
+    String message, {
+    String? title,
+    VoidCallback? onClose,
+  }) {
     showBottomSheet(
       title: title ?? 'Information',
       message: message,
@@ -185,7 +205,11 @@ class Helpers {
   }
 
   // Show Warning Bottom Sheet
-  static void showWarningSheet(String message, {String? title, VoidCallback? onClose}) {
+  static void showWarningSheet(
+    String message, {
+    String? title,
+    VoidCallback? onClose,
+  }) {
     showBottomSheet(
       title: title ?? 'Warning!',
       message: message,
@@ -318,7 +342,10 @@ class Helpers {
   }
 
   // Calculate Discount Percentage
-  static double calculateDiscountPercentage(double originalPrice, double discountedPrice) {
+  static double calculateDiscountPercentage(
+    double originalPrice,
+    double discountedPrice,
+  ) {
     if (originalPrice == 0) return 0;
     return ((originalPrice - discountedPrice) / originalPrice) * 100;
   }

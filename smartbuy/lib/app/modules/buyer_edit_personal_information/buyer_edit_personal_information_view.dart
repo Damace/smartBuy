@@ -16,88 +16,128 @@ class BuyerEditPersonalInformationView
       appBar: AppBar(
         title: Text('edit_personal_information'.tr),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Profile Photo
-            _buildProfilePhoto(),
-            const SizedBox(height: 24),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-            // Full Name
-            _buildTextField(
-              label: 'full_name'.tr,
-              controller: controller.fullNameController,
-            ),
-            const SizedBox(height: 16),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Profile Photo
+              _buildProfilePhoto(),
+              const SizedBox(height: 24),
 
-            // Email Address
-            _buildEmailField(),
-            const SizedBox(height: 16),
+              // Full Name
+              _buildTextField(
+                label: 'full_name'.tr,
+                controller: controller.fullNameController,
+              ),
+              const SizedBox(height: 16),
 
-            // Phone Number
-            _buildPhoneNumberField(),
-            const SizedBox(height: 16),
+              // Email Address
+              _buildEmailField(),
+              const SizedBox(height: 16),
 
-            // Gender
-            _buildGenderSection(),
-            const SizedBox(height: 16),
+              // Phone Number
+              _buildPhoneNumberField(),
+              const SizedBox(height: 16),
 
-            // Buyer Account Badge
-            _buildBuyerAccountBadge(),
-            const SizedBox(height: 24),
+              // Gender
+              _buildGenderSection(),
+              const SizedBox(height: 16),
 
-            // Update Profile Button
-            _buildUpdateButton(),
-          ],
-        ),
-      ),
+              // Buyer Account Badge
+              _buildBuyerAccountBadge(),
+              const SizedBox(height: 24),
+
+              // Update Profile Button
+              _buildUpdateButton(),
+            ],
+          ),
+        );
+      }),
     );
   }
 
   Widget _buildProfilePhoto() {
     return Column(
       children: [
-        Stack(
-          children: [
-            // Profile Avatar
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Get.isDarkMode
-                    ? Colors.grey.shade800
-                    : Colors.grey.shade200,
-              ),
-              child: Icon(
-                Icons.person,
-                size: 50,
-                color: Get.isDarkMode
-                    ? Colors.grey.shade600
-                    : Colors.grey.shade400,
-              ),
-            ),
-            // Camera Icon
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: Colors.orange,
-                  shape: BoxShape.circle,
+        Obx(() {
+          final photoUrl = controller.profilePhotoUrl.value;
+          final isUploading = controller.isUploadingPhoto.value;
+
+          return Stack(
+            children: [
+              // Profile Avatar
+              GestureDetector(
+                onTap: isUploading ? null : controller.changePhoto,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Get.isDarkMode
+                        ? Colors.grey.shade800
+                        : Colors.grey.shade200,
+                  ),
+                  child: isUploading
+                      ? const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : photoUrl.isNotEmpty
+                          ? ClipOval(
+                              child: Image.network(
+                                photoUrl,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Get.isDarkMode
+                                        ? Colors.grey.shade600
+                                        : Colors.grey.shade400,
+                                  );
+                                },
+                              ),
+                            )
+                          : Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Get.isDarkMode
+                                  ? Colors.grey.shade600
+                                  : Colors.grey.shade400,
+                            ),
                 ),
-                child: const Icon(
-                  Icons.camera_alt,
-                  color: Colors.white,
-                  size: 20,
-                ),
               ),
-            ),
-          ],
-        ),
+              // Camera Icon
+              if (!isUploading)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: GestureDetector(
+                    onTap: controller.changePhoto,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Colors.orange,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
         const SizedBox(height: 8),
         TextButton(
           onPressed: controller.changePhoto,
@@ -484,24 +524,36 @@ class BuyerEditPersonalInformationView
   }
 
   Widget _buildUpdateButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: controller.updateProfile,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+    return Obx(
+      () => SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed:
+              controller.isSaving.value ? null : controller.updateProfile,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
-        child: Text(
-          'update_profile'.tr,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          child: controller.isSaving.value
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  'update_profile'.tr,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
       ),
     );

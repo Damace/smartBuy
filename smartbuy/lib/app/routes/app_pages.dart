@@ -87,14 +87,14 @@ class AppPages {
 
   //static const INITIAL = Routes.SPLASH;
 
-  static const INITIAL = Routes.VENDOR_HOME;
+  static const INITIAL = Routes.SPLASH;
   static final routes = [
     GetPage(
       name: _Paths.SPLASH,
       page: () => const SplashView(),
       binding: SplashBinding(),
       transition: Transition.fade,
-      transitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 1000),
     ),
     GetPage(
       name: _Paths.ONBOARDING,

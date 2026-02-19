@@ -329,35 +329,59 @@ class BuyerEditPaymentView extends GetView<BuyerEditPaymentController> {
             const SizedBox(height: 32),
 
             // Save Changes Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: controller.saveChanges,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            Obx(() => SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: controller.isSaving.value
+                        ? null
+                        : controller.saveChanges,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: controller.isSaving.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text('save_changes'.tr),
                   ),
-                ),
-                child: Text('save_changes'.tr),
-              ),
-            ),
+                )),
             const SizedBox(height: 16),
 
             // Remove Card Button (only in edit mode)
-            Obx(() => controller.isEditMode.value
-                ? TextButton.icon(
-                    onPressed: controller.removeCard,
-                    icon: const Icon(Icons.delete_outline,
-                        color: AppTheme.errorColor),
-                    label: Text(
-                      'remove_card'.tr,
-                      style: const TextStyle(color: AppTheme.errorColor),
+            Obx(() {
+              if (!controller.isEditMode.value) return const SizedBox();
+              if (controller.isDeleting.value) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                  )
-                : const SizedBox()),
+                  ),
+                );
+              }
+              return TextButton.icon(
+                onPressed: controller.removeCard,
+                icon: const Icon(Icons.delete_outline,
+                    color: AppTheme.errorColor),
+                label: Text(
+                  'remove_card'.tr,
+                  style: const TextStyle(color: AppTheme.errorColor),
+                ),
+              );
+            }),
           ],
         ),
       ),

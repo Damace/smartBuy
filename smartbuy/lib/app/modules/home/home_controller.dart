@@ -8,10 +8,12 @@ class HomeController extends GetxController {
   final RxList<Map<String, dynamic>> recommendedProducts =
       <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> banners = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> vendorProducts = <Map<String, dynamic>>[].obs;
   final RxInt currentBannerIndex = 0.obs;
   final RxInt notificationCount = 2.obs;
   final RxInt cartCount = 2.obs;
   final RxBool isLoadingProducts = false.obs;
+  final RxBool isLoadingVendorProducts = false.obs;
 
   final ApiProvider _apiProvider = ApiProvider();
 
@@ -21,6 +23,8 @@ class HomeController extends GetxController {
     loadBanners();
     loadCategories();
     loadRecommendedProducts();
+    loadVendorProducts();
+    loadCartCount();
   }
 
   void loadBanners() {
@@ -77,25 +81,23 @@ class HomeController extends GetxController {
             .map((p) => <String, dynamic>{
                   'id': p['id'].toString(),
                   'name': p['name'] ?? '',
-                  'price': (p['price'] is String
-                          ? double.tryParse(p['price'])
-                          : p['price'] ?? 0)
-                      .toDouble(),
-                  'originalPrice': p['sale_price'] != null &&
+                  'price': (p['sale_price'] != null &&
                           p['sale_price'].toString() != '0.00' &&
-                          p['sale_price'].toString() != '0'
-                      ? (p['price'] is String
-                              ? double.tryParse(p['price'])
-                              : p['price'] ?? 0)
-                          .toDouble()
+                          p['sale_price'].toString() != '0')
+                      ? _toDouble(p['sale_price'])
+                      : _toDouble(p['price']),
+                  'originalPrice': (p['sale_price'] != null &&
+                          p['sale_price'].toString() != '0.00' &&
+                          p['sale_price'].toString() != '0')
+                      ? _toDouble(p['price'])
                       : null,
-                  'rating': (p['rating'] is String
-                          ? double.tryParse(p['rating'])
-                          : p['rating'] ?? 0)
-                      .toDouble(),
+                  'rating': _toDouble(p['rating']),
                   'ratingCount': p['total_reviews'] ?? 0,
                   'image': p['primary_image'] ?? 'default',
                   'badge': p['is_featured'] == true ? 'Hot Sale' : null,
+                  'vendorName': p['vendor'] != null
+                      ? p['vendor']['business_name'] ?? ''
+                      : '',
                 })
             .toList()
             .cast<Map<String, dynamic>>();
@@ -106,6 +108,96 @@ class HomeController extends GetxController {
     // Fallback to mock data
     _loadMockProducts();
     isLoadingProducts.value = false;
+  }
+
+  void loadVendorProducts() async {
+    isLoadingVendorProducts.value = true;
+    try {
+      final response = await _apiProvider.get(ApiConstants.products);
+      final data = response.data['data'] ?? response.data;
+      if (data is List && data.isNotEmpty) {
+        // Group products by vendor
+        final Map<String, Map<String, dynamic>> vendorMap = {};
+        for (var p in data) {
+          final vendorName = p['vendor'] != null
+              ? (p['vendor']['business_name'] ?? 'Unknown Vendor')
+              : 'Unknown Vendor';
+          final vendorId = p['vendor_id']?.toString() ?? '0';
+
+          if (!vendorMap.containsKey(vendorId)) {
+            vendorMap[vendorId] = {
+              'vendorId': vendorId,
+              'vendorName': vendorName,
+              'products': <Map<String, dynamic>>[],
+            };
+          }
+
+          (vendorMap[vendorId]!['products'] as List<Map<String, dynamic>>).add({
+            'id': p['id'].toString(),
+            'name': p['name'] ?? '',
+            'price': (p['sale_price'] != null &&
+                    p['sale_price'].toString() != '0.00' &&
+                    p['sale_price'].toString() != '0')
+                ? _toDouble(p['sale_price'])
+                : _toDouble(p['price']),
+            'originalPrice': (p['sale_price'] != null &&
+                    p['sale_price'].toString() != '0.00' &&
+                    p['sale_price'].toString() != '0')
+                ? _toDouble(p['price'])
+                : null,
+            'image': p['primary_image'] ?? 'default',
+            'rating': _toDouble(p['rating']),
+            'vendorName': vendorName,
+          });
+        }
+
+        vendorProducts.value = vendorMap.values
+            .where((v) => (v['products'] as List).isNotEmpty)
+            .toList()
+            .cast<Map<String, dynamic>>();
+        isLoadingVendorProducts.value = false;
+        return;
+      }
+    } catch (_) {}
+    // Fallback mock
+    _loadMockVendorProducts();
+    isLoadingVendorProducts.value = false;
+  }
+
+  void _loadMockVendorProducts() {
+    vendorProducts.value = [
+      {
+        'vendorId': '1',
+        'vendorName': 'TechZone Electronics',
+        'products': [
+          {'id': '1', 'name': 'Wireless Pro Headphones', 'price': 199.00, 'originalPrice': null, 'image': 'headphones', 'rating': 4.5, 'vendorName': 'TechZone Electronics'},
+          {'id': '5', 'name': 'Smart Watch Pro', 'price': 299.00, 'originalPrice': 349.00, 'image': 'default', 'rating': 4.3, 'vendorName': 'TechZone Electronics'},
+        ],
+      },
+      {
+        'vendorId': '2',
+        'vendorName': 'Fashion Hub',
+        'products': [
+          {'id': '2', 'name': 'Premium Leather Jacket', 'price': 250.00, 'originalPrice': null, 'image': 'jacket', 'rating': 4.8, 'vendorName': 'Fashion Hub'},
+          {'id': '4', 'name': 'Ultra Light Running Shoes', 'price': 100.00, 'originalPrice': 140.00, 'image': 'shoes', 'rating': 4.7, 'vendorName': 'Fashion Hub'},
+        ],
+      },
+      {
+        'vendorId': '3',
+        'vendorName': 'Home Essentials',
+        'products': [
+          {'id': '3', 'name': 'Barista Coffee Maker', 'price': 85.00, 'originalPrice': null, 'image': 'coffee', 'rating': 4.2, 'vendorName': 'Home Essentials'},
+        ],
+      },
+    ];
+  }
+
+  double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 
   int _getCategoryColor(String name) {
@@ -286,21 +378,64 @@ class HomeController extends GetxController {
     } catch (_) {}
   }
 
-  void onWishlistTapped(String productId) {
-    Get.snackbar(
-      'wishlist'.tr,
-      'item_saved'.tr,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+  void loadCartCount() async {
+    try {
+      final response = await _apiProvider.get(ApiConstants.cart);
+      cartCount.value = response.data['total_items'] ?? 0;
+    } catch (_) {
+      cartCount.value = 0;
+    }
   }
 
-  void onAddToCartTapped(String productId) {
-    Get.snackbar(
-      'cart'.tr,
-      'item_added'.tr,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+  void onWishlistTapped(String productId) async {
+    try {
+      await _apiProvider.post(
+        ApiConstants.buyerWishlist,
+        data: {'product_id': int.tryParse(productId) ?? 0},
+      );
+      Get.snackbar(
+        'wishlist'.tr,
+        'item_saved'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      // 409 means already in wishlist
+      final message = e.toString().contains('already')
+          ? 'already_in_wishlist'.tr
+          : 'wishlist_error'.tr;
+      Get.snackbar(
+        'wishlist'.tr,
+        message,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
+
+  void onAddToCartTapped(String productId) async {
+    try {
+      final response = await _apiProvider.post(
+        ApiConstants.addToCart,
+        data: {
+          'product_id': int.tryParse(productId) ?? 0,
+          'quantity': 1,
+        },
+      );
+      cartCount.value = response.data['cart_count'] ?? (cartCount.value + 1);
+      Get.snackbar(
+        'cart'.tr,
+        'item_added'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'cart'.tr,
+        'cart_error'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 }

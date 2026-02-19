@@ -178,36 +178,58 @@ class LoginView extends GetView<LoginController> {
               ),
               const SizedBox(height: 24),
               // Social Login Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: controller.loginWithGoogle,
-                      icon: const Icon(Icons.g_mobiledata, size: 24),
-                      label: Text('google'.tr),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(
-                          context,
-                        ).textTheme.bodyLarge?.color,
-                        side: BorderSide(color: AppTheme.borderColor),
+              Obx(
+                () => Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: controller.isGoogleLoading.value
+                            ? null
+                            : controller.loginWithGoogle,
+                        icon: controller.isGoogleLoading.value
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.g_mobiledata, size: 24),
+                        label: Text('google'.tr),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.color,
+                          side: BorderSide(color: AppTheme.borderColor),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: controller.loginWithApple,
-                      icon: const Icon(Icons.apple, size: 20),
-                      label: Text('apple'.tr),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(
-                          context,
-                        ).textTheme.bodyLarge?.color,
-                        side: BorderSide(color: AppTheme.borderColor),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: controller.isAppleLoading.value
+                            ? null
+                            : controller.loginWithApple,
+                        icon: controller.isAppleLoading.value
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.apple, size: 20),
+                        label: Text('apple'.tr),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.color,
+                          side: BorderSide(color: AppTheme.borderColor),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               // Register Link
