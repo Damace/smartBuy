@@ -9,15 +9,21 @@ class ApiProvider {
   final storage = GetStorage();
 
   ApiProvider() {
-    _dio = Dio(BaseOptions(
-      baseUrl: ApiConstants.baseUrl,
-      connectTimeout: const Duration(milliseconds: AppConstants.connectionTimeout),
-      receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: const Duration(
+          milliseconds: AppConstants.connectionTimeout,
+        ),
+        receiveTimeout: const Duration(
+          milliseconds: AppConstants.receiveTimeout,
+        ),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
 
     // Add interceptors
     _dio.interceptors.add(
@@ -155,10 +161,7 @@ class ApiProvider {
         ...?data,
       });
 
-      final response = await _dio.post(
-        path,
-        data: formData,
-      );
+      final response = await _dio.post(path, data: formData);
       return response;
     } on DioException catch (e) {
       throw _handleError(e);

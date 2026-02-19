@@ -93,4 +93,27 @@ class ApiConstants {
 
   // Vendor Product Endpoints
   static const String vendorProducts = '/vendor/products';
+
+  // =========================
+  // Wishlist Endpoints
+  // =========================
+
+  /// Get wishlist by user ID
+  static const String wishlistList = '/wishlist';
+  // Usage: /wishlist/{userId}
+
+  /// Add item to wishlist
+  static const String wishlistCreate = '/wishlist';
+
+  /// Update wishlist item
+  static const String wishlistUpdate = '/wishlist';
+  // Usage: /wishlist/{id}
+
+  /// Delete single wishlist item
+  static const String wishlistDelete = '/wishlist';
+  // Usage: /wishlist/{id}
+
+  /// Clear all wishlist items for user
+  static const String wishlistClear = '/wishlist/clear';
+  // Usage: /wishlist/clear/{userId}
 }

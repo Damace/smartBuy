@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import '../../core/utils/helpers.dart';
 
 class WishlistController extends GetxController {
-  /// Main Wishlist List
   final RxList<Map<String, dynamic>> wishlistItems = <Map<String, dynamic>>[
     {
       'id': '1',
@@ -41,57 +40,38 @@ class WishlistController extends GetxController {
     },
   ].obs;
 
-  /// Search query
   final RxString searchQuery = ''.obs;
-
-  /// Filtered list (used in UI)
   final RxList<Map<String, dynamic>> filteredItems =
       <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
     super.onInit();
+    filteredItems.value = wishlistItems;
 
-    // Initial load
-    _syncFilteredList();
-
-    // React to search changes
+    // Listen to search query changes
     ever(searchQuery, (_) => filterWishlist());
-
-    // React to wishlist changes
-    ever(wishlistItems, (_) => filterWishlist());
   }
 
-  /// Sync full list
-  void _syncFilteredList() {
-    filteredItems.assignAll(wishlistItems);
-  }
-
-  /// Filter Wishlist
   void filterWishlist() {
-    final query = searchQuery.value.trim().toLowerCase();
-
-    if (query.isEmpty) {
-      _syncFilteredList();
-      return;
+    if (searchQuery.value.isEmpty) {
+      filteredItems.value = wishlistItems;
+    } else {
+      filteredItems.value = wishlistItems.where((item) {
+        final name = item['name'].toString().toLowerCase();
+        final brand = (item['brand'] ?? '').toString().toLowerCase();
+        final query = searchQuery.value.toLowerCase();
+        return name.contains(query) || brand.contains(query);
+      }).toList();
     }
-
-    final results = wishlistItems.where((item) {
-      final name = (item['name'] ?? '').toString().toLowerCase();
-      final brand = (item['brand'] ?? '').toString().toLowerCase();
-      return name.contains(query) || brand.contains(query);
-    }).toList();
-
-    filteredItems.assignAll(results);
   }
 
-  /// Remove Single Item
   void removeFromWishlist(Map<String, dynamic> item) {
-    wishlistItems.removeWhere((e) => e['id'] == item['id']);
+    wishlistItems.remove(item);
+    filterWishlist();
     Helpers.showSuccess('removed_from_wishlist'.tr);
   }
 
-  /// Clear All Wishlist
   void clearAllWishlist() {
     if (wishlistItems.isEmpty) return;
 
@@ -103,36 +83,23 @@ class WishlistController extends GetxController {
       confirmTextColor: Get.theme.colorScheme.onPrimary,
       onConfirm: () {
         wishlistItems.clear();
+        filterWishlist();
         Get.back();
         Helpers.showSuccess('wishlist_cleared'.tr);
       },
     );
   }
 
-  /// Move to Cart
   void moveToCart(Map<String, dynamic> item) {
-    wishlistItems.removeWhere((e) => e['id'] == item['id']);
+    // Remove from wishlist
+    wishlistItems.remove(item);
+    filterWishlist();
+
+    // Show success message
     Helpers.showSuccess('moved_to_cart'.tr);
   }
 
-  /// Notify Me
   void notifyMe(Map<String, dynamic> item) {
     Helpers.showSuccess('${'notify_me_enabled'.tr} ${item['name']}');
-  }
-
-  /// Add New Item (Future ready for API)
-  void addToWishlist(Map<String, dynamic> item) {
-    wishlistItems.add(item);
-    Helpers.showSuccess('added_to_wishlist'.tr);
-  }
-
-  /// Update Item (Future ready)
-  void updateWishlistItem(String id, Map<String, dynamic> newData) {
-    final index = wishlistItems.indexWhere((element) => element['id'] == id);
-
-    if (index != -1) {
-      wishlistItems[index] = {...wishlistItems[index], ...newData};
-      wishlistItems.refresh();
-    }
   }
 }

@@ -7,7 +7,8 @@ import '../../../core/utils/helpers.dart';
 import '../../../data/providers/api_provider.dart';
 import '../../../routes/app_pages.dart';
 
-class LoginController extends GetxController with GetSingleTickerProviderStateMixin {
+class LoginController extends GetxController
+    with GetSingleTickerProviderStateMixin {
   late TabController tabController;
 
   final TextEditingController emailController = TextEditingController();
@@ -60,7 +61,7 @@ class LoginController extends GetxController with GetSingleTickerProviderStateMi
         onClose: () => Get.offAllNamed(Routes.HOME),
       );
     } catch (e) {
-      Helpers.showErrorSheet(Helpers.parseErrorMessage(e));
+      Helpers.showErrorSheetLogin(Helpers.parseErrorMessage(e));
     } finally {
       isLoading.value = false;
     }

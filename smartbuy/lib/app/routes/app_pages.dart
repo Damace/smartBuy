@@ -93,7 +93,7 @@ class AppPages {
       page: () => const SplashView(),
       binding: SplashBinding(),
       transition: Transition.fade,
-      transitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 700),
     ),
     GetPage(
       name: _Paths.ONBOARDING,

@@ -13,9 +13,7 @@ class BuyerEditPersonalInformationView
       backgroundColor: Get.isDarkMode
           ? AppTheme.darkBackgroundColor
           : AppTheme.backgroundColor,
-      appBar: AppBar(
-        title: Text('edit_personal_information'.tr),
-      ),
+      appBar: AppBar(title: Text('edit_personal_information'.tr)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -127,8 +125,9 @@ class BuyerEditPersonalInformationView
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color:
-                Get.isDarkMode ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -176,8 +175,9 @@ class BuyerEditPersonalInformationView
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color:
-                Get.isDarkMode ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -261,8 +261,9 @@ class BuyerEditPersonalInformationView
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color:
-                Get.isDarkMode ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -291,13 +292,16 @@ class BuyerEditPersonalInformationView
                           ? AppTheme.darkTextPrimary
                           : AppTheme.textPrimary,
                     ),
-                    dropdownColor:
-                        Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                    dropdownColor: Get.isDarkMode
+                        ? AppTheme.darkCardColor
+                        : Colors.white,
                     items: controller.countryCodes
-                        .map((code) => DropdownMenuItem<String>(
-                              value: code,
-                              child: Text(code),
-                            ))
+                        .map(
+                          (code) => DropdownMenuItem<String>(
+                            value: code,
+                            child: Text(code),
+                          ),
+                        )
                         .toList(),
                     onChanged: controller.setCountryCode,
                   ),
@@ -312,8 +316,9 @@ class BuyerEditPersonalInformationView
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor:
-                      Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                  fillColor: Get.isDarkMode
+                      ? AppTheme.darkCardColor
+                      : Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
@@ -355,8 +360,9 @@ class BuyerEditPersonalInformationView
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color:
-                Get.isDarkMode ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -375,15 +381,15 @@ class BuyerEditPersonalInformationView
                         color: isSelected
                             ? Colors.orange.withValues(alpha: 0.1)
                             : Get.isDarkMode
-                                ? AppTheme.darkCardColor
-                                : Colors.white,
+                            ? AppTheme.darkCardColor
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isSelected
                               ? Colors.orange
                               : Get.isDarkMode
-                                  ? Colors.grey.shade700
-                                  : Colors.grey.shade300,
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -392,13 +398,14 @@ class BuyerEditPersonalInformationView
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                           color: isSelected
                               ? Colors.orange
                               : Get.isDarkMode
-                                  ? AppTheme.darkTextPrimary
-                                  : AppTheme.textPrimary,
+                              ? AppTheme.darkTextPrimary
+                              : AppTheme.textPrimary,
                         ),
                       ),
                     ),
@@ -492,16 +499,11 @@ class BuyerEditPersonalInformationView
           backgroundColor: Colors.orange,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: Text(
           'update_profile'.tr,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
