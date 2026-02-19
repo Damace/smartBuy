@@ -178,7 +178,7 @@ class Helpers {
     VoidCallback? onClose,
   }) {
     showBottomSheet(
-      title: title ?? 'Error!',
+      title: title ?? message,
       message: message,
       icon: Icons.error,
       iconColor: AppTheme.errorColor,
