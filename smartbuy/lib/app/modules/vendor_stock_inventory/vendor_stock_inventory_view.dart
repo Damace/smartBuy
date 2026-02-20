@@ -17,11 +17,16 @@ class VendorStockInventoryView extends GetView<VendorStockInventoryController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Get.toNamed('/vendor-inventory-alerts');
+            },
           ),
         ],
       ),
-      body: Column(
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
         children: [
           // Search Bar
           Padding(
@@ -184,6 +189,7 @@ class VendorStockInventoryView extends GetView<VendorStockInventoryController> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

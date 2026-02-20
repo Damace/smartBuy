@@ -85,15 +85,16 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.SPLASH;
+  //static const INITIAL = Routes.SPLASH;
 
+  static const INITIAL = Routes.SPLASH;
   static final routes = [
     GetPage(
       name: _Paths.SPLASH,
       page: () => const SplashView(),
       binding: SplashBinding(),
       transition: Transition.fade,
-      transitionDuration: const Duration(milliseconds: 700),
+      transitionDuration: const Duration(milliseconds: 1000),
     ),
     GetPage(
       name: _Paths.ONBOARDING,

@@ -19,58 +19,95 @@ class BuyerSavedAddressView extends GetView<BuyerSavedAddressController> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Obx(() => ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: controller.addresses.length,
-                  itemBuilder: (context, index) {
-                    final address = controller.addresses[index];
-                    return _buildAddressCard(address);
-                  },
-                )),
-          ),
-          // Info text
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'address_limit_info'.tr,
-              style: TextStyle(
-                color: Get.isDarkMode
-                    ? AppTheme.darkTextSecondary
-                    : AppTheme.textSecondary,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Column(
+          children: [
+            Expanded(
+              child: controller.addresses.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.location_off,
+                            size: 64,
+                            color: Get.isDarkMode
+                                ? Colors.grey[600]
+                                : Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'no_saved_addresses'.tr,
+                            style: TextStyle(
+                              color: Get.isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: controller.fetchAddresses,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.addresses.length,
+                        itemBuilder: (context, index) {
+                          final address = controller.addresses[index];
+                          return _buildAddressCard(address);
+                        },
+                      ),
+                    ),
             ),
-          ),
-          // Add New Address Button
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: controller.addNewAddress,
-                icon: const Icon(Icons.add, size: 20),
-                label: Text('add_new_address'.tr),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            // Info text
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'address_limit_info'.tr,
+                style: TextStyle(
+                  color: Get.isDarkMode
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            // Add New Address Button
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: controller.addNewAddress,
+                  icon: const Icon(Icons.add, size: 20),
+                  label: Text('add_new_address'.tr),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 
   Widget _buildAddressCard(Map<String, dynamic> address) {
+    final int addressId = address['id'];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -87,7 +124,7 @@ class BuyerSavedAddressView extends GetView<BuyerSavedAddressController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Name and default badge
+          // Name, type icon, and default badge
           Row(
             children: [
               Icon(
@@ -123,6 +160,31 @@ class BuyerSavedAddressView extends GetView<BuyerSavedAddressController> {
                     ),
                   ),
                 ),
+              if (address['isDefault'] != true)
+                Obx(() {
+                  final isSettingDefault =
+                      controller.settingDefaultIds.contains(addressId);
+                  return TextButton(
+                    onPressed: isSettingDefault
+                        ? null
+                        : () => controller.setDefaultAddress(address),
+                    child: isSettingDefault
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child:
+                                CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            'set_default'.tr,
+                            style: const TextStyle(
+                              color: AppTheme.primaryColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                  );
+                }),
             ],
           ),
           const SizedBox(height: 12),
@@ -158,19 +220,32 @@ class BuyerSavedAddressView extends GetView<BuyerSavedAddressController> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => controller.removeAddress(address),
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  label: Text('remove'.tr),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.errorColor,
-                    side: const BorderSide(color: AppTheme.errorColor),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: Obx(() {
+                  final isRemoving =
+                      controller.removingIds.contains(addressId);
+                  return OutlinedButton.icon(
+                    onPressed: isRemoving
+                        ? null
+                        : () => controller.removeAddress(address),
+                    icon: isRemoving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child:
+                                CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.delete_outline, size: 18),
+                    label: Text('remove'.tr),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.errorColor,
+                      side: const BorderSide(color: AppTheme.errorColor),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }),
               ),
             ],
           ),

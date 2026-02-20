@@ -132,7 +132,7 @@ class MainNavigationView extends GetView<MainNavigationController> {
 
   Widget _centerButton() {
     return GestureDetector(
-      onTap: () => controller.currentIndex,
+      onTap: controller.openNotifications,
       child: Container(
         height: 54,
         width: 54,

@@ -90,30 +90,31 @@ class BuyerOrderSuccessView extends GetView<BuyerOrderSuccessController> {
               const SizedBox(height: 32),
 
               // Order ID Section
-              _buildInfoSection(
+              Obx(() => _buildInfoSection(
                 Icons.receipt_long_outlined,
                 'order_id_label'.tr,
-                controller.orderId,
+                controller.orderId.value,
                 showCopy: true,
-              ),
+                onCopy: controller.copyOrderId,
+              )),
 
               const SizedBox(height: 16),
 
               // Delivery Address Section
-              _buildInfoSection(
+              Obx(() => _buildInfoSection(
                 Icons.location_on_outlined,
                 'delivery_address'.tr,
                 '${controller.deliveryAddress['address'] ?? ''}, ${controller.deliveryAddress['city'] ?? ''}, ${controller.deliveryAddress['state'] ?? ''} ${controller.deliveryAddress['zipCode'] ?? ''}',
-              ),
+              )),
 
               const SizedBox(height: 16),
 
               // Estimated Arrival Section
-              _buildInfoSection(
+              Obx(() => _buildInfoSection(
                 Icons.calendar_today_outlined,
                 'estimated_arrival'.tr,
-                controller.estimatedDelivery,
-              ),
+                controller.estimatedDelivery.value,
+              )),
 
               const SizedBox(height: 32),
 
@@ -249,6 +250,7 @@ class BuyerOrderSuccessView extends GetView<BuyerOrderSuccessController> {
     String label,
     String value, {
     bool showCopy = false,
+    VoidCallback? onCopy,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -307,9 +309,7 @@ class BuyerOrderSuccessView extends GetView<BuyerOrderSuccessController> {
                 size: 20,
                 color: Get.isDarkMode ? Colors.white60 : AppTheme.textSecondary,
               ),
-              onPressed: () {
-                // Copy to clipboard functionality
-              },
+              onPressed: onCopy,
             ),
         ],
       ),

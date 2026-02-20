@@ -91,7 +91,14 @@ class VendorHomeView extends GetView<VendorHomeController> {
         // Notification Bell
         IconButton(
           icon: const Icon(Icons.notifications_outlined),
-          onPressed: () {},
+          onPressed: () {
+            Get.snackbar(
+              'notifications'.tr,
+              'feature_coming_soon'.tr,
+              snackPosition: SnackPosition.BOTTOM,
+              duration: const Duration(seconds: 2),
+            );
+          },
           style: IconButton.styleFrom(
             backgroundColor: Get.isDarkMode
                 ? AppTheme.darkCardColor

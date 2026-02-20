@@ -23,23 +23,31 @@ class VendorShippingPartnersView extends GetView<VendorShippingPartnersControlle
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Default Shipping Partner
-            _buildDefaultPartnerSection(),
-            const SizedBox(height: 24),
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: controller.fetchShippingPartners,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Default Shipping Partner
+                      _buildDefaultPartnerSection(),
+                      const SizedBox(height: 24),
 
-            // Available Logistics Partners
-            _buildAvailablePartnersSection(),
-            const SizedBox(height: 24),
+                      // Available Logistics Partners
+                      _buildAvailablePartnersSection(),
+                      const SizedBox(height: 24),
 
-            // Update Preferences Button
-            _buildUpdateButton(),
-          ],
-        ),
+                      // Update Preferences Button
+                      _buildUpdateButton(),
+                    ],
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -275,31 +283,44 @@ class VendorShippingPartnersView extends GetView<VendorShippingPartnersControlle
   }
 
   Widget _buildUpdateButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: controller.updatePreferences,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.check_circle, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              'update_preferences'.tr,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+    return Obx(
+      () => SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: controller.isSaving.value
+              ? null
+              : controller.updatePreferences,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-          ],
+          ),
+          child: controller.isSaving.value
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.check_circle, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'update_preferences'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

@@ -70,7 +70,9 @@ class AppTheme {
     // Card Theme
     cardTheme: CardThemeData(
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
 
@@ -110,8 +112,13 @@ class AppTheme {
         foregroundColor: textWhite,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
 
@@ -121,8 +128,13 @@ class AppTheme {
         foregroundColor: primaryColor,
         side: const BorderSide(color: primaryColor, width: 1.5),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
 
@@ -131,7 +143,10 @@ class AppTheme {
       style: TextButton.styleFrom(
         foregroundColor: primaryColor,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
 
@@ -142,7 +157,10 @@ class AppTheme {
       unselectedItemColor: textSecondary,
       type: BottomNavigationBarType.fixed,
       elevation: 8,
-      selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      selectedLabelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
       unselectedLabelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w500,
@@ -204,7 +222,10 @@ class AppTheme {
     ),
 
     // Icon Theme
-    iconTheme: const IconThemeData(color: textPrimary, size: 24),
+    iconTheme: const IconThemeData(
+      color: textPrimary,
+      size: 24,
+    ),
 
     // Divider Theme
     dividerTheme: const DividerThemeData(
@@ -218,7 +239,10 @@ class AppTheme {
       labelColor: primaryColor,
       unselectedLabelColor: textSecondary,
       indicatorColor: primaryColor,
-      labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      labelStyle: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
       unselectedLabelStyle: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
@@ -265,7 +289,9 @@ class AppTheme {
     cardTheme: CardThemeData(
       color: darkCardColor,
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
 
@@ -305,8 +331,13 @@ class AppTheme {
         foregroundColor: textWhite,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
 
@@ -316,8 +347,13 @@ class AppTheme {
         foregroundColor: primaryColor,
         side: const BorderSide(color: primaryColor, width: 1.5),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
 
@@ -326,7 +362,10 @@ class AppTheme {
       style: TextButton.styleFrom(
         foregroundColor: primaryColor,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
 
@@ -337,7 +376,10 @@ class AppTheme {
       unselectedItemColor: darkTextSecondary,
       type: BottomNavigationBarType.fixed,
       elevation: 8,
-      selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      selectedLabelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+      ),
       unselectedLabelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w500,
@@ -399,7 +441,10 @@ class AppTheme {
     ),
 
     // Icon Theme
-    iconTheme: const IconThemeData(color: darkTextPrimary, size: 24),
+    iconTheme: const IconThemeData(
+      color: darkTextPrimary,
+      size: 24,
+    ),
 
     // Divider Theme
     dividerTheme: const DividerThemeData(
@@ -413,7 +458,10 @@ class AppTheme {
       labelColor: primaryColor,
       unselectedLabelColor: darkTextSecondary,
       indicatorColor: primaryColor,
-      labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      labelStyle: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
       unselectedLabelStyle: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,

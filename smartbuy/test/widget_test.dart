@@ -9,8 +9,6 @@
 // import 'package:flutter_test/flutter_test.dart';
 // import 'package:get_storage/get_storage.dart';
 
-// import 'package:smartbuy/main.dart';
-
 // void main() {
 //   // Initialize GetStorage for testing
 //   setUpAll(() async {
@@ -19,7 +17,7 @@
 
 //   testWidgets('SmartBuy app initializes correctly', (WidgetTester tester) async {
 //     // Build our app and trigger a frame.
-//     await tester.pumpWidget(const SmartBuyApp());
+//     await tester.pumpWidget(SmartBuyApp());
 //     await tester.pumpAndSettle();
 
 //     // Verify that the splash screen or initial route loads

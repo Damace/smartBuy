@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/utils/helpers.dart';
+import '../../data/providers/api_provider.dart';
 
 class VendorEditBusinessDetailsController extends GetxController {
-  final TextEditingController legalNameController = TextEditingController(
-    text: 'SmartBuy Solutions Ltd.',
-  );
+  final ApiProvider _apiProvider = ApiProvider();
+
+  final TextEditingController legalNameController = TextEditingController();
   final TextEditingController registrationNumberController =
-      TextEditingController(
-    text: 'REG-88829-001',
-  );
-  final TextEditingController officeAddressController = TextEditingController(
-    text: '123 Tech Avenue, Silicon Valley, CA 94025, United States',
-  );
+      TextEditingController();
+  final TextEditingController officeAddressController = TextEditingController();
 
   final RxString selectedBusinessType = 'Limited Liability Company (LLC)'.obs;
   final RxString uploadedFileName = ''.obs;
   final RxBool isUploading = false.obs;
+  final RxBool isSaving = false.obs;
+  final RxBool isLoading = false.obs;
 
   final List<String> businessTypes = [
     'Limited Liability Company (LLC)',
@@ -25,6 +25,46 @@ class VendorEditBusinessDetailsController extends GetxController {
     'Corporation',
     'Non-Profit Organization',
   ];
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadCurrentDetails();
+  }
+
+  Future<void> _loadCurrentDetails() async {
+    isLoading.value = true;
+    try {
+      final response =
+          await _apiProvider.get(ApiConstants.vendorBusinessDetails);
+      final vendor = response.data['vendor'];
+
+      if (vendor != null) {
+        legalNameController.text = vendor['business_name'] ?? '';
+        registrationNumberController.text =
+            vendor['business_registration_number'] ?? '';
+        officeAddressController.text = vendor['business_address'] ?? '';
+
+        final taxId = vendor['tax_id'] ?? '';
+        if (businessTypes.contains(taxId)) {
+          selectedBusinessType.value = taxId;
+        }
+
+        if (vendor['business_proof_document'] != null) {
+          uploadedFileName.value =
+              vendor['business_proof_document'].toString().split('/').last;
+        }
+      }
+    } catch (e) {
+      // Fall back to mock data
+      legalNameController.text = 'SmartBuy Solutions Ltd.';
+      registrationNumberController.text = 'REG-88829-001';
+      officeAddressController.text =
+          '123 Tech Avenue, Silicon Valley, CA 94025, United States';
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void setBusinessType(String? type) {
     if (type != null) {
@@ -47,7 +87,7 @@ class VendorEditBusinessDetailsController extends GetxController {
     Helpers.showInfo('certificate_removed'.tr);
   }
 
-  void saveChanges() {
+  Future<void> saveChanges() async {
     // Validate fields
     if (legalNameController.text.isEmpty) {
       Helpers.showError('legal_name_required'.tr);
@@ -62,9 +102,25 @@ class VendorEditBusinessDetailsController extends GetxController {
       return;
     }
 
-    // Save changes
-    Helpers.showSuccess('business_details_updated_successfully'.tr);
-    Get.back();
+    isSaving.value = true;
+    try {
+      await _apiProvider.put(
+        ApiConstants.vendorBusinessDetails,
+        data: {
+          'business_name': legalNameController.text.trim(),
+          'business_registration_number':
+              registrationNumberController.text.trim(),
+          'business_address': officeAddressController.text.trim(),
+          'tax_id': selectedBusinessType.value,
+        },
+      );
+      Helpers.showSuccess('business_details_updated_successfully'.tr);
+      Get.back();
+    } catch (e) {
+      Helpers.showError(Helpers.parseErrorMessage(e));
+    } finally {
+      isSaving.value = false;
+    }
   }
 
   @override

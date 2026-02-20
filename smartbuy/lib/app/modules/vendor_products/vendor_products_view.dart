@@ -16,9 +16,33 @@ class VendorProductsView extends GetView<VendorProductsController> {
       appBar: AppBar(
         title: Text('my_products'.tr),
         actions: [
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            onSelected: (value) {
+              if (value == 'sort_name') {
+                Get.snackbar(
+                  'sort'.tr,
+                  'feature_coming_soon'.tr,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              } else if (value == 'sort_price') {
+                Get.snackbar(
+                  'sort'.tr,
+                  'feature_coming_soon'.tr,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'sort_name',
+                child: Text('Sort by Name'),
+              ),
+              const PopupMenuItem(
+                value: 'sort_price',
+                child: Text('Sort by Price'),
+              ),
+            ],
           ),
         ],
       ),
@@ -65,13 +89,22 @@ class VendorProductsView extends GetView<VendorProductsController> {
                     _buildFilterChip('all', 'all'.tr, controller.allCount),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                        'in_stock', 'in_stock'.tr, controller.inStockCount),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('out_of_stock', 'out_of_stock'.tr,
-                        controller.outOfStockCount),
+                      'in_stock',
+                      'in_stock'.tr,
+                      controller.inStockCount,
+                    ),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                        'drafts', 'drafts'.tr, controller.draftsCount),
+                      'out_of_stock',
+                      'out_of_stock'.tr,
+                      controller.outOfStockCount,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      'drafts',
+                      'drafts'.tr,
+                      controller.draftsCount,
+                    ),
                   ],
                 ),
               ),
@@ -82,47 +115,45 @@ class VendorProductsView extends GetView<VendorProductsController> {
 
           // Products List
           Expanded(
-            child: Obx(
-              () {
-                final products = controller.filteredProducts;
+            child: Obx(() {
+              final products = controller.filteredProducts;
 
-                if (products.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: 64,
+              if (products.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.inventory_2_outlined,
+                        size: 64,
+                        color: Get.isDarkMode
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.textSecondary.withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'no_products_found'.tr,
+                        style: TextStyle(
+                          fontSize: 16,
                           color: Get.isDarkMode
                               ? AppTheme.darkTextSecondary
-                              : AppTheme.textSecondary.withValues(alpha: 0.5),
+                              : AppTheme.textSecondary,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'no_products_found'.tr,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Get.isDarkMode
-                                ? AppTheme.darkTextSecondary
-                                : AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    final product = products[index];
-                    return _buildProductCard(product);
-                  },
+                      ),
+                    ],
+                  ),
                 );
-              },
-            ),
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return _buildProductCard(context, product);
+                },
+              );
+            }),
           ),
         ],
       ),
@@ -145,15 +176,15 @@ class VendorProductsView extends GetView<VendorProductsController> {
           color: isSelected
               ? AppTheme.primaryColor
               : Get.isDarkMode
-                  ? AppTheme.darkCardColor
-                  : Colors.white,
+              ? AppTheme.darkCardColor
+              : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? AppTheme.primaryColor
                 : Get.isDarkMode
-                    ? AppTheme.darkCardColor
-                    : Colors.grey.shade300,
+                ? AppTheme.darkCardColor
+                : Colors.grey.shade300,
           ),
         ),
         child: Text(
@@ -162,8 +193,8 @@ class VendorProductsView extends GetView<VendorProductsController> {
             color: isSelected
                 ? Colors.white
                 : Get.isDarkMode
-                    ? AppTheme.darkTextPrimary
-                    : AppTheme.textPrimary,
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             fontSize: 14,
           ),
@@ -172,7 +203,7 @@ class VendorProductsView extends GetView<VendorProductsController> {
     );
   }
 
-  Widget _buildProductCard(Map<String, dynamic> product) {
+  Widget _buildProductCard(BuildContext context, Map<String, dynamic> product) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -202,15 +233,20 @@ class VendorProductsView extends GetView<VendorProductsController> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: product['image'] != null && product['image'] != 'default'
-                  ? Image.network(
-                      '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/${product['image']}',
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(
-                        _getProductIcon(product['image']),
-                        color: AppTheme.primaryColor,
-                        size: 28,
+                  ? InkWell(
+                      onTap: () {
+                        showProductBottomSheet(context);
+                      },
+                      child: Image.network(
+                        '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/${product['image']}',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          _getProductIcon(product['image']),
+                          color: AppTheme.primaryColor,
+                          size: 28,
+                        ),
                       ),
                     )
                   : Icon(
@@ -350,5 +386,175 @@ class VendorProductsView extends GetView<VendorProductsController> {
             ? AppTheme.darkTextSecondary
             : AppTheme.textSecondary;
     }
+  }
+
+  void showProductBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (_, controller) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+              ),
+              child: SingleChildScrollView(
+                controller: controller,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// Drag Handle
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+
+                    /// Product Image + Badge
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            "https://via.placeholder.com/400x250",
+                            height: 220,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              "DRAFT STATUS",
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    /// Product Name
+                    const Text(
+                      "ProductTwo",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    /// Price
+                    Row(
+                      children: const [
+                        Text(
+                          "\$120.00",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          "Price Fixed",
+                          style: TextStyle(fontSize: 14, color: Colors.orange),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    /// Details Grid
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        // ProductInfo(title: "CATEGORY", value: "Fashion"),
+                        // ProductInfo(title: "STOCK QUANTITY", value: "48 Units"),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        // ProductInfo(title: "SKU", value: "PR-009"),
+                        // ProductInfo(title: "VENDOR", value: "John & Co"),
+                      ],
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    /// Buttons Row
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {},
+                            child: const Text(
+                              "Edit Product",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {},
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }

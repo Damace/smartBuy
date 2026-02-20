@@ -36,8 +36,17 @@ class Helpers {
   }
 
   // Show Error Message
+  // static void showError(String message) {
+  //   showSnackbar(title: 'Error', message: message, backgroundColor: Colors.red);
+  // }
+
   static void showError(String message) {
-    showSnackbar(title: 'Error', message: message, backgroundColor: Colors.red);
+    showSnackbar(
+      title: message,
+      message: 'Kindly contact support for further assistance.',
+
+      backgroundColor: Colors.red.withOpacity(0.7),
+    );
   }
 
   // Show Info Message
@@ -172,13 +181,14 @@ class Helpers {
     );
   }
 
+  // Show Error Bottom Sheet
   static void showErrorSheetLogin(
     String message, {
     String? title,
     VoidCallback? onClose,
   }) {
     showBottomSheet(
-      title: title ?? message,
+      title: title ?? 'Error!',
       message: message,
       icon: Icons.error,
       iconColor: AppTheme.errorColor,

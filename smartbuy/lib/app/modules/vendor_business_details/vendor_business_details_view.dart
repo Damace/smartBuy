@@ -15,27 +15,35 @@ class VendorBusinessDetailsView extends GetView<VendorBusinessDetailsController>
       appBar: AppBar(
         title: Text('business_details'.tr),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // KYC Verification Status Card
-            _buildKycCard(),
-            const SizedBox(height: 20),
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: controller.fetchBusinessDetails,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // KYC Verification Status Card
+                      _buildKycCard(),
+                      const SizedBox(height: 20),
 
-            // Legal Information
-            _buildLegalInformation(),
-            const SizedBox(height: 20),
+                      // Legal Information
+                      _buildLegalInformation(),
+                      const SizedBox(height: 20),
 
-            // Registered Address
-            _buildRegisteredAddress(),
-            const SizedBox(height: 24),
+                      // Registered Address
+                      _buildRegisteredAddress(),
+                      const SizedBox(height: 24),
 
-            // Edit Details Button
-            _buildEditButton(),
-          ],
-        ),
+                      // Edit Details Button
+                      _buildEditButton(),
+                    ],
+                  ),
+                ),
+              ),
       ),
     );
   }

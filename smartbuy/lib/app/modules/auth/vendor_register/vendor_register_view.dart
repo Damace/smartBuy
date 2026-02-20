@@ -311,7 +311,9 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
                             color: AppTheme.primaryColor,
                             fontWeight: FontWeight.w600,
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = () {},
+                          recognizer: TapGestureRecognizer()..onTap = () {
+                            Get.snackbar('terms_conditions'.tr, 'feature_coming_soon'.tr, snackPosition: SnackPosition.BOTTOM);
+                          },
                         ),
                         TextSpan(text: 'and'.tr),
                         TextSpan(
@@ -320,7 +322,9 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
                             color: AppTheme.primaryColor,
                             fontWeight: FontWeight.w600,
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = () {},
+                          recognizer: TapGestureRecognizer()..onTap = () {
+                            Get.snackbar('privacy_policy'.tr, 'feature_coming_soon'.tr, snackPosition: SnackPosition.BOTTOM);
+                          },
                         ),
                         const TextSpan(text: '.'),
                       ],
@@ -617,7 +621,7 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
                     ),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: controller.previousStep,
                 child: Text(
                   'edit'.tr,
                   style: const TextStyle(
@@ -681,7 +685,9 @@ class VendorRegisterView extends GetView<VendorRegisterController> {
                             color: AppTheme.primaryColor,
                             fontWeight: FontWeight.w600,
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = () {},
+                          recognizer: TapGestureRecognizer()..onTap = () {
+                            Get.snackbar('marketplace_seller_agreement'.tr, 'feature_coming_soon'.tr, snackPosition: SnackPosition.BOTTOM);
+                          },
                         ),
                         TextSpan(text: 'confirm_details_accurate'.tr),
                       ],

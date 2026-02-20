@@ -12,13 +12,18 @@ class BuyerTrackOrderView extends GetView<BuyerTrackOrderController> {
       backgroundColor: Get.isDarkMode
           ? AppTheme.darkBackgroundColor
           : AppTheme.backgroundColor,
-      body: Stack(
-        children: [
-          // Map View
-          _buildMapView(),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          // Content Overlay
-          Column(
+        return Stack(
+          children: [
+            // Map View
+            _buildMapView(),
+
+            // Content Overlay
+            Column(
             children: [
               // Top Bar with Order Number
               SafeArea(
@@ -84,7 +89,8 @@ class BuyerTrackOrderView extends GetView<BuyerTrackOrderController> {
             ],
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 

@@ -167,6 +167,10 @@ class VendorEditBankAccountDetailsView extends GetView<VendorEditBankAccountDeta
 
             // Update Account Button
             _buildUpdateButton(),
+            const SizedBox(height: 12),
+
+            // Delete Account Button
+            _buildDeleteButton(),
           ],
         ),
       ),
@@ -259,24 +263,79 @@ class VendorEditBankAccountDetailsView extends GetView<VendorEditBankAccountDeta
   }
 
   Widget _buildUpdateButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: controller.updateAccount,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+    return Obx(
+      () => SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed:
+              controller.isSaving.value ? null : controller.updateAccount,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
+          child: controller.isSaving.value
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  'update_account'.tr,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
-        child: Text(
-          'update_account'.tr,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton() {
+    return Obx(
+      () => SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed:
+              controller.isDeleting.value ? null : controller.deleteAccount,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.red,
+            side: const BorderSide(color: Colors.red),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
+          child: controller.isDeleting.value
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.red,
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.delete_outline, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'delete_bank_account'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

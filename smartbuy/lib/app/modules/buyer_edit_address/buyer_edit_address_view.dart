@@ -19,13 +19,26 @@ class BuyerEditAddressView extends GetView<BuyerEditAddressController> {
           onPressed: () => Get.back(),
         ),
         actions: [
-          Obx(() => controller.isEditMode.value
-              ? IconButton(
-                  icon: const Icon(Icons.delete_outline,
-                      color: AppTheme.errorColor),
-                  onPressed: controller.deleteAddress,
-                )
-              : const SizedBox()),
+          Obx(() {
+            if (!controller.isEditMode.value) return const SizedBox();
+            if (controller.isDeleting.value) {
+              return const Padding(
+                padding: EdgeInsets.only(right: 16),
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              );
+            }
+            return IconButton(
+              icon: const Icon(Icons.delete_outline,
+                  color: AppTheme.errorColor),
+              onPressed: controller.deleteAddress,
+            );
+          }),
         ],
       ),
       body: Form(
@@ -315,7 +328,7 @@ class BuyerEditAddressView extends GetView<BuyerEditAddressController> {
             ),
             const SizedBox(height: 8),
             Obx(() => DropdownButtonFormField<String>(
-                  value: controller.selectedState.value,
+                  initialValue: controller.selectedState.value,
                   onChanged: (value) {
                     if (value != null) {
                       controller.selectedState.value = value;
@@ -378,21 +391,40 @@ class BuyerEditAddressView extends GetView<BuyerEditAddressController> {
             const SizedBox(height: 32),
 
             // Update Address Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: controller.updateAddress,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            Obx(() => SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: controller.isSaving.value
+                        ? null
+                        : controller.updateAddress,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: controller.isSaving.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            controller.isEditMode.value
+                                ? 'update_address'.tr
+                                : 'add_address'.tr,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
-                ),
-                child: Text('update_address'.tr),
-              ),
-            ),
+                )),
           ],
         ),
       ),

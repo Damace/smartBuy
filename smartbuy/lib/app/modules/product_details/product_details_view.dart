@@ -22,7 +22,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined),
-            onPressed: () {},
+            onPressed: controller.shareProduct,
           ),
         ],
       ),
@@ -113,7 +113,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                   bottom: 16,
                   right: 16,
                   child: GestureDetector(
-                    onTap: () => _showVideoInfo(),
+                    onTap: () => controller.playVideo(),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 8),
@@ -444,100 +444,199 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Get.isDarkMode
-                  ? AppTheme.darkTextSecondary
-                  : AppTheme.textSecondary,
-            ),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: Text(
-              'read_more'.tr,
-              style: const TextStyle(color: AppTheme.primaryColor),
-            ),
-          ),
+          Obx(() => Text(
+                description,
+                maxLines: controller.isDescriptionExpanded.value ? null : 3,
+                overflow: controller.isDescriptionExpanded.value
+                    ? null
+                    : TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: Get.isDarkMode
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary,
+                ),
+              )),
+          Obx(() => TextButton(
+                onPressed: controller.toggleDescription,
+                child: Text(
+                  controller.isDescriptionExpanded.value
+                      ? 'show_less'.tr
+                      : 'read_more'.tr,
+                  style: const TextStyle(color: AppTheme.primaryColor),
+                ),
+              )),
         ],
       ),
     );
   }
 
   Widget _buildReviewsSection() {
-    final rating =
-        double.tryParse(controller.product['rating']?.toString() ?? '0') ?? 0;
-    final reviewCount = controller.product['total_reviews'] ?? 0;
+    return Obx(() {
+      final summary = controller.reviewSummary;
+      final rating = (summary['average_rating'] is num)
+          ? (summary['average_rating'] as num).toDouble()
+          : double.tryParse(
+                  controller.product['rating']?.toString() ?? '0') ??
+              0;
+      final reviewCount =
+          summary['total_reviews'] ?? controller.product['total_reviews'] ?? 0;
+      final reviews = controller.reviews;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${'customer_reviews'.tr} ($reviewCount)',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  'view_all'.tr,
-                  style: const TextStyle(color: AppTheme.primaryColor),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          // Rating summary
-          Row(
-            children: [
-              Text(
-                rating.toStringAsFixed(1),
-                style: const TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: List.generate(5, (i) {
-                      return Icon(
-                        i < rating.round()
-                            ? Icons.star
-                            : Icons.star_border,
-                        color: Colors.amber,
-                        size: 20,
-                      );
-                    }),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${'customer_reviews'.tr} ($reviewCount)',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$reviewCount ${'reviews'.tr}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Get.isDarkMode
-                          ? AppTheme.darkTextSecondary
-                          : AppTheme.textSecondary,
+                ),
+                TextButton(
+                  onPressed: controller.viewAllReviews,
+                  child: Text(
+                    'view_all'.tr,
+                    style: const TextStyle(color: AppTheme.primaryColor),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Rating summary
+            Row(
+              children: [
+                Text(
+                  rating.toStringAsFixed(1),
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: List.generate(5, (i) {
+                          return Icon(
+                            i < rating.round()
+                                ? Icons.star
+                                : Icons.star_border,
+                            color: Colors.amber,
+                            size: 20,
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '$reviewCount ${'reviews'.tr}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Get.isDarkMode
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Write review button
+            OutlinedButton.icon(
+              onPressed: controller.showWriteReviewDialog,
+              icon: const Icon(Icons.rate_review, size: 18),
+              label: Text('write_review'.tr),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.primaryColor,
+                side: const BorderSide(color: AppTheme.primaryColor),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            // Recent reviews preview
+            if (reviews.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              ...reviews.take(2).map((review) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 14,
+                              backgroundColor:
+                                  AppTheme.primaryColor.withValues(alpha: 0.1),
+                              child: Text(
+                                (review['buyer_name'] ?? 'A')[0].toUpperCase(),
+                                style: const TextStyle(
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              review['buyer_name'] ?? 'Anonymous',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                            if (review['is_verified_purchase'] == true) ...[
+                              const SizedBox(width: 4),
+                              Icon(Icons.verified,
+                                  size: 13, color: Colors.green[600]),
+                            ],
+                            const Spacer(),
+                            Row(
+                              children: List.generate(5, (i) {
+                                return Icon(
+                                  i < (review['rating'] ?? 0)
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color: Colors.amber,
+                                  size: 14,
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                        if (review['comment'] != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6, left: 36),
+                            child: Text(
+                              review['comment'],
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Get.isDarkMode
+                                    ? AppTheme.darkTextSecondary
+                                    : AppTheme.textSecondary,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
+                  )),
             ],
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildBottomBar() {
@@ -554,13 +653,21 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
         ],
       ),
       child: SafeArea(
-        child: Row(
+        child: Obx(() => Row(
           children: [
             // Add to Cart
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: controller.addToCart,
-                icon: const Icon(Icons.add_shopping_cart, size: 20),
+                onPressed: controller.isAddingToCart.value
+                    ? null
+                    : controller.addToCart,
+                icon: controller.isAddingToCart.value
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.add_shopping_cart, size: 20),
                 label: Text('add_to_cart'.tr),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.primaryColor,
@@ -576,7 +683,9 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
             // Buy Now
             Expanded(
               child: ElevatedButton(
-                onPressed: controller.buyNow,
+                onPressed: controller.isBuyingNow.value
+                    ? null
+                    : controller.buyNow,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
                   foregroundColor: Colors.white,
@@ -585,26 +694,29 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text(
-                  'buy_now'.tr,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: controller.isBuyingNow.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(
+                        'buy_now'.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
           ],
-        ),
+        )),
       ),
     );
   }
 
-  void _showVideoInfo() {
-    Get.snackbar(
-      'video'.tr,
-      'video_playback_coming_soon'.tr,
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
 }

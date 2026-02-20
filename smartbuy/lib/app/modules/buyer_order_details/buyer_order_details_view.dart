@@ -13,7 +13,8 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
           ? AppTheme.darkBackgroundColor
           : AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text('${'order'.tr} #${controller.orderData['id'] ?? ''}'),
+        title: Text(
+            '${'order'.tr} #${controller.orderData['order_number'] ?? controller.orderData['id'] ?? ''}'),
         actions: [
           TextButton(
             onPressed: controller.getHelp,
@@ -28,92 +29,84 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Order Date
-            Text(
-              '${'placed_on'.tr} ${controller.orderData['orderDate'] ?? ''}',
-              style: TextStyle(
-                fontSize: 13,
-                color: Get.isDarkMode
-                    ? AppTheme.darkTextSecondary
-                    : AppTheme.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 20),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-            // Tracking Status Section
-            Text(
-              'tracking_status'.tr.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Get.isDarkMode
-                    ? AppTheme.darkTextSecondary
-                    : AppTheme.textSecondary,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Tracking Timeline
-            _buildTrackingTimeline(),
-            const SizedBox(height: 32),
-
-            // Shipping Address
-            _buildShippingAddress(),
-            const SizedBox(height: 20),
-
-            // Payment Details
-            _buildPaymentDetails(),
-            const SizedBox(height: 24),
-
-            // Buy It Again Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: controller.buyItAgain,
-                icon: const Icon(Icons.refresh, size: 20),
-                label: Text('buy_it_again'.tr),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Order Date
+              Text(
+                '${'placed_on'.tr} ${controller.orderDetails['order_date'] ?? controller.orderData['orderDate'] ?? ''}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Get.isDarkMode
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary,
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 20),
 
-            // Download Invoice Button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: controller.downloadInvoice,
-                icon: const Icon(Icons.download, size: 20),
-                label: Text('download_invoice'.tr),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Get.isDarkMode ? Colors.white : Colors.black87,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  side: BorderSide(
+              // Tracking Status Section
+              Text(
+                'tracking_status'.tr.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Get.isDarkMode
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Tracking Timeline
+              _buildTrackingTimeline(),
+              const SizedBox(height: 32),
+
+              // Order Items (if loaded from API)
+              if (controller.orderItems.isNotEmpty) ...[
+                Text(
+                  'order_items'.tr.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                     color: Get.isDarkMode
-                        ? Colors.grey.shade700
-                        : Colors.grey.shade300,
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.textSecondary,
+                    letterSpacing: 0.5,
                   ),
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
+                const SizedBox(height: 12),
+                _buildOrderItems(),
+                const SizedBox(height: 20),
+              ],
+
+              // Shipping Address
+              _buildShippingAddress(),
+              const SizedBox(height: 20),
+
+              // Payment Details
+              _buildPaymentDetails(),
+              const SizedBox(height: 20),
+
+              // Price Breakdown
+              if (controller.subtotal.value > 0) ...[
+                _buildPriceBreakdown(),
+                const SizedBox(height: 24),
+              ],
+
+              // Action Buttons based on status
+              _buildActionButtons(),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -125,6 +118,7 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
           (index) {
             final status = controller.trackingStatus[index];
             final isLast = index == controller.trackingStatus.length - 1;
+            final isCancelled = status['isCancelled'] == true;
 
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,28 +126,32 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
                 // Timeline Indicator
                 Column(
                   children: [
-                    // Circle Icon
                     Container(
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: status['isCompleted'] == true
-                            ? Colors.orange
-                            : status['isActive'] == true
+                        color: isCancelled
+                            ? Colors.red
+                            : status['isCompleted'] == true
                                 ? Colors.orange
-                                : Get.isDarkMode
-                                    ? Colors.grey.shade800
-                                    : Colors.grey.shade300,
+                                : status['isActive'] == true
+                                    ? Colors.orange
+                                    : Get.isDarkMode
+                                        ? Colors.grey.shade800
+                                        : Colors.grey.shade300,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        status['isCompleted'] == true
-                            ? Icons.check
-                            : status['isActive'] == true
-                                ? Icons.local_shipping
-                                : Icons.circle,
+                        isCancelled
+                            ? Icons.cancel
+                            : status['isCompleted'] == true
+                                ? Icons.check
+                                : status['isActive'] == true
+                                    ? Icons.local_shipping
+                                    : Icons.circle,
                         color: status['isCompleted'] == true ||
-                                status['isActive'] == true
+                                status['isActive'] == true ||
+                                isCancelled
                             ? Colors.white
                             : Get.isDarkMode
                                 ? Colors.grey.shade600
@@ -161,13 +159,14 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
                         size: status['isActive'] == true ? 18 : 16,
                       ),
                     ),
-                    // Connecting Line
                     if (!isLast)
                       Container(
                         width: 2,
                         height: 40,
                         color: status['isCompleted'] == true
-                            ? Colors.orange
+                            ? isCancelled
+                                ? Colors.red
+                                : Colors.orange
                             : Get.isDarkMode
                                 ? Colors.grey.shade800
                                 : Colors.grey.shade300,
@@ -187,12 +186,14 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
                           status['title'],
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: status['isActive'] == true
+                            fontWeight: status['isActive'] == true || isCancelled
                                 ? FontWeight.w600
                                 : FontWeight.normal,
-                            color: Get.isDarkMode
-                                ? AppTheme.darkTextPrimary
-                                : AppTheme.textPrimary,
+                            color: isCancelled
+                                ? Colors.red
+                                : Get.isDarkMode
+                                    ? AppTheme.darkTextPrimary
+                                    : AppTheme.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -217,6 +218,82 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
     );
   }
 
+  Widget _buildOrderItems() {
+    return Obx(
+      () => Column(
+        children: controller.orderItems.map((item) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Get.isDarkMode
+                        ? Colors.grey.shade800
+                        : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: item['product_image'] != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.network(
+                            item['product_image'],
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                                Icons.shopping_bag_outlined,
+                                size: 24),
+                          ),
+                        )
+                      : const Icon(Icons.shopping_bag_outlined, size: 24),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item['product_name'],
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'x${item['quantity']} • \$${item['price'].toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Get.isDarkMode
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '\$${item['total'].toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget _buildShippingAddress() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,8 +303,9 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color:
-                Get.isDarkMode ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -267,17 +345,19 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
                   () => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        controller.shippingName.value,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Get.isDarkMode
-                              ? AppTheme.darkTextPrimary
-                              : AppTheme.textPrimary,
+                      if (controller.shippingName.value.isNotEmpty)
+                        Text(
+                          controller.shippingName.value,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Get.isDarkMode
+                                ? AppTheme.darkTextPrimary
+                                : AppTheme.textPrimary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
+                      if (controller.shippingName.value.isNotEmpty)
+                        const SizedBox(height: 4),
                       Text(
                         controller.shippingAddress.value,
                         style: TextStyle(
@@ -307,8 +387,9 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color:
-                Get.isDarkMode ? AppTheme.darkTextPrimary : AppTheme.textPrimary,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -364,7 +445,7 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        controller.paymentDate.value,
+                        controller.paymentStatus.value,
                         style: TextStyle(
                           fontSize: 13,
                           color: Get.isDarkMode
@@ -388,5 +469,154 @@ class BuyerOrderDetailsView extends GetView<BuyerOrderDetailsController> {
         ),
       ],
     );
+  }
+
+  Widget _buildPriceBreakdown() {
+    return Obx(
+      () => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            _buildPriceRow('subtotal'.tr, controller.subtotal.value),
+            if (controller.tax.value > 0)
+              _buildPriceRow('tax'.tr, controller.tax.value),
+            if (controller.shippingCost.value > 0)
+              _buildPriceRow(
+                  'shipping'.tr, controller.shippingCost.value),
+            if (controller.discount.value > 0)
+              _buildPriceRow(
+                  'discount'.tr, -controller.discount.value,
+                  isDiscount: true),
+            const Divider(height: 20),
+            _buildPriceRow('total'.tr, controller.total.value,
+                isBold: true),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriceRow(String label, double amount,
+      {bool isBold = false, bool isDiscount = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: isBold ? 16 : 14,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.normal,
+              color: Get.isDarkMode
+                  ? AppTheme.darkTextPrimary
+                  : AppTheme.textPrimary,
+            ),
+          ),
+          Text(
+            '${isDiscount ? '-' : ''}\$${amount.abs().toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: isBold ? 16 : 14,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.normal,
+              color: isDiscount
+                  ? Colors.green
+                  : Get.isDarkMode
+                      ? AppTheme.darkTextPrimary
+                      : AppTheme.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    final status = controller.orderDetails['status'] ??
+        controller.orderData['status'] ?? '';
+
+    return Obx(() {
+      return Column(
+        children: [
+          // Cancel button for pending/processing orders
+          if (status == 'pending' || status == 'processing')
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: controller.isCancelling.value
+                    ? null
+                    : controller.cancelOrder,
+                icon: controller.isCancelling.value
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.cancel_outlined, size: 20),
+                label: Text(
+                  'cancel_order'.tr,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+
+          // Buy It Again for delivered/completed
+          if (status == 'delivered' || status == 'completed') ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: controller.buyItAgain,
+                icon: const Icon(Icons.refresh, size: 20),
+                label: Text('buy_it_again'.tr),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Download Invoice (always shown)
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: controller.downloadInvoice,
+              icon: const Icon(Icons.download, size: 20),
+              label: Text('download_invoice'.tr),
+              style: OutlinedButton.styleFrom(
+                foregroundColor:
+                    Get.isDarkMode ? Colors.white : Colors.black87,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                side: BorderSide(
+                  color: Get.isDarkMode
+                      ? Colors.grey.shade700
+                      : Colors.grey.shade300,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }

@@ -9,6 +9,8 @@ class ApiConstants {
   static const String register = '/auth/register';
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';
+  static const String googleLogin = '/auth/google';
+  static const String appleLogin = '/auth/apple';
   static const String forgotPassword = '/auth/forgot-password';
   static const String resetPassword = '/auth/reset-password';
   static const String verifyEmail = '/auth/verify-email';
@@ -18,6 +20,28 @@ class ApiConstants {
   static const String updateProfile = '/user/update-profile';
   static const String changePassword = '/user/change-password';
   static const String deleteAccount = '/user/delete-account';
+
+  // Buyer Profile Endpoints
+  static const String buyerProfile = '/auth/profile';
+  static const String buyerProfilePhoto = '/auth/profile/photo';
+
+  // Buyer Order Endpoints
+  static const String buyerOrders = '/auth/orders';
+
+  // Buyer Wishlist Endpoints
+  static const String buyerWishlist = '/auth/wishlist';
+
+  // Buyer Address Endpoints
+  static const String buyerAddresses = '/auth/addresses';
+
+  // Buyer Payment Method Endpoints
+  static const String buyerPaymentMethods = '/auth/payment-methods';
+
+  // Buyer Notification Preferences Endpoints
+  static const String buyerNotificationPreferences = '/auth/notification-preferences';
+
+  // Buyer Place Order Endpoint
+  static const String buyerPlaceOrder = '/auth/orders';
 
   // Product Endpoints
   static const String products = '/products';
@@ -34,11 +58,11 @@ class ApiConstants {
   static const String categoryProducts = '/categories/{id}/products';
 
   // Cart Endpoints
-  static const String cart = '/cart';
-  static const String addToCart = '/cart/add';
-  static const String updateCartItem = '/cart/update/{id}';
-  static const String removeFromCart = '/cart/remove/{id}';
-  static const String clearCart = '/cart/clear';
+  static const String cart = '/auth/cart';
+  static const String addToCart = '/auth/cart/add';
+  static const String updateCartItem = '/auth/cart/{id}';
+  static const String removeFromCart = '/auth/cart/{id}';
+  static const String clearCart = '/auth/cart/clear';
 
   // Wishlist Endpoints
   static const String wishlist = '/wishlist';
@@ -91,29 +115,24 @@ class ApiConstants {
   static const String vendorLogin = '/vendor/login';
   static const String vendorLogout = '/vendor/logout';
 
+  // Vendor Business Details Endpoints
+  static const String vendorBusinessDetails = '/vendor/business-details';
+
+  // Vendor Bank Account Endpoints
+  static const String vendorBankAccount = '/vendor/bank-account';
+
+  // Vendor Inventory Endpoints
+  static const String vendorInventory = '/vendor/inventory';
+
+  // Vendor Shipping Partners Endpoints
+  static const String vendorShippingPartners = '/vendor/shipping-partners';
+
+  // Vendor Settings Endpoints
+  static const String vendorSettings = '/vendor/settings';
+
   // Vendor Product Endpoints
   static const String vendorProducts = '/vendor/products';
 
-  // =========================
-  // Wishlist Endpoints
-  // =========================
-
-  /// Get wishlist by user ID
-  static const String wishlistList = '/wishlist';
-  // Usage: /wishlist/{userId}
-
-  /// Add item to wishlist
-  static const String wishlistCreate = '/wishlist';
-
-  /// Update wishlist item
-  static const String wishlistUpdate = '/wishlist';
-  // Usage: /wishlist/{id}
-
-  /// Delete single wishlist item
-  static const String wishlistDelete = '/wishlist';
-  // Usage: /wishlist/{id}
-
-  /// Clear all wishlist items for user
-  static const String wishlistClear = '/wishlist/clear';
-  // Usage: /wishlist/clear/{userId}
+  // Vendor Order Endpoints
+  static const String vendorOrders = '/vendor/orders';
 }

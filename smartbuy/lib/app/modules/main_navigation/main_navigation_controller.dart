@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../routes/app_pages.dart';
 import '../cart/cart_controller.dart';
 
 class MainNavigationController extends GetxController {
@@ -6,6 +7,10 @@ class MainNavigationController extends GetxController {
 
   void changePage(int index) {
     currentIndex.value = index;
+  }
+
+  void openNotifications() {
+    Get.toNamed(Routes.BUYER_MESSAGES_INBOX);
   }
 
   // Get cart item count from CartController
