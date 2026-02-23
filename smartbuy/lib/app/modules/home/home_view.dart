@@ -22,18 +22,35 @@ class HomeView extends GetView<HomeController> {
 
           /// 🔥 Foreground Content
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SingleChildScrollView(
+              // 👈 Add this
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
 
-                  /// Search Bar on top of carousel
-                  _buildSearchBar(context),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: _buildSearchBar(context),
+                  ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.23),
 
-                  /// Other page content here
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: double.infinity,
+                      color: Colors.white,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildCategoriesSection(context),
+                          const SizedBox(height: 24),
+                          _buildNewArrivalSection(context),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -252,7 +269,7 @@ class HomeView extends GetView<HomeController> {
               );
             },
             options: carousel.CarouselOptions(
-              height: screenHeight * 0.22,
+              height: MediaQuery.of(context).size.height * 0.35, // 👈 increased
               viewportFraction: 1.0,
               enlargeCenterPage: false,
               autoPlay: true,
