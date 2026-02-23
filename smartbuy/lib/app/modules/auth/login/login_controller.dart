@@ -33,12 +33,16 @@ class LoginController extends GetxController
   @override
   void onInit() {
     super.onInit();
+
     tabController = TabController(length: 2, vsync: this);
+
     tabController.addListener(() {
-      currentTab.value = tabController.index;
-      // Navigate to Vendor Login when Vendor tab is selected
-      if (tabController.index == 1) {
-        goToVendorLogin();
+      if (!tabController.indexIsChanging) {
+        currentTab.value = tabController.index;
+
+        if (tabController.index == 1) {
+          goToVendorLogin();
+        }
       }
     });
   }
@@ -67,7 +71,7 @@ class LoginController extends GetxController
       Helpers.showSuccessSheet(
         'You\'re all set to continue shopping for the best deals.',
         title: 'Login Successful!',
-        onClose: () => Get.offAllNamed(Routes.HOME),
+        onClose: () => Get.offAllNamed(Routes.LOADING_SCREEN),
       );
     } catch (e) {
       // ----------------------------------------------------------------------------
@@ -81,17 +85,17 @@ class LoginController extends GetxController
 
   bool _validateForm() {
     if (emailController.text.trim().isEmpty) {
-      Helpers.showErrorSheet('field_required'.tr);
+      Helpers.showError('field_required'.tr);
       return false;
     }
 
     if (passwordController.text.trim().isEmpty) {
-      Helpers.showErrorSheet('field_required'.tr);
+      Helpers.showError('field_required'.tr);
       return false;
     }
 
     if (passwordController.text.length < 6) {
-      Helpers.showErrorSheet('password_too_short'.tr);
+      Helpers.showError('password_too_short'.tr);
       return false;
     }
 
@@ -136,10 +140,10 @@ class LoginController extends GetxController
       Helpers.showSuccessSheet(
         'You\'re all set to continue shopping for the best deals.',
         title: 'Login Successful!',
-        onClose: () => Get.offAllNamed(Routes.HOME),
+        onClose: () => Get.offAllNamed(Routes.LOADING_SCREEN),
       );
     } catch (e) {
-      Helpers.showErrorSheet(Helpers.parseErrorMessage(e));
+      Helpers.showError(Helpers.parseErrorMessage(e));
     } finally {
       isGoogleLoading.value = false;
     }
@@ -190,7 +194,7 @@ class LoginController extends GetxController
       Helpers.showSuccessSheet(
         'You\'re all set to continue shopping for the best deals.',
         title: 'Login Successful!',
-        onClose: () => Get.offAllNamed(Routes.HOME),
+        onClose: () => Get.offAllNamed(Routes.LOADING_SCREEN),
       );
     } catch (e) {
       if (e is SignInWithAppleAuthorizationException) {

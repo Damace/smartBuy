@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:SmartBuy/app/core/themes/app_theme.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,7 @@ class VendorAddProductController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   final RxInt currentStep = 0.obs;
   final RxBool isLoading = false.obs;
+  final RxList<String> categories = <String>[].obs;
 
   // Step 1: Basic Info & Media
   final TextEditingController productNameController = TextEditingController();
@@ -48,6 +50,7 @@ class VendorAddProductController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeDefaultValues();
+    _loadMockCategories(); // 👈 MUST call this
   }
 
   void _initializeDefaultValues() {
@@ -120,43 +123,82 @@ class VendorAddProductController extends GetxController {
           color: Get.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'select_category'.tr,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+
+              /// Drag Handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ...['Electronics', 'Fashion', 'Home', 'Beauty', 'Sports'].map(
-              (category) => ListTile(
-                title: Text(category),
-                onTap: () {
-                  selectedCategory.value = category;
-                  Get.back();
-                },
+
+              const SizedBox(height: 20),
+
+              /// Title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'select_category'.tr,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+
+              const SizedBox(height: 20),
+
+              /// Categories List
+              Flexible(
+                child: Obx(
+                  () => ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: categories.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+
+                      final isSelected = selectedCategory.value == category;
+
+                      return ListTile(
+                        title: Text(
+                          category,
+                          style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected ? AppTheme.primaryColor : null,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? const Icon(
+                                Icons.check,
+                                color: AppTheme.primaryColor,
+                              )
+                            : null,
+                        onTap: () {
+                          selectedCategory.value = category;
+                          Get.back();
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
+      isScrollControlled: true,
     );
   }
 
@@ -356,6 +398,28 @@ class VendorAddProductController extends GetxController {
         ),
       ),
     );
+  }
+
+  void _loadMockCategories() {
+    categories.value = [
+      'Fashion',
+      'Electronics',
+      'Home',
+      'Beauty',
+      'Grocery',
+      'Sports',
+      'Toys',
+      'Books',
+      'Automotive',
+      'Health',
+      'Jewelry',
+      'Baby',
+      'Furniture',
+      'Mobiles',
+      'Laptops',
+      'Shoes',
+      'Others',
+    ];
   }
 
   void _publishProduct() {

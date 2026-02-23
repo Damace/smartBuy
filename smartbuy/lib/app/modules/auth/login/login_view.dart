@@ -55,20 +55,20 @@ class LoginView extends GetView<LoginController> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppTheme.borderColor),
                 ),
-                child: TabBar(
-                  controller: controller.tabController,
-                  indicator: BoxDecoration(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  labelColor: AppTheme.primaryColor,
-                  unselectedLabelColor: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.color,
-                  dividerColor: Colors.transparent,
-                  tabs: [
-                    Tab(text: 'buyer'.tr),
-                    Tab(text: 'vendor'.tr),
+                child: Row(
+                  children: [
+                    _buildTabButton(
+                      context,
+                      index: 0,
+                      label: 'buyer'.tr,
+                      icon: Icons.person_outline,
+                    ),
+                    _buildTabButton(
+                      context,
+                      index: 1,
+                      label: 'vendor'.tr,
+                      icon: Icons.store_outlined,
+                    ),
                   ],
                 ),
               ),
@@ -251,6 +251,57 @@ class LoginView extends GetView<LoginController> {
                     ),
                   ),
                 ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(
+    BuildContext context, {
+    required int index,
+    required String label,
+    required IconData icon,
+  }) {
+    final bool isSelected = controller.tabController.index == index;
+
+    //final bool isSelected = controller.currentTab.value == index;
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          controller.tabController.animateTo(index);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppTheme.primaryColor.withValues(alpha: 0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isSelected
+                    ? AppTheme.primaryColor
+                    : Theme.of(context).textTheme.bodySmall?.color,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected
+                      ? AppTheme.primaryColor
+                      : Theme.of(context).textTheme.bodySmall?.color,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),

@@ -11,27 +11,25 @@ import 'app/routes/app_pages.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Parallel initialization for speed
-  await Future.wait([
-    GetStorage.init(),
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]),
-  ]);
+  // Only storage init is required before runApp (ThemeController reads from it)
+  await GetStorage.init();
 
-  // Set system UI overlay style for fast visual readiness
+  Get.put(ThemeController());
+
+  // Start the app immediately to minimize native white-screen time
+  runApp(const SmartBuyApp());
+
+  // Non-visual setup deferred after first frame
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
     ),
   );
-
-  // Initialize Theme Controller
-  Get.put(ThemeController());
-
-  runApp(const SmartBuyApp());
 }
 
 class SmartBuyApp extends StatelessWidget {

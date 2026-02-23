@@ -2,7 +2,7 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URL - Will be configured for Laravel backend
-  static const String baseUrl = 'http://192.168.1.181:8000/api';
+  static const String baseUrl = 'https://smartbuy.sutech.co.tz/api';
 
   // Auth Endpoints
   static const String login = '/auth/login';
@@ -38,7 +38,8 @@ class ApiConstants {
   static const String buyerPaymentMethods = '/auth/payment-methods';
 
   // Buyer Notification Preferences Endpoints
-  static const String buyerNotificationPreferences = '/auth/notification-preferences';
+  static const String buyerNotificationPreferences =
+      '/auth/notification-preferences';
 
   // Buyer Place Order Endpoint
   static const String buyerPlaceOrder = '/auth/orders';

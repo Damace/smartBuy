@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'cart_controller.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/themes/app_theme.dart';
 import '../../data/models/cart_item_model.dart';
 import '../../data/models/product_model.dart';
@@ -22,63 +23,71 @@ class CartView extends GetView<CartController> {
         title: Text('shopping_cart'.tr),
         centerTitle: true,
       ),
-      body: Obx(
-        () => controller.cartItems.isEmpty
-            ? _buildEmptyCart(context)
-            : Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Cart items count
-                          Text(
-                            'items_in_cart'.trParams({
-                              'count': controller.cartItemCount.toString(),
-                            }),
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Cart items list
-                          ...controller.cartItems.map(
-                            (item) => _buildCartItem(context, item),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // // Coupon code section
-                          // _buildCouponSection(context),
-
-                          // const SizedBox(height: 24),
-
-                          // Saved for later section
-                          if (controller.savedForLater.isNotEmpty) ...[
-                            _buildSavedForLaterSection(context),
-                            const SizedBox(height: 24),
-                          ],
-
-                          // Summary section
-                          _buildSummarySection(context),
-
-                          const SizedBox(
-                            height: 100,
-                          ), // Space for checkout button
-                        ],
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (controller.cartItems.isEmpty) {
+          return _buildEmptyCart(context);
+        }
+        return Column(
+          children: [
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.loadCartItems,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Cart items count
+                      Text(
+                        'items_in_cart'.trParams({
+                          'count': controller.cartItemCount.toString(),
+                        }),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
-                    ),
-                  ),
+                      const SizedBox(height: 16),
 
-                  // Checkout button (fixed at bottom)
-                  _buildCheckoutButton(context),
-                ],
+                      // Cart items list
+                      ...controller.cartItems.map(
+                        (item) => _buildCartItem(context, item),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Coupon code section
+                      _buildCouponSection(context),
+
+                      const SizedBox(height: 16),
+
+                      // Saved for later section
+                      if (controller.savedForLater.isNotEmpty) ...[
+                        _buildSavedForLaterSection(context),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Summary section
+                      _buildSummarySection(context),
+
+                      const SizedBox(height: 100), // space for checkout button
+                    ],
+                  ),
+                ),
               ),
-      ),
+            ),
+
+            // Checkout button (fixed at bottom)
+            _buildCheckoutButton(context),
+          ],
+        );
+      }),
     );
   }
+
+  // ─── Empty state ─────────────────────────────────────────────────────────────
 
   Widget _buildEmptyCart(BuildContext context) {
     return Center(
@@ -95,9 +104,10 @@ class CartView extends GetView<CartController> {
           const SizedBox(height: 24),
           Text(
             'cart_is_empty'.tr,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            style: Theme.of(context)
+                .textTheme
+                .titleLarge
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           Text(
@@ -118,6 +128,8 @@ class CartView extends GetView<CartController> {
       ),
     );
   }
+
+  // ─── Cart item card ──────────────────────────────────────────────────────────
 
   Widget _buildCartItem(BuildContext context, CartItemModel item) {
     final product = item.product;
@@ -143,22 +155,9 @@ class CartView extends GetView<CartController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Product image
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              color: Get.isDarkMode
-                  ? AppTheme.darkBackgroundColor
-                  : Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Icon(
-                _getProductIcon(product.image ?? ''),
-                size: 35,
-                color: AppTheme.primaryColor,
-              ),
-            ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: _buildProductImage(product.image, 70, 70),
           ),
           const SizedBox(width: 12),
 
@@ -169,9 +168,10 @@ class CartView extends GetView<CartController> {
               children: [
                 Text(
                   product.name,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -183,18 +183,20 @@ class CartView extends GetView<CartController> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${'vendor'.tr}: ${product.categoryName ?? 'SmartBuy'}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Get.isDarkMode
-                        ? AppTheme.darkTextSecondary
-                        : AppTheme.textSecondary,
+                if ((product.categoryName ?? '').isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '${'vendor'.tr}: ${product.categoryName}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Get.isDarkMode
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textSecondary,
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 12),
 
-                // Quantity controls
+                // Quantity controls + remove
                 Row(
                   children: [
                     _buildQuantityButton(
@@ -205,9 +207,10 @@ class CartView extends GetView<CartController> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         item.quantity.toString(),
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                     ),
                     _buildQuantityButton(
@@ -215,8 +218,6 @@ class CartView extends GetView<CartController> {
                       onTap: () => controller.incrementQuantity(item.id),
                     ),
                     const Spacer(),
-
-                    // Remove button
                     IconButton(
                       onPressed: () => _showRemoveDialog(context, item),
                       icon: Icon(
@@ -262,68 +263,95 @@ class CartView extends GetView<CartController> {
     );
   }
 
+  // ─── Coupon ──────────────────────────────────────────────────────────────────
+
   Widget _buildCouponSection(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: controller.couponController,
-            decoration: InputDecoration(
-              hintText: 'coupon_code'.tr,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+    return Obx(() => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: controller.couponController,
+                    enabled: controller.appliedCoupon.value.isEmpty,
+                    decoration: InputDecoration(
+                      hintText: 'coupon_code'.tr,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                controller.appliedCoupon.value.isEmpty
+                    ? ElevatedButton(
+                        onPressed: controller.applyCoupon,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text('apply'.tr),
+                      )
+                    : OutlinedButton(
+                        onPressed: controller.removeCoupon,
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          foregroundColor: AppTheme.errorColor,
+                          side: const BorderSide(color: AppTheme.errorColor),
+                        ),
+                        child: Text('remove'.tr),
+                      ),
+              ],
             ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        ElevatedButton(
-          onPressed: controller.applyCoupon,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: Text('apply'.tr),
-        ),
-      ],
-    );
+            if (controller.appliedCoupon.value.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.check_circle,
+                      size: 14, color: AppTheme.successColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${'coupon'.tr}: ${controller.appliedCoupon.value}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppTheme.successColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ));
   }
+
+  // ─── Saved for later ─────────────────────────────────────────────────────────
 
   Widget _buildSavedForLaterSection(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'saved_for_later'.tr,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            TextButton(
-              onPressed: () {
-                Get.toNamed('/wishlist');
-              },
-              child: Text(
-                'view_all'.tr,
-                style: const TextStyle(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+        Text(
+          'saved_for_later'.tr,
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 140,
+          height: 150,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: controller.savedForLater.length,
@@ -359,32 +387,31 @@ class CartView extends GetView<CartController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Get.isDarkMode
-                    ? AppTheme.darkBackgroundColor
-                    : Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                _getProductIcon(product.image ?? ''),
-                size: 40,
-                color: AppTheme.primaryColor,
-              ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: _buildProductImage(product.image, 80, 80),
             ),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 product.name,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'move_to_cart'.tr,
+              style: TextStyle(
+                fontSize: 10,
+                color: AppTheme.primaryColor,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -392,6 +419,8 @@ class CartView extends GetView<CartController> {
       ),
     );
   }
+
+  // ─── Summary ─────────────────────────────────────────────────────────────────
 
   Widget _buildSummarySection(BuildContext context) {
     return Container(
@@ -409,42 +438,42 @@ class CartView extends GetView<CartController> {
                 ),
               ],
       ),
-      child: Column(
-        children: [
-          _buildSummaryRow(
-            context,
-            'subtotal'.tr,
-            '\$${controller.subtotal.toStringAsFixed(2)}',
-            false,
-          ),
-          const SizedBox(height: 12),
-          _buildSummaryRow(
-            context,
-            'shipping'.tr,
-            controller.shipping == 0
-                ? 'free'.tr
-                : '\$${controller.shipping.toStringAsFixed(2)}',
-            false,
-          ),
-          if (controller.discount.value > 0) ...[
-            const SizedBox(height: 12),
-            _buildSummaryRow(
-              context,
-              'discount'.tr,
-              '-\$${controller.discount.value.toStringAsFixed(2)}',
-              false,
-              color: AppTheme.successColor,
-            ),
-          ],
-          const Divider(height: 24),
-          _buildSummaryRow(
-            context,
-            'total'.tr,
-            '\$${controller.total.toStringAsFixed(2)}',
-            true,
-          ),
-        ],
-      ),
+      child: Obx(() => Column(
+            children: [
+              _buildSummaryRow(
+                context,
+                'subtotal'.tr,
+                '\$${controller.subtotal.toStringAsFixed(2)}',
+                false,
+              ),
+              const SizedBox(height: 12),
+              _buildSummaryRow(
+                context,
+                'shipping'.tr,
+                controller.shipping == 0
+                    ? 'free'.tr
+                    : '\$${controller.shipping.toStringAsFixed(2)}',
+                false,
+              ),
+              if (controller.discount.value > 0) ...[
+                const SizedBox(height: 12),
+                _buildSummaryRow(
+                  context,
+                  'discount'.tr,
+                  '-\$${controller.discount.value.toStringAsFixed(2)}',
+                  false,
+                  color: AppTheme.successColor,
+                ),
+              ],
+              const Divider(height: 24),
+              _buildSummaryRow(
+                context,
+                'total'.tr,
+                '\$${controller.total.toStringAsFixed(2)}',
+                true,
+              ),
+            ],
+          )),
     );
   }
 
@@ -476,6 +505,8 @@ class CartView extends GetView<CartController> {
       ],
     );
   }
+
+  // ─── Checkout button ─────────────────────────────────────────────────────────
 
   Widget _buildCheckoutButton(BuildContext context) {
     return Container(
@@ -521,6 +552,8 @@ class CartView extends GetView<CartController> {
     );
   }
 
+  // ─── Remove bottom sheet ──────────────────────────────────────────────────────
+
   void _showRemoveDialog(BuildContext context, CartItemModel item) {
     Get.bottomSheet(
       Container(
@@ -535,7 +568,6 @@ class CartView extends GetView<CartController> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle bar
               Container(
                 margin: const EdgeInsets.only(top: 12, bottom: 8),
                 width: 40,
@@ -547,8 +579,6 @@ class CartView extends GetView<CartController> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-
-              // Title
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -572,35 +602,28 @@ class CartView extends GetView<CartController> {
                   ],
                 ),
               ),
-
               const Divider(height: 1),
-
-              // Options list
               _buildBottomSheetOption(
                 context,
                 icon: Icons.delete_outline,
                 iconColor: AppTheme.errorColor,
                 title: 'remove_from_cart'.tr,
                 onTap: () {
-                  controller.removeItem(item.id);
                   Get.back();
+                  controller.removeItem(item.id);
                 },
               ),
-
               _buildBottomSheetOption(
                 context,
                 icon: Icons.bookmark_outline,
                 iconColor: AppTheme.primaryColor,
                 title: 'save_for_later'.tr,
                 onTap: () {
-                  controller.saveForLater(item);
                   Get.back();
+                  controller.saveForLater(item);
                 },
               ),
-
               const Divider(height: 1),
-
-              // Cancel button
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: SizedBox(
@@ -651,9 +674,10 @@ class CartView extends GetView<CartController> {
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(fontWeight: FontWeight.w500),
               ),
             ),
             Icon(
@@ -669,20 +693,31 @@ class CartView extends GetView<CartController> {
     );
   }
 
-  IconData _getProductIcon(String imageName) {
-    switch (imageName) {
-      case 'headphones':
-        return Icons.headphones;
-      case 'keyboard':
-        return Icons.keyboard;
-      case 'mouse':
-        return Icons.mouse;
-      case 'watch':
-        return Icons.watch;
-      case 'speaker':
-        return Icons.speaker;
-      default:
-        return Icons.shopping_bag;
+  // ─── Product image helper ─────────────────────────────────────────────────────
+
+  Widget _buildProductImage(String? imagePath, double width, double height) {
+    if (imagePath != null && imagePath.contains('/')) {
+      return Image.network(
+        '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/$imagePath',
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _imagePlaceholder(width, height),
+      );
     }
+    return _imagePlaceholder(width, height);
+  }
+
+  Widget _imagePlaceholder(double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      color: Get.isDarkMode ? AppTheme.darkBackgroundColor : Colors.grey[100],
+      child: Icon(
+        Icons.shopping_bag,
+        size: width * 0.5,
+        color: AppTheme.primaryColor,
+      ),
+    );
   }
 }

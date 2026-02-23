@@ -86,10 +86,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
         children: [
           if (controller.currentStep.value == 0)
             Text(
-              'step_of'.trParams({
-                'current': '1',
-                'total': '3',
-              }),
+              'step_of'.trParams({'current': '1', 'total': '3'}),
               style: TextStyle(
                 fontSize: 12,
                 color: Get.isDarkMode
@@ -110,8 +107,8 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                     color: isCompleted || isCurrent
                         ? AppTheme.primaryColor
                         : Get.isDarkMode
-                            ? AppTheme.darkCardColor
-                            : Colors.grey.shade300,
+                        ? AppTheme.darkCardColor
+                        : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -132,20 +129,14 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
         children: [
           Text(
             'basic_info_media'.tr,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
 
           // Product Name
           Text(
             'product_name'.tr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextField(
@@ -153,8 +144,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
             decoration: InputDecoration(
               hintText: 'product_name_placeholder'.tr,
               filled: true,
-              fillColor:
-                  Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+              fillColor: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -166,10 +156,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           // Category
           Text(
             'category'.tr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -178,8 +165,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color:
-                      Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                  color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -192,8 +178,8 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                       style: TextStyle(
                         color: controller.selectedCategory.value.isEmpty
                             ? (Get.isDarkMode
-                                ? AppTheme.darkTextSecondary
-                                : AppTheme.textSecondary)
+                                  ? AppTheme.darkTextSecondary
+                                  : AppTheme.textSecondary)
                             : null,
                       ),
                     ),
@@ -211,10 +197,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           // Product Description
           Text(
             'product_description'.tr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Container(
@@ -311,64 +294,69 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           const SizedBox(height: 12),
 
           // Cover Image + Video row
-          Obx(() => Row(
-            children: [
-              // Cover Image
-              Expanded(
-                child: controller.coverImage.value != null
-                    ? _buildMediaPreview(
-                        file: controller.coverImage.value!,
-                        label: 'cover'.tr,
-                        onRemove: controller.removeCoverImage,
-                      )
-                    : _buildMediaUploadBox(
-                        icon: Icons.photo_camera,
-                        label: 'cover'.tr,
-                        subtitle: 'required'.tr,
-                        onTap: controller.uploadCoverImage,
-                      ),
-              ),
-              const SizedBox(width: 12),
-              // Video
-              Expanded(
-                child: controller.videoFile.value != null
-                    ? _buildMediaPreview(
-                        file: controller.videoFile.value!,
-                        label: 'video'.tr,
-                        isVideo: true,
-                        onRemove: controller.removeVideo,
-                      )
-                    : _buildMediaUploadBox(
-                        icon: Icons.videocam,
-                        label: 'video'.tr,
-                        subtitle: 'max_5s'.tr,
-                        onTap: controller.uploadVideo,
-                      ),
-              ),
-            ],
-          )),
+          Obx(
+            () => Row(
+              children: [
+                // Cover Image
+                Expanded(
+                  child: controller.coverImage.value != null
+                      ? _buildMediaPreview(
+                          file: controller.coverImage.value!,
+                          label: 'cover'.tr,
+                          onRemove: controller.removeCoverImage,
+                        )
+                      : _buildMediaUploadBox(
+                          icon: Icons.photo_camera,
+                          label: 'cover'.tr,
+                          subtitle: 'required'.tr,
+                          onTap: controller.uploadCoverImage,
+                        ),
+                ),
+                const SizedBox(width: 12),
+                // Video
+                Expanded(
+                  child: controller.videoFile.value != null
+                      ? _buildMediaPreview(
+                          file: controller.videoFile.value!,
+                          label: 'video'.tr,
+                          isVideo: true,
+                          onRemove: controller.removeVideo,
+                        )
+                      : _buildMediaUploadBox(
+                          icon: Icons.videocam,
+                          label: 'video'.tr,
+                          subtitle: 'max_5s'.tr,
+                          onTap: controller.uploadVideo,
+                        ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 12),
 
           // Product Images (4 slots)
-          Obx(() => Row(
-            children: List.generate(4, (index) {
-              final hasImage = index < controller.productImages.length;
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: index < 3 ? 8 : 0),
-                  child: hasImage
-                      ? _buildSmallMediaPreview(
-                          file: controller.productImages[index],
-                          onRemove: () => controller.removeProductImage(index),
-                        )
-                      : _buildSmallUploadBox(
-                          onTap: controller.addProductImage,
-                          showLabel: index == controller.productImages.length,
-                        ),
-                ),
-              );
-            }),
-          )),
+          Obx(
+            () => Row(
+              children: List.generate(4, (index) {
+                final hasImage = index < controller.productImages.length;
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: index < 3 ? 8 : 0),
+                    child: hasImage
+                        ? _buildSmallMediaPreview(
+                            file: controller.productImages[index],
+                            onRemove: () =>
+                                controller.removeProductImage(index),
+                          )
+                        : _buildSmallUploadBox(
+                            onTap: controller.addProductImage,
+                            showLabel: index == controller.productImages.length,
+                          ),
+                  ),
+                );
+              }),
+            ),
+          ),
           const SizedBox(height: 40),
 
           // Next Button
@@ -464,7 +452,9 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+              color: Get.isDarkMode
+                  ? Colors.grey.shade700
+                  : Colors.grey.shade300,
             ),
           ),
           child: ClipRRect(
@@ -478,7 +468,11 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.videocam, size: 32, color: AppTheme.primaryColor),
+                          const Icon(
+                            Icons.videocam,
+                            size: 32,
+                            color: AppTheme.primaryColor,
+                          ),
                           const SizedBox(height: 4),
                           Text(
                             label,
@@ -530,7 +524,9 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+              color: Get.isDarkMode
+                  ? Colors.grey.shade700
+                  : Colors.grey.shade300,
             ),
           ),
           child: ClipRRect(
@@ -571,9 +567,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
       child: Container(
         height: 80,
         decoration: BoxDecoration(
-          color: Get.isDarkMode
-              ? AppTheme.darkCardColor
-              : Colors.grey.shade100,
+          color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
@@ -583,7 +577,11 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.add_photo_alternate_outlined, color: Colors.grey, size: 24),
+            const Icon(
+              Icons.add_photo_alternate_outlined,
+              color: Colors.grey,
+              size: 24,
+            ),
             if (showLabel)
               Text(
                 'add'.tr,
@@ -604,10 +602,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
         children: [
           Text(
             'pricing_inventory'.tr,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Text(
             'pricing_inventory_desc'.tr,
@@ -623,10 +618,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           // Pricing
           Text(
             'pricing'.tr,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -644,10 +636,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const Text(
-                          '*',
-                          style: TextStyle(color: Colors.red),
-                        ),
+                        const Text('*', style: TextStyle(color: Colors.red)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -707,26 +696,19 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           // Inventory
           Text(
             'inventory'.tr,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Text(
             'sku_label'.tr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           TextField(
             controller: controller.skuController,
             decoration: InputDecoration(
               filled: true,
-              fillColor:
-                  Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+              fillColor: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -736,10 +718,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           const SizedBox(height: 16),
           Text(
             'quantity_in_stock'.tr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -869,8 +848,9 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color:
-                        Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                    color: Get.isDarkMode
+                        ? AppTheme.darkCardColor
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -902,21 +882,22 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: (variant['options'] as List<String>)
-                            .map((option) {
+                        children: (variant['options'] as List<String>).map((
+                          option,
+                        ) {
                           return Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: variant['name'] == 'COLOR' &&
-                                      option == 'Blue'
+                              color:
+                                  variant['name'] == 'COLOR' && option == 'Blue'
                                   ? Colors.blue.shade100
                                   : variant['name'] == 'COLOR' &&
-                                          option == 'Black'
-                                      ? Colors.grey.shade300
-                                      : Colors.grey.shade200,
+                                        option == 'Black'
+                                  ? Colors.grey.shade300
+                                  : Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
@@ -944,11 +925,10 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                                 const SizedBox(width: 6),
                                 GestureDetector(
                                   onTap: () => controller.removeVariantOption(
-                                      variant['name'], option),
-                                  child: const Icon(
-                                    Icons.close,
-                                    size: 16,
+                                    variant['name'],
+                                    option,
                                   ),
+                                  child: const Icon(Icons.close, size: 16),
                                 ),
                               ],
                             ),
@@ -1006,10 +986,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
         children: [
           Text(
             'shipping_policy'.tr,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Text(
             'shipping_policy_desc'.tr,
@@ -1025,18 +1002,12 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           // Shipping Logistics
           Text(
             'shipping_logistics'.tr,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Text(
             'shipping_partner'.tr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Obx(
@@ -1045,14 +1016,15 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color:
-                      Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                  color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${controller.shippingPartner.value} (${'recommended'.tr})'),
+                    Text(
+                      '${controller.shippingPartner.value} (${'recommended'.tr})',
+                    ),
                     const Icon(Icons.arrow_drop_down),
                   ],
                 ),
@@ -1262,7 +1234,8 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                              '${controller.returnWindow.value.split('_')[0]} ${'days'.tr} ${'returnable'.tr}'),
+                            '${controller.returnWindow.value.split('_')[0]} ${'days'.tr} ${'returnable'.tr}',
+                          ),
                           const Icon(Icons.arrow_drop_down),
                         ],
                       ),
@@ -1294,10 +1267,7 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                 Expanded(
                   child: Text(
                     'vendor_terms_notice'.tr,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      height: 1.5,
-                    ),
+                    style: const TextStyle(fontSize: 12, height: 1.5),
                   ),
                 ),
               ],

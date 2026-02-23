@@ -10,7 +10,7 @@ class MainNavigationController extends GetxController {
   }
 
   void openNotifications() {
-    Get.toNamed(Routes.BUYER_MESSAGES_INBOX);
+    Get.toNamed(Routes.NOTIFICATION);
   }
 
   // Get cart item count from CartController

@@ -22,49 +22,61 @@ class NotificationView extends GetView<NotificationController> {
           ),
         ],
       ),
-      body: Obx(
-        () => controller.notifications.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.notifications_off_outlined,
-                      size: 80,
-                      color: Get.isDarkMode
-                          ? AppTheme.darkTextSecondary
-                          : AppTheme.textSecondary,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'no_notifications'.tr,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
+      body: Obx(() {
+        if (controller.isLoading.value && controller.notifications.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.notifications.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.notifications_off_outlined,
+                  size: 80,
+                  color: Get.isDarkMode
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary,
                 ),
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.notifications.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final notification = controller.notifications[index];
-                  return _buildNotificationCard(context, notification);
-                },
-              ),
-      ),
+                const SizedBox(height: 16),
+                Text(
+                  'no_notifications'.tr,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () => controller.loadNotifications(),
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: controller.notifications.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final notification = controller.notifications[index];
+              return _buildNotificationCard(context, notification);
+            },
+          ),
+        );
+      }),
     );
   }
 
-  Widget _buildNotificationCard(BuildContext context, Map<String, dynamic> notification) {
+  Widget _buildNotificationCard(
+    BuildContext context,
+    Map<String, dynamic> notification,
+  ) {
     final isRead = notification['isRead'] as bool;
     return Card(
       elevation: isRead ? 0 : 2,
       color: isRead
           ? (Get.isDarkMode ? AppTheme.darkCardColor : Colors.white)
           : (Get.isDarkMode
-              ? AppTheme.darkCardColor.withValues(alpha: 0.8)
-              : AppTheme.primaryColor.withValues(alpha: 0.05)),
+                ? AppTheme.darkCardColor.withValues(alpha: 0.8)
+                : AppTheme.primaryColor.withValues(alpha: 0.05)),
       child: InkWell(
         onTap: () => controller.markAsRead(notification['id']),
         borderRadius: BorderRadius.circular(12),
@@ -77,7 +89,9 @@ class NotificationView extends GetView<NotificationController> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getNotificationColor(notification['type']).withValues(alpha: 0.1),
+                  color: _getNotificationColor(
+                    notification['type'],
+                  ).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -95,8 +109,11 @@ class NotificationView extends GetView<NotificationController> {
                         Expanded(
                           child: Text(
                             notification['title'],
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: isRead ? FontWeight.w500 : FontWeight.w700,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: isRead
+                                      ? FontWeight.w500
+                                      : FontWeight.w700,
                                 ),
                           ),
                         ),
@@ -115,10 +132,10 @@ class NotificationView extends GetView<NotificationController> {
                     Text(
                       notification['message'],
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Get.isDarkMode
-                                ? AppTheme.darkTextSecondary
-                                : AppTheme.textSecondary,
-                          ),
+                        color: Get.isDarkMode
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.textSecondary,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -126,10 +143,10 @@ class NotificationView extends GetView<NotificationController> {
                     Text(
                       notification['time'],
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Get.isDarkMode
-                                ? AppTheme.darkTextSecondary
-                                : AppTheme.textSecondary,
-                          ),
+                        color: Get.isDarkMode
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.textSecondary,
+                      ),
                     ),
                   ],
                 ),

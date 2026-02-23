@@ -7,7 +7,10 @@ class ProductModel {
   final int stock;
   final String? image;
   final List<String>? images;
-  final int categoryId;
+
+  /// ✅ Changed from int categoryId → String category
+  final String category;
+
   final String? categoryName;
   final double? rating;
   final int? reviewsCount;
@@ -26,7 +29,7 @@ class ProductModel {
     required this.stock,
     this.image,
     this.images,
-    required this.categoryId,
+    required this.category, // ✅ now String
     this.categoryName,
     this.rating,
     this.reviewsCount,
@@ -51,9 +54,12 @@ class ProductModel {
       images: json['images'] != null
           ? List<String>.from(json['images'] as List)
           : null,
-      categoryId: json['category_id'] as int,
+      category: json['category'] as String? ?? '',
+
       categoryName: json['category_name'] as String?,
-      rating: json['rating'] != null ? (json['rating'] as num).toDouble() : null,
+      rating: json['rating'] != null
+          ? (json['rating'] as num).toDouble()
+          : null,
       reviewsCount: json['reviews_count'] as int?,
       isFeatured: json['is_featured'] as bool? ?? false,
       isNewArrival: json['is_new_arrival'] as bool? ?? false,
@@ -73,7 +79,7 @@ class ProductModel {
       'stock': stock,
       'image': image,
       'images': images,
-      'category_id': categoryId,
+      'category': category,
       'category_name': categoryName,
       'rating': rating,
       'reviews_count': reviewsCount,
@@ -105,7 +111,7 @@ class ProductModel {
     int? stock,
     String? image,
     List<String>? images,
-    int? categoryId,
+    String? category, // ✅ updated
     String? categoryName,
     double? rating,
     int? reviewsCount,
@@ -124,7 +130,7 @@ class ProductModel {
       stock: stock ?? this.stock,
       image: image ?? this.image,
       images: images ?? this.images,
-      categoryId: categoryId ?? this.categoryId,
+      category: category ?? this.category, // ✅ updated
       categoryName: categoryName ?? this.categoryName,
       rating: rating ?? this.rating,
       reviewsCount: reviewsCount ?? this.reviewsCount,

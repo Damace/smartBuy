@@ -10,8 +10,9 @@ class CategoryView extends GetView<CategoryController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Get.isDarkMode ? AppTheme.darkBackgroundColor : AppTheme.backgroundColor,
+      backgroundColor: Get.isDarkMode
+          ? AppTheme.darkBackgroundColor
+          : AppTheme.backgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -23,18 +24,9 @@ class CategoryView extends GetView<CategoryController> {
             icon: const Icon(Icons.sort),
             onSelected: controller.onSortChanged,
             itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'latest',
-                child: Text('sort_latest'.tr),
-              ),
-              PopupMenuItem(
-                value: 'name_asc',
-                child: Text('sort_a_z'.tr),
-              ),
-              PopupMenuItem(
-                value: 'name_desc',
-                child: Text('sort_z_a'.tr),
-              ),
+              PopupMenuItem(value: 'latest', child: Text('sort_latest'.tr)),
+              PopupMenuItem(value: 'name_asc', child: Text('sort_a_z'.tr)),
+              PopupMenuItem(value: 'name_desc', child: Text('sort_z_a'.tr)),
               PopupMenuItem(
                 value: 'price_low',
                 child: Text('sort_price_low'.tr),
@@ -43,14 +35,8 @@ class CategoryView extends GetView<CategoryController> {
                 value: 'price_high',
                 child: Text('sort_price_high'.tr),
               ),
-              PopupMenuItem(
-                value: 'rating',
-                child: Text('sort_rating'.tr),
-              ),
-              PopupMenuItem(
-                value: 'popular',
-                child: Text('sort_popular'.tr),
-              ),
+              PopupMenuItem(value: 'rating', child: Text('sort_rating'.tr)),
+              PopupMenuItem(value: 'popular', child: Text('sort_popular'.tr)),
             ],
           ),
         ],
@@ -66,9 +52,7 @@ class CategoryView extends GetView<CategoryController> {
               return Row(
                 children: [
                   _buildCategorySidebar(context),
-                  Expanded(
-                    child: _buildMainContent(context),
-                  ),
+                  Expanded(child: _buildMainContent(context)),
                 ],
               );
             }),
@@ -99,17 +83,20 @@ class CategoryView extends GetView<CategoryController> {
                 : AppTheme.textSecondary,
             size: 20,
           ),
-          suffixIcon: Obx(() => controller.isSearchActive.value
-              ? IconButton(
-                  icon: const Icon(Icons.close, size: 20),
-                  onPressed: controller.clearSearch,
-                )
-              : const SizedBox.shrink()),
+          suffixIcon: Obx(
+            () => controller.isSearchActive.value
+                ? IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: controller.clearSearch,
+                  )
+                : const SizedBox.shrink(),
+          ),
           filled: true,
-          fillColor:
-              Get.isDarkMode ? AppTheme.darkCardColor : Colors.grey[100],
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          fillColor: Get.isDarkMode ? AppTheme.darkCardColor : Colors.grey[100],
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
@@ -176,8 +163,7 @@ class CategoryView extends GetView<CategoryController> {
                       suggestion,
                       style: const TextStyle(fontSize: 12),
                     ),
-                    onPressed: () =>
-                        controller.onSuggestionTapped(suggestion),
+                    onPressed: () => controller.onSuggestionTapped(suggestion),
                     backgroundColor: Get.isDarkMode
                         ? AppTheme.darkCardColor
                         : Colors.grey[100],
@@ -259,28 +245,26 @@ class CategoryView extends GetView<CategoryController> {
           itemCount: controller.categories.length,
           itemBuilder: (context, index) {
             final category = controller.categories[index];
-            final isSelected =
-                controller.selectedCategoryIndex.value == index;
+            final isSelected = controller.selectedCategoryIndex.value == index;
 
             return Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => controller.selectCategory(index),
-                splashColor:
-                    AppTheme.primaryColor.withValues(alpha: 0.1),
-                highlightColor:
-                    AppTheme.primaryColor.withValues(alpha: 0.05),
+                splashColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+                highlightColor: AppTheme.primaryColor.withValues(alpha: 0.05),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
                   padding: const EdgeInsets.symmetric(
-                      vertical: 16, horizontal: 8),
+                    vertical: 16,
+                    horizontal: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? (Get.isDarkMode
-                            ? AppTheme.primaryColor
-                                .withValues(alpha: 0.15)
-                            : AppTheme.backgroundColor)
+                              ? AppTheme.primaryColor.withValues(alpha: 0.15)
+                              : AppTheme.backgroundColor)
                         : Colors.transparent,
                     border: Border(
                       left: BorderSide(
@@ -300,8 +284,7 @@ class CategoryView extends GetView<CategoryController> {
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppTheme.primaryColor
-                                  .withValues(alpha: 0.15)
+                              ? AppTheme.primaryColor.withValues(alpha: 0.15)
                               : Colors.transparent,
                           shape: BoxShape.circle,
                         ),
@@ -311,30 +294,27 @@ class CategoryView extends GetView<CategoryController> {
                           color: isSelected
                               ? AppTheme.primaryColor
                               : (Get.isDarkMode
-                                  ? AppTheme.darkTextSecondary
-                                  : AppTheme.textSecondary),
+                                    ? AppTheme.darkTextSecondary
+                                    : AppTheme.textSecondary),
                         ),
                       ),
                       const SizedBox(height: 6),
                       AnimatedDefaultTextStyle(
                         duration: const Duration(milliseconds: 200),
                         curve: Curves.easeInOut,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall!
-                            .copyWith(
-                              fontSize: 9,
-                              fontWeight: isSelected
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              color: isSelected
-                                  ? AppTheme.primaryColor
-                                  : (Get.isDarkMode
-                                      ? AppTheme.darkTextSecondary
-                                      : AppTheme.textSecondary),
-                              letterSpacing: 0.5,
-                              height: 1.2,
-                            ),
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          fontSize: 9,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: isSelected
+                              ? AppTheme.primaryColor
+                              : (Get.isDarkMode
+                                    ? AppTheme.darkTextSecondary
+                                    : AppTheme.textSecondary),
+                          letterSpacing: 0.5,
+                          height: 1.2,
+                        ),
                         child: Text(
                           (category['name'] ?? '').toUpperCase(),
                           textAlign: TextAlign.center,
@@ -356,88 +336,88 @@ class CategoryView extends GetView<CategoryController> {
   // --- Main Content ---
 
   Widget _buildMainContent(BuildContext context) {
-    return Obx(() => Container(
-          color: Get.isDarkMode
-              ? AppTheme.darkBackgroundColor
-              : AppTheme.backgroundColor,
-          child: Column(
-            children: [
-              // Category Header
-              if (controller.categories.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        controller
-                                .categories[
-                                    controller.selectedCategoryIndex.value]
-                                    ['name'] ??
-                            '',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
+    return Obx(
+      () => Container(
+        color: Get.isDarkMode
+            ? AppTheme.darkBackgroundColor
+            : AppTheme.backgroundColor,
+        child: Column(
+          children: [
+            // Category Header
+            if (controller.categories.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      controller.categories[controller
+                              .selectedCategoryIndex
+                              .value]['name'] ??
+                          '',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                      TextButton(
-                        onPressed: controller.onViewAllTapped,
-                        child: Text(
-                          'view_all'.tr,
-                          style: const TextStyle(
-                            color: AppTheme.primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    ),
+                    TextButton(
+                      onPressed: controller.onViewAllTapped,
+                      child: Text(
+                        'view_all'.tr,
+                        style: const TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-              // Subcategories horizontal list
-              if (controller.isLoadingSubcategories.value)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                  ),
-                )
-              else if (controller.subcategories.isNotEmpty)
-                SizedBox(
-                  height: 100,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: controller.subcategories.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final sub = controller.subcategories[index];
-                      return _buildSubcategoryChip(context, sub);
-                    },
+                  ],
+                ),
+              ),
+
+            // Subcategories horizontal list
+            if (controller.isLoadingSubcategories.value)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
-              const SizedBox(height: 8),
-
-              // Products grid
-              Expanded(
-                child: _buildProductsGrid(context),
+              )
+            else if (controller.subcategories.isNotEmpty)
+              SizedBox(
+                height: 100,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: controller.subcategories.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final sub = controller.subcategories[index];
+                    return _buildSubcategoryChip(context, sub);
+                  },
+                ),
               ),
-            ],
-          ),
-        ));
+            const SizedBox(height: 8),
+
+            // Products grid
+            Expanded(child: _buildProductsGrid(context)),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildSubcategoryChip(
-      BuildContext context, Map<String, dynamic> subcategory) {
+    BuildContext context,
+    Map<String, dynamic> subcategory,
+  ) {
     return GestureDetector(
-      onTap: () => controller.onSubcategoryTapped(subcategory['id']),
+      onTap: () => controller.onSubcategoryTapped(subcategory),
       child: SizedBox(
         width: 80,
         child: Column(
@@ -446,8 +426,9 @@ class CategoryView extends GetView<CategoryController> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Color(subcategory['color'] ?? 0xFF636E72)
-                    .withValues(alpha: 0.1),
+                color: Color(
+                  subcategory['color'] ?? 0xFF636E72,
+                ).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -461,9 +442,9 @@ class CategoryView extends GetView<CategoryController> {
               subcategory['name'] ?? '',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -475,6 +456,9 @@ class CategoryView extends GetView<CategoryController> {
 
   Widget _buildProductsGrid(BuildContext context) {
     return Obx(() {
+      // Observe selectedCategoryIndex so the grid reacts directly to sidebar taps
+      final selectedIdx = controller.selectedCategoryIndex.value;
+
       if (controller.isLoadingProducts.value) {
         return const Center(child: CircularProgressIndicator());
       }
@@ -484,8 +468,11 @@ class CategoryView extends GetView<CategoryController> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.inventory_2_outlined,
-                  size: 60, color: Colors.grey[400]),
+              Icon(
+                Icons.inventory_2_outlined,
+                size: 60,
+                color: Colors.grey[400],
+              ),
               const SizedBox(height: 12),
               Text(
                 'no_products'.tr,
@@ -502,6 +489,8 @@ class CategoryView extends GetView<CategoryController> {
       }
 
       return GridView.builder(
+        // Force a full grid rebuild when the selected category changes
+        key: ValueKey(selectedIdx),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -520,8 +509,7 @@ class CategoryView extends GetView<CategoryController> {
 
   // --- Product Card ---
 
-  Widget _buildProductCard(
-      BuildContext context, Map<String, dynamic> product) {
+  Widget _buildProductCard(BuildContext context, Map<String, dynamic> product) {
     final hasDiscount = product['originalPrice'] != null;
 
     return GestureDetector(
@@ -564,10 +552,9 @@ class CategoryView extends GetView<CategoryController> {
                   children: [
                     Text(
                       product['name'] ?? '',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -577,9 +564,7 @@ class CategoryView extends GetView<CategoryController> {
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(
                           product['vendorName'],
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 fontSize: 10,
                                 color: Get.isDarkMode
@@ -593,15 +578,13 @@ class CategoryView extends GetView<CategoryController> {
                     const Spacer(),
                     Row(
                       children: [
-                        const Icon(Icons.star,
-                            size: 12, color: Colors.amber),
+                        const Icon(Icons.star, size: 12, color: Colors.amber),
                         const SizedBox(width: 2),
                         Text(
                           '${product['rating'] ?? 0}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(fontSize: 11),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(fontSize: 11),
                         ),
                       ],
                     ),
@@ -611,9 +594,7 @@ class CategoryView extends GetView<CategoryController> {
                         Flexible(
                           child: Text(
                             '\$${(product['price'] ?? 0).toStringAsFixed(2)}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppTheme.primaryColor,
@@ -625,12 +606,9 @@ class CategoryView extends GetView<CategoryController> {
                           Flexible(
                             child: Text(
                               '\$${product['originalPrice'].toStringAsFixed(2)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                    decoration:
-                                        TextDecoration.lineThrough,
+                                    decoration: TextDecoration.lineThrough,
                                     color: Get.isDarkMode
                                         ? AppTheme.darkTextSecondary
                                         : AppTheme.textSecondary,
@@ -657,11 +635,14 @@ class CategoryView extends GetView<CategoryController> {
         '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/$imagePath',
         width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
+        errorBuilder: (_, _, _) => Container(
           color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.grey[100],
           child: const Center(
-            child:
-                Icon(Icons.image_not_supported, size: 40, color: Colors.grey),
+            child: Icon(
+              Icons.image_not_supported,
+              size: 40,
+              color: Colors.grey,
+            ),
           ),
         ),
       );

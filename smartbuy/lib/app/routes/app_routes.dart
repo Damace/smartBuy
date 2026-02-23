@@ -21,12 +21,15 @@ abstract class Routes {
   static const VENDOR_SHIPPING_PARTNERS = _Paths.VENDOR_SHIPPING_PARTNERS;
   static const VENDOR_STOCK_INVENTORY = _Paths.VENDOR_STOCK_INVENTORY;
   static const VENDOR_INVENTORY_ALERTS = _Paths.VENDOR_INVENTORY_ALERTS;
-  static const VENDOR_EDIT_BUSINESS_DETAILS = _Paths.VENDOR_EDIT_BUSINESS_DETAILS;
-  static const VENDOR_EDIT_BANK_ACCOUNT_DETAILS = _Paths.VENDOR_EDIT_BANK_ACCOUNT_DETAILS;
+  static const VENDOR_EDIT_BUSINESS_DETAILS =
+      _Paths.VENDOR_EDIT_BUSINESS_DETAILS;
+  static const VENDOR_EDIT_BANK_ACCOUNT_DETAILS =
+      _Paths.VENDOR_EDIT_BANK_ACCOUNT_DETAILS;
   static const VENDOR_STORE_PREVIEW = _Paths.VENDOR_STORE_PREVIEW;
   static const HOME = _Paths.HOME;
   static const PROFILE = _Paths.PROFILE;
-  static const BUYER_EDIT_PERSONAL_INFORMATION = _Paths.BUYER_EDIT_PERSONAL_INFORMATION;
+  static const BUYER_EDIT_PERSONAL_INFORMATION =
+      _Paths.BUYER_EDIT_PERSONAL_INFORMATION;
   static const BUYER_ORDERS = _Paths.BUYER_ORDERS;
   static const BUYER_ORDER_DETAILS = _Paths.BUYER_ORDER_DETAILS;
   static const BUYER_TRACK_ORDER = _Paths.BUYER_TRACK_ORDER;
@@ -45,12 +48,18 @@ abstract class Routes {
   static const BUYER_EDIT_ADDRESS = _Paths.BUYER_EDIT_ADDRESS;
   static const BUYER_SAVED_PAYMENT = _Paths.BUYER_SAVED_PAYMENT;
   static const BUYER_EDIT_PAYMENT = _Paths.BUYER_EDIT_PAYMENT;
-  static const BUYER_NOTIFICATION_PREFERENCES = _Paths.BUYER_NOTIFICATION_PREFERENCES;
+  static const BUYER_NOTIFICATION_PREFERENCES =
+      _Paths.BUYER_NOTIFICATION_PREFERENCES;
   static const NETWORK_CONNECTION = _Paths.NETWORK_CONNECTION;
   static const BUYER_MESSAGES_INBOX = _Paths.BUYER_MESSAGES_INBOX;
   static const BUYER_CHAT_INTERFACE = _Paths.BUYER_CHAT_INTERFACE;
   static const BUYER_CHECKOUT = _Paths.BUYER_CHECKOUT;
   static const BUYER_ORDER_SUCCESS = _Paths.BUYER_ORDER_SUCCESS;
+  static const CATEGORY_LIST = _Paths.CATEGORY_LIST;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
+  static const VENDOR_PAYMENT_DETAILS = _Paths.VENDOR_PAYMENT_DETAILS;
+  static const LOADING_SCREEN = _Paths.LOADING_SCREEN;
+  static const SYSTEM_STATUS = _Paths.SYSTEM_STATUS;
 }
 
 abstract class _Paths {
@@ -75,11 +84,13 @@ abstract class _Paths {
   static const VENDOR_STOCK_INVENTORY = '/vendor-stock-inventory';
   static const VENDOR_INVENTORY_ALERTS = '/vendor-inventory-alerts';
   static const VENDOR_EDIT_BUSINESS_DETAILS = '/vendor-edit-business-details';
-  static const VENDOR_EDIT_BANK_ACCOUNT_DETAILS = '/vendor-edit-bank-account-details';
+  static const VENDOR_EDIT_BANK_ACCOUNT_DETAILS =
+      '/vendor-edit-bank-account-details';
   static const VENDOR_STORE_PREVIEW = '/vendor-store-preview';
   static const HOME = '/home';
   static const PROFILE = '/profile';
-  static const BUYER_EDIT_PERSONAL_INFORMATION = '/buyer-edit-personal-information';
+  static const BUYER_EDIT_PERSONAL_INFORMATION =
+      '/buyer-edit-personal-information';
   static const BUYER_ORDERS = '/buyer-orders';
   static const BUYER_ORDER_DETAILS = '/buyer-order-details';
   static const BUYER_TRACK_ORDER = '/buyer-track-order';
@@ -98,10 +109,16 @@ abstract class _Paths {
   static const BUYER_EDIT_ADDRESS = '/buyer-edit-address';
   static const BUYER_SAVED_PAYMENT = '/buyer-saved-payment';
   static const BUYER_EDIT_PAYMENT = '/buyer-edit-payment';
-  static const BUYER_NOTIFICATION_PREFERENCES = '/buyer-notification-preferences';
+  static const BUYER_NOTIFICATION_PREFERENCES =
+      '/buyer-notification-preferences';
   static const NETWORK_CONNECTION = '/network-connection';
   static const BUYER_MESSAGES_INBOX = '/buyer-messages-inbox';
   static const BUYER_CHAT_INTERFACE = '/buyer-chat-interface';
   static const BUYER_CHECKOUT = '/buyer-checkout';
   static const BUYER_ORDER_SUCCESS = '/buyer-order-success';
+  static const CATEGORY_LIST = '/category-list';
+  static const NOTIFICATION = '/notification';
+  static const VENDOR_PAYMENT_DETAILS = '/vendor-payment-details';
+  static const LOADING_SCREEN = '/loading-screen';
+  static const SYSTEM_STATUS = '/system-status';
 }

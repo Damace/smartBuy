@@ -21,6 +21,9 @@ class SplashController extends GetxController {
     }
     progress.value = 1.0;
 
+    // Remove native splash screen now that Flutter UI is ready
+    // FlutterNativeSplash.remove();
+
     // Check if user is logged in
     final token = storage.read(AppConstants.storageKeyToken);
     final isFirstTime = storage.read(AppConstants.storageKeyIsFirstTime);
@@ -32,7 +35,8 @@ class SplashController extends GetxController {
       if (userType == 'vendor') {
         Get.offNamed(Routes.VENDOR_HOME);
       } else {
-        Get.offNamed(Routes.HOME);
+        //Get.offAllNamed(Routes.LOADING_SCREEN);
+        Get.offAllNamed(Routes.HOME);
       }
     } else if (isFirstTime != false) {
       // Get.offNamed(Routes.ONBOARDING); Remind me to edit here

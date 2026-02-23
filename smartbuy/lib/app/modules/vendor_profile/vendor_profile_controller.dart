@@ -74,7 +74,7 @@ class VendorProfileController extends GetxController {
       onConfirm: () {
         storage.erase();
         Get.back();
-        Get.offAllNamed(Routes.VENDOR_LOGIN);
+        Get.offAllNamed(Routes.LOGIN);
       },
     );
   }

@@ -40,16 +40,16 @@ class VendorLoginView extends GetView<VendorLoginController> {
               // Title
               Text(
                 'seller_central'.tr,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 'manage_business_on_go'.tr,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
+                  color: Theme.of(context).textTheme.bodySmall?.color,
+                ),
               ),
               const SizedBox(height: 48),
               // Email/Phone Field
@@ -57,9 +57,9 @@ class VendorLoginView extends GetView<VendorLoginController> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'registered_email_phone'.tr,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
                 ),
               ),
               const SizedBox(height: 8),
@@ -76,9 +76,9 @@ class VendorLoginView extends GetView<VendorLoginController> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'password'.tr,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
                 ),
               ),
               const SizedBox(height: 8),
@@ -103,33 +103,53 @@ class VendorLoginView extends GetView<VendorLoginController> {
               ),
               const SizedBox(height: 12),
               // Forgot Password
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Get.snackbar(
-                      'forgot_password'.tr,
-                      'feature_coming_soon'.tr,
-                      snackPosition: SnackPosition.BOTTOM,
-                      duration: const Duration(seconds: 2),
-                    );
-                  },
-                  child: Text(
-                    'forgot_password'.tr,
-                    style: const TextStyle(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.w600,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      controller.goToBuyerRegister();
+                    },
+                    child: Text(
+                      //'forgot_password'.tr,
+                      'Buyer login',
+                      style: const TextStyle(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
+
+                  TextButton(
+                    onPressed: () {
+                      Get.snackbar(
+                        'forgot_password'.tr,
+                        'feature_coming_soon'.tr,
+                        snackPosition: SnackPosition.BOTTOM,
+                        duration: const Duration(seconds: 2),
+                      );
+                    },
+                    child: Text(
+                      'forgot_password'.tr,
+                      style: const TextStyle(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
+
               const SizedBox(height: 24),
               // Login Button
               Obx(
                 () => SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: controller.isLoading.value ? null : controller.login,
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : controller.login,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -139,7 +159,9 @@ class VendorLoginView extends GetView<VendorLoginController> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         else ...[
@@ -171,7 +193,11 @@ class VendorLoginView extends GetView<VendorLoginController> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.arrow_forward, size: 16, color: AppTheme.primaryColor),
+                    const Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: AppTheme.primaryColor,
+                    ),
                   ],
                 ),
               ),
