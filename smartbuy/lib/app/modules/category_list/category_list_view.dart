@@ -30,6 +30,7 @@ class CategoryListView extends GetView<CategoryListController> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
+        onChanged: controller.searchProducts,
         decoration: InputDecoration(
           hintText: "Search in ${controller.categoryName}",
           prefixIcon: const Icon(Icons.search),

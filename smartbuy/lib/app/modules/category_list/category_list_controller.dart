@@ -15,6 +15,7 @@ class CategoryListController extends GetxController {
   RxBool isLoading = false.obs;
 
   RxString selectedCategory = ''.obs;
+  RxString searchQuery = ''.obs;
 
   /// All products (flattened)
   RxList<Map<String, dynamic>> allProducts = <Map<String, dynamic>>[].obs;
@@ -85,28 +86,37 @@ class CategoryListController extends GetxController {
   }
 
   void _filterProducts() {
-    // The base category is either what came from arguments or what is selected in chips
-    // If chip is 'All', we filter by the initial categoryName (from arguments)
-    // If chip is specific, we filter by that specific category
-
     final String activeFilter = selectedFilter.value == 'All'
         ? categoryName.toLowerCase().trim()
         : selectedFilter.value.toLowerCase().trim();
 
+    List<Map<String, dynamic>> base;
     if (activeFilter == 'all') {
-      filteredProducts.assignAll(allProducts);
+      base = allProducts.toList();
     } else {
-      filteredProducts.assignAll(
-        allProducts.where((p) {
-          final pCat = (p['category'] ?? '').toString().toLowerCase().trim();
-          return pCat == activeFilter;
-        }).toList(),
-      );
+      base = allProducts.where((p) {
+        final pCat = (p['category'] ?? '').toString().toLowerCase().trim();
+        return pCat == activeFilter;
+      }).toList();
     }
 
+    final query = searchQuery.value.toLowerCase().trim();
+    if (query.isNotEmpty) {
+      base = base.where((p) {
+        final name = (p['name'] ?? '').toString().toLowerCase();
+        return name.contains(query);
+      }).toList();
+    }
+
+    filteredProducts.assignAll(base);
     debugPrint(
-      "Filter applied: $activeFilter, Results: ${filteredProducts.length}",
+      "Filter applied: $activeFilter, query: '$query', Results: ${filteredProducts.length}",
     );
+  }
+
+  void searchProducts(String query) {
+    searchQuery.value = query;
+    _filterProducts();
   }
 
   double _toDouble(dynamic value) {

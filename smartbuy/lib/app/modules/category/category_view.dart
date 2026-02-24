@@ -456,14 +456,30 @@ class CategoryView extends GetView<CategoryController> {
 
   Widget _buildProductsGrid(BuildContext context) {
     return Obx(() {
-      // Observe selectedCategoryIndex so the grid reacts directly to sidebar taps
       final selectedIdx = controller.selectedCategoryIndex.value;
+      final selectedCategory = controller.categories.isNotEmpty
+          ? controller.categories[selectedIdx]
+          : <String, dynamic>{};
+      final categoryName =
+          (selectedCategory['name'] ?? '').toString().trim();
+      final categoryId = (selectedCategory['id'] ?? '').toString();
 
       if (controller.isLoadingProducts.value) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      if (controller.products.isEmpty) {
+      // Filter products whose categoryName matches the selected sidebar category.
+      // The controller now stores each product's actual category from the API
+      // response, so this comparison is meaningful.
+      final filteredProducts = controller.products.where((product) {
+        if (categoryName.isEmpty) return true;
+        final productCategory =
+            (product['categoryName'] ?? '').toString().toLowerCase().trim();
+        if (productCategory.isEmpty) return true;
+        return productCategory == categoryName.toLowerCase();
+      }).toList();
+
+      if (filteredProducts.isEmpty) {
         return Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -483,14 +499,26 @@ class CategoryView extends GetView<CategoryController> {
                       : AppTheme.textSecondary,
                 ),
               ),
+              if (categoryName.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'in $categoryName',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Get.isDarkMode
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.textSecondary,
+                  ),
+                ),
+              ],
             ],
           ),
         );
       }
 
       return GridView.builder(
-        // Force a full grid rebuild when the selected category changes
-        key: ValueKey(selectedIdx),
+        // Force a full rebuild whenever the selected category changes.
+        key: ValueKey('${categoryId}_$categoryName'),
         padding: const EdgeInsets.symmetric(horizontal: 12),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -498,11 +526,9 @@ class CategoryView extends GetView<CategoryController> {
           mainAxisSpacing: 10,
           childAspectRatio: 0.65,
         ),
-        itemCount: controller.products.length,
-        itemBuilder: (context, index) {
-          final product = controller.products[index];
-          return _buildProductCard(context, product);
-        },
+        itemCount: filteredProducts.length,
+        itemBuilder: (context, index) =>
+            _buildProductCard(context, filteredProducts[index]),
       );
     });
   }

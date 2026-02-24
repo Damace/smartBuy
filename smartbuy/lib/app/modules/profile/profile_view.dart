@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'profile_controller.dart';
@@ -68,6 +69,26 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
+  Widget _buildInitialsAvatar() {
+    final name = controller.userName.value;
+    final parts = name.trim().split(' ');
+    final initials = parts.length >= 2
+        ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
+        : name.isNotEmpty
+            ? name[0].toUpperCase()
+            : '?';
+    return Center(
+      child: Text(
+        initials,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   Widget _buildProfileHeader(BuildContext context) {
     return Column(
       children: [
@@ -97,15 +118,21 @@ class ProfileView extends GetView<ProfileController> {
               ),
               child: Obx(
                 () => controller.profileImageUrl.value.isEmpty
-                    ? const Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.white,
-                      )
+                    ? _buildInitialsAvatar()
                     : ClipOval(
-                        child: Image.network(
-                          controller.profileImageUrl.value,
+                        child: CachedNetworkImage(
+                          imageUrl: controller.profileImageUrl.value,
                           fit: BoxFit.cover,
+                          width: 100,
+                          height: 100,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) =>
+                              _buildInitialsAvatar(),
                         ),
                       ),
               ),

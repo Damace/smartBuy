@@ -220,16 +220,8 @@ class HomeController extends GetxController {
     ];
   }
 
-  void onCategoryTapped(String categoryId) {
-    // Navigate to category tab via MainNavigationController
-    try {
-      final navController = Get.find<dynamic>();
-      if (navController.runtimeType.toString().contains('MainNavigation')) {
-        navController.changePage(1);
-      }
-    } catch (_) {
-      // Fallback: category is already visible in bottom nav
-    }
+  void onCategoryTapped(String categoryName) {
+    Get.toNamed(Routes.CATEGORY_LIST, arguments: categoryName);
   }
 
   void onProductTapped(String productId) {

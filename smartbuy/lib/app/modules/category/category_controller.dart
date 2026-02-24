@@ -45,34 +45,8 @@ class CategoryController extends GetxController {
 
   // --- Categories ---
 
-  void loadCategories() async {
+  void loadCategories() {
     isLoadingCategories.value = true;
-    try {
-      final response = await _apiProvider.get(ApiConstants.categories);
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      if (data.isNotEmpty) {
-        categories.value = data
-            .map(
-              (c) => <String, dynamic>{
-                'id': c['id'].toString(),
-                'name': c['name'] ?? '',
-                'icon': _getCategoryIcon(c['icon'] ?? c['name'] ?? ''),
-                'color': _getCategoryColor(c['name'] ?? ''),
-                'image': c['image'],
-                'childrenCount': c['children_count'] ?? 0,
-                'productsCount': c['products_count'] ?? 0,
-              },
-            )
-            .toList()
-            .cast<Map<String, dynamic>>();
-        if (categories.isNotEmpty) {
-          loadSubcategories(0);
-          loadCategoryProducts(categories[0]['id']);
-        }
-        isLoadingCategories.value = false;
-        return;
-      }
-    } catch (_) {}
     _loadMockCategories();
     isLoadingCategories.value = false;
   }
@@ -117,6 +91,14 @@ class CategoryController extends GetxController {
   void loadCategoryProducts(String categoryId) async {
     isLoadingProducts.value = true;
     products.clear();
+
+    // Get the category name for the current categoryId
+    final category = categories.firstWhere(
+      (c) => c['id'] == categoryId,
+      orElse: () => {'name': ''},
+    );
+    final categoryName = category['name'] ?? '';
+
     try {
       final response = await _apiProvider.get(
         ApiConstants.products,
@@ -133,6 +115,9 @@ class CategoryController extends GetxController {
               (p) => <String, dynamic>{
                 'id': p['id'].toString(),
                 'name': p['name'] ?? '',
+                'categoryName': (p['category'] is Map)
+                    ? (p['category']['name']?.toString() ?? categoryName)
+                    : (p['category_name']?.toString() ?? categoryName),
                 'price': _toDouble(
                   (p['sale_price'] != null &&
                           p['sale_price'].toString() != '0.00' &&
@@ -155,9 +140,30 @@ class CategoryController extends GetxController {
             )
             .toList()
             .cast<Map<String, dynamic>>();
+        isLoadingProducts.value = false;
+        return;
       }
     } catch (_) {}
+
+    // Fallback to mock products if API fails
+    _loadMockProducts(categoryId, categoryName);
     isLoadingProducts.value = false;
+  }
+
+  void _loadMockProducts(String categoryId, String categoryName) {
+    products.value = List.generate(
+      6,
+      (index) => {
+        'id': 'p-$categoryId-$index',
+        'name': '$categoryName Product ${index + 1}',
+        'categoryName': categoryName,
+        'price': 29.99 + (index * 10),
+        'originalPrice': 39.99 + (index * 10),
+        'rating': 4.0 + (index % 2 == 0 ? 0.5 : 0.2),
+        'image': null,
+        'vendorName': 'SmartBuy Vendor',
+      },
+    );
   }
 
   // --- Search ---
@@ -344,27 +350,6 @@ class CategoryController extends GetxController {
         return Icons.fitness_center;
       default:
         return Icons.category;
-    }
-  }
-
-  int _getCategoryColor(String name) {
-    switch (name.toLowerCase()) {
-      case 'electronics':
-        return 0xFF6C5CE7;
-      case 'fashion':
-        return 0xFFEF8D32;
-      case 'home':
-        return 0xFF00B894;
-      case 'beauty':
-        return 0xFFFF6B9D;
-      case 'groceries':
-        return 0xFF00CEC9;
-      case 'toys':
-        return 0xFFE17055;
-      case 'sports':
-        return 0xFF0984E3;
-      default:
-        return 0xFF636E72;
     }
   }
 

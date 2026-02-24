@@ -409,7 +409,7 @@ class HomeView extends GetView<HomeController> {
     Map<String, dynamic> category,
   ) {
     return GestureDetector(
-      onTap: () => controller.onCategoryTapped(category['id']),
+      onTap: () => controller.onCategoryTapped(category['name']),
       child: SizedBox(
         width: 72,
         child: Column(
