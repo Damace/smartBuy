@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:carousel_slider/carousel_slider.dart' as carousel;
@@ -36,19 +37,24 @@ class HomeView extends GetView<HomeController> {
 
                   SizedBox(height: MediaQuery.of(context).size.height * 0.23),
 
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      width: double.infinity,
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
                       color: Colors.white,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildCategoriesSection(context),
-                          const SizedBox(height: 24),
-                          _buildNewArrivalSection(context),
-                        ],
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
                       ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildCategoriesSection(context),
+                        const SizedBox(height: 24),
+                        _buildMostSells(context),
+                        const SizedBox(height: 24),
+                        _buildNewArrivalSection(context),
+                      ],
                     ),
                   ),
                 ],
@@ -90,24 +96,24 @@ class HomeView extends GetView<HomeController> {
             ],
           ),
           const Spacer(),
-          // Obx(
-          //   () => badges.Badge(
-          //     badgeContent: Text(
-          //       controller.notificationCount.value.toString(),
-          //       style: const TextStyle(
-          //         color: Colors.white,
-          //         fontSize: 10,
-          //         fontWeight: FontWeight.bold,
-          //       ),
-          //     ),
-          //     showBadge: controller.notificationCount.value > 0,
-          //     position: badges.BadgePosition.topEnd(top: -8, end: -8),
-          //     child: IconButton(
-          //       icon: const Icon(Icons.notifications_outlined),
-          //       onPressed: controller.onNotificationTapped,
-          //     ),
-          //   ),
-          // ),
+          Obx(
+            () => badges.Badge(
+              badgeContent: Text(
+                controller.notificationCount.value.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              showBadge: controller.notificationCount.value > 0,
+              position: badges.BadgePosition.topEnd(top: -8, end: -8),
+              child: IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: controller.onNotificationTapped,
+              ),
+            ),
+          ),
           Obx(
             () => badges.Badge(
               badgeContent: Text(
@@ -269,7 +275,7 @@ class HomeView extends GetView<HomeController> {
               );
             },
             options: carousel.CarouselOptions(
-              height: MediaQuery.of(context).size.height * 0.35, // 👈 increased
+              height: MediaQuery.of(context).size.height * 0.36, // 👈 increased
               viewportFraction: 1.0,
               enlargeCenterPage: false,
               autoPlay: true,
@@ -355,26 +361,29 @@ class HomeView extends GetView<HomeController> {
   Widget _buildCategoriesSection(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'categories'.tr,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            TextButton(
-              onPressed: controller.onSeeAllCategories,
-              child: Text(
-                'see_all'.tr,
-                style: const TextStyle(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.w600,
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'categories'.tr,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              TextButton(
+                onPressed: controller.onSeeAllCategories,
+                child: Text(
+                  'see_all'.tr,
+                  style: const TextStyle(
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -469,96 +478,6 @@ class HomeView extends GetView<HomeController> {
       default:
         return Icons.category;
     }
-  }
-
-  Widget _buildVendorProductsSection(BuildContext context) {
-    return Obx(() {
-      if (controller.isLoadingVendorProducts.value) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Center(child: CircularProgressIndicator()),
-        );
-      }
-      if (controller.vendorProducts.isEmpty) {
-        return const SizedBox.shrink();
-      }
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'vendor_products'.tr,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...controller.vendorProducts.map((vendor) {
-            final products = vendor['products'] as List<Map<String, dynamic>>;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.store,
-                          color: AppTheme.primaryColor,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          vendor['vendorName'] ?? '',
-                          style: Theme.of(context).textTheme.bodyLarge
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        '${products.length} ${'products_count'.tr}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Get.isDarkMode
-                              ? AppTheme.darkTextSecondary
-                              : AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 220,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: products.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return _buildVendorProductCard(context, product);
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            );
-          }),
-        ],
-      );
-    });
   }
 
   Widget _buildVendorProductCard(
@@ -687,7 +606,7 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildNewArrivalSection(BuildContext context) {
+  Widget _buildMostSells(BuildContext context) {
     return Column(
       children: [
         Padding(
@@ -696,7 +615,7 @@ class HomeView extends GetView<HomeController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'new_arrival'.tr,
+                'electronics'.tr,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -717,7 +636,7 @@ class HomeView extends GetView<HomeController> {
         const SizedBox(height: 12),
         Obx(
           () => SizedBox(
-            height: 240,
+            height: 120,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -742,7 +661,7 @@ class HomeView extends GetView<HomeController> {
     return GestureDetector(
       onTap: () => controller.onProductTapped(product['id']),
       child: Container(
-        width: 160,
+        width: 140,
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
           color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
@@ -753,55 +672,248 @@ class HomeView extends GetView<HomeController> {
                 : Colors.grey.withValues(alpha: 0.15),
           ),
         ),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.grey[100],
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            child: _buildProduct(product['image'], 100, 50),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewArrivalSection(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'new_arrival'.tr,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              TextButton(
+                onPressed: controller.onSeeAllNewArrivals,
+                child: Text(
+                  'see_all'.tr,
+                  style: const TextStyle(
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Obx(
+          () => MasonryGridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            mainAxisSpacing: 1,
+            crossAxisSpacing: 1,
+            itemCount: controller.recommendedProducts.length,
+            itemBuilder: (context, index) {
+              final product = controller.recommendedProducts[index];
+              // Alternate heights for staggered effect
+              final isEvenIndex = index % 2 == 0;
+              return _buildProductCard(context, product, isEvenIndex);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductCard(
+    BuildContext context,
+    Map<String, dynamic> product,
+    bool isTall,
+  ) {
+    final hasDiscount = product['originalPrice'] != null;
+    final imageHeight = isTall ? 220.0 : 170.0;
+
+    return GestureDetector(
+      onTap: () => controller.onProductTapped(product['id']),
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 140,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Get.isDarkMode
-                    ? AppTheme.darkCardColor
-                    : Colors.grey[100],
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
+            Stack(
+              children: [
+                Container(
+                  height: imageHeight,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Get.isDarkMode
+                        ? AppTheme.darkCardColor
+                        : Colors.grey[100],
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                    child: _buildProductImage(
+                      product['image'],
+                      imageHeight,
+                      60,
+                    ),
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-                child: _buildProductImage(product['image'], 140, 50),
-              ),
+                if (product['badge'] != null)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.errorColor,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        product['badge'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
+
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     product['name'],
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (product['vendorName'] != null &&
+                      product['vendorName'].toString().isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.store,
+                            size: 12,
+                            color: Get.isDarkMode
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              product['vendorName'],
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    fontSize: 11,
+                                    color: Get.isDarkMode
+                                        ? AppTheme.darkTextSecondary
+                                        : AppTheme.textSecondary,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          '\$${product['price'].toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
-                              ),
+                      const Icon(Icons.star, size: 14, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text(
+                        product['rating'].toString(),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '(${product['ratingCount']})',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Get.isDarkMode
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.textSecondary,
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '\$${product['price'].toStringAsFixed(2)}',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                            ),
+                            if (hasDiscount)
+                              Text(
+                                '\$${product['originalPrice'].toStringAsFixed(2)}',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      decoration: TextDecoration.lineThrough,
+                                      color: Get.isDarkMode
+                                          ? AppTheme.darkTextSecondary
+                                          : AppTheme.textSecondary,
+                                    ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => controller.onWishlistTapped(product['id']),
+                        child: Icon(
+                          Icons.favorite_border,
+                          size: 20,
+                          color: Get.isDarkMode
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       GestureDetector(
                         onTap: () =>
                             controller.onAddToCartTapped(product['id']),
@@ -813,28 +925,50 @@ class HomeView extends GetView<HomeController> {
                           ),
                           child: const Icon(
                             Icons.add_shopping_cart,
-                            size: 14,
+                            size: 16,
                             color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  if (hasDiscount)
-                    Text(
-                      '\$${product['originalPrice'].toStringAsFixed(2)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        decoration: TextDecoration.lineThrough,
-                        color: Get.isDarkMode
-                            ? AppTheme.darkTextSecondary
-                            : AppTheme.textSecondary,
-                        fontSize: 11,
-                      ),
-                    ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProduct(String? imagePath, double height, double iconSize) {
+    if (imagePath != null &&
+        imagePath != 'default' &&
+        imagePath.contains('/')) {
+      return Image.network(
+        '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/$imagePath',
+        width: double.infinity,
+
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => SizedBox(
+          height: height,
+          child: Center(
+            child: Icon(
+              Icons.image_not_supported,
+              size: iconSize,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+    }
+    return SizedBox(
+      height: height,
+      child: Center(
+        child: Icon(
+          Icons.shopping_bag,
+          size: iconSize,
+          color: AppTheme.primaryColor,
         ),
       ),
     );
