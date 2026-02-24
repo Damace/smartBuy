@@ -36,8 +36,17 @@ class Helpers {
   }
 
   // Show Error Message
+  // static void showError(String message) {
+  //   showSnackbar(title: 'Error', message: message, backgroundColor: Colors.red);
+  // }
+
   static void showError(String message) {
-    showSnackbar(title: 'Error', message: message, backgroundColor: Colors.red);
+    showSnackbar(
+      title: message,
+      message: 'Kindly contact support for further assistance.',
+
+      backgroundColor: Colors.red.withOpacity(0.7),
+    );
   }
 
   // Show Info Message

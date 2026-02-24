@@ -45,8 +45,9 @@ class BuyerOrdersView extends GetView<BuyerOrdersController> {
                           : AppTheme.textSecondary,
                     ),
                     filled: true,
-                    fillColor:
-                        Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                    fillColor: Get.isDarkMode
+                        ? AppTheme.darkCardColor
+                        : Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -67,17 +68,25 @@ class BuyerOrdersView extends GetView<BuyerOrdersController> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterChip('all',
-                            '${'all'.tr} (${controller.allCount.value})'),
+                        _buildFilterChip(
+                          'all',
+                          '${'all'.tr} (${controller.allCount.value})',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip('ongoing',
-                            '${'ongoing'.tr} (${controller.ongoingCount.value})'),
+                        _buildFilterChip(
+                          'ongoing',
+                          '${'ongoing'.tr} (${controller.ongoingCount.value})',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip('completed',
-                            '${'completed'.tr} (${controller.completedCount.value})'),
+                        _buildFilterChip(
+                          'completed',
+                          '${'completed'.tr} (${controller.completedCount.value})',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip('cancelled',
-                            '${'cancelled'.tr} (${controller.cancelledCount.value})'),
+                        _buildFilterChip(
+                          'cancelled',
+                          '${'cancelled'.tr} (${controller.cancelledCount.value})',
+                        ),
                       ],
                     ),
                   ),
@@ -88,48 +97,45 @@ class BuyerOrdersView extends GetView<BuyerOrdersController> {
 
               // Orders List
               Expanded(
-                child: Obx(
-                  () {
-                    final orders = controller.filteredOrders;
+                child: Obx(() {
+                  final orders = controller.filteredOrders;
 
-                    if (orders.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.shopping_bag_outlined,
-                              size: 64,
+                  if (orders.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 64,
+                            color: Get.isDarkMode
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.textSecondary.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'no_orders_found'.tr,
+                            style: TextStyle(
+                              fontSize: 16,
                               color: Get.isDarkMode
                                   ? AppTheme.darkTextSecondary
-                                  : AppTheme.textSecondary
-                                      .withValues(alpha: 0.5),
+                                  : AppTheme.textSecondary,
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'no_orders_found'.tr,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Get.isDarkMode
-                                    ? AppTheme.darkTextSecondary
-                                    : AppTheme.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: orders.length,
-                      itemBuilder: (context, index) {
-                        final order = orders[index];
-                        return _buildOrderCard(order);
-                      },
+                          ),
+                        ],
+                      ),
                     );
-                  },
-                ),
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      final order = orders[index];
+                      return _buildOrderCard(order);
+                    },
+                  );
+                }),
               ),
             ],
           ),
@@ -149,15 +155,15 @@ class BuyerOrdersView extends GetView<BuyerOrdersController> {
           color: isSelected
               ? Colors.orange
               : Get.isDarkMode
-                  ? AppTheme.darkCardColor
-                  : Colors.white,
+              ? AppTheme.darkCardColor
+              : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? Colors.orange
                 : Get.isDarkMode
-                    ? AppTheme.darkCardColor
-                    : Colors.grey.shade300,
+                ? AppTheme.darkCardColor
+                : Colors.grey.shade300,
           ),
         ),
         child: Text(
@@ -166,8 +172,8 @@ class BuyerOrdersView extends GetView<BuyerOrdersController> {
             color: isSelected
                 ? Colors.white
                 : Get.isDarkMode
-                    ? AppTheme.darkTextPrimary
-                    : AppTheme.textPrimary,
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             fontSize: 14,
           ),
@@ -386,8 +392,7 @@ class BuyerOrdersView extends GetView<BuyerOrdersController> {
             child: OutlinedButton(
               onPressed: () => controller.viewOrderDetails(order),
               style: OutlinedButton.styleFrom(
-                foregroundColor:
-                    Get.isDarkMode ? Colors.white : Colors.black87,
+                foregroundColor: Get.isDarkMode ? Colors.white : Colors.black87,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -427,8 +432,7 @@ class BuyerOrdersView extends GetView<BuyerOrdersController> {
             child: OutlinedButton(
               onPressed: () => controller.viewOrderDetails(order),
               style: OutlinedButton.styleFrom(
-                foregroundColor:
-                    Get.isDarkMode ? Colors.white : Colors.black87,
+                foregroundColor: Get.isDarkMode ? Colors.white : Colors.black87,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -457,8 +461,9 @@ class BuyerOrdersView extends GetView<BuyerOrdersController> {
               borderRadius: BorderRadius.circular(8),
             ),
             side: BorderSide(
-              color:
-                  Get.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+              color: Get.isDarkMode
+                  ? Colors.grey.shade700
+                  : Colors.grey.shade300,
             ),
           ),
           child: Text('view_cancellation_details'.tr),

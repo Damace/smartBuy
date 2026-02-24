@@ -61,6 +61,10 @@ class VendorLoginController extends GetxController {
     return true;
   }
 
+  void goToBuyerRegister() {
+    Get.toNamed(Routes.LOGIN);
+  }
+
   void goToVendorRegister() {
     Get.toNamed(Routes.VENDOR_REGISTER);
   }

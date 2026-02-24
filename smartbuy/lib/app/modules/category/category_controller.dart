@@ -10,9 +10,11 @@ class CategoryController extends GetxController {
 
   final RxList<Map<String, dynamic>> categories = <Map<String, dynamic>>[].obs;
   final RxInt selectedCategoryIndex = 0.obs;
-  final RxList<Map<String, dynamic>> subcategories = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> subcategories =
+      <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> products = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> searchResults = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> searchResults =
+      <Map<String, dynamic>>[].obs;
   final RxList<String> searchSuggestions = <String>[].obs;
 
   final RxBool isLoadingCategories = false.obs;
@@ -43,32 +45,8 @@ class CategoryController extends GetxController {
 
   // --- Categories ---
 
-  void loadCategories() async {
+  void loadCategories() {
     isLoadingCategories.value = true;
-    try {
-      final response = await _apiProvider.get(ApiConstants.categories);
-      final List<dynamic> data = response.data['data'] ?? response.data;
-      if (data.isNotEmpty) {
-        categories.value = data
-            .map((c) => <String, dynamic>{
-                  'id': c['id'].toString(),
-                  'name': c['name'] ?? '',
-                  'icon': _getCategoryIcon(c['icon'] ?? c['name'] ?? ''),
-                  'color': _getCategoryColor(c['name'] ?? ''),
-                  'image': c['image'],
-                  'childrenCount': c['children_count'] ?? 0,
-                  'productsCount': c['products_count'] ?? 0,
-                })
-            .toList()
-            .cast<Map<String, dynamic>>();
-        if (categories.isNotEmpty) {
-          loadSubcategories(0);
-          loadCategoryProducts(categories[0]['id']);
-        }
-        isLoadingCategories.value = false;
-        return;
-      }
-    } catch (_) {}
     _loadMockCategories();
     isLoadingCategories.value = false;
   }
@@ -87,15 +65,18 @@ class CategoryController extends GetxController {
       final List<dynamic> data = response.data['data'] ?? [];
       if (data.isNotEmpty) {
         subcategories.value = data
-            .map((c) => <String, dynamic>{
-                  'id': c['id'].toString(),
-                  'name': c['name'] ?? '',
-                  'icon': _getCategoryIcon(c['icon'] ?? c['name'] ?? ''),
-                  'color': _getSubcategoryColor(data.indexOf(c)),
-                  'image': c['image'],
-                  'productsCount': c['products_count'] ?? 0,
-                  'subtitle': '${c['products_count'] ?? 0} ${'products_count'.tr}',
-                })
+            .map(
+              (c) => <String, dynamic>{
+                'id': c['id'].toString(),
+                'name': c['name'] ?? '',
+                'icon': _getCategoryIcon(c['icon'] ?? c['name'] ?? ''),
+                'color': _getSubcategoryColor(data.indexOf(c)),
+                'image': c['image'],
+                'productsCount': c['products_count'] ?? 0,
+                'subtitle':
+                    '${c['products_count'] ?? 0} ${'products_count'.tr}',
+              },
+            )
             .toList()
             .cast<Map<String, dynamic>>();
         isLoadingSubcategories.value = false;
@@ -109,6 +90,15 @@ class CategoryController extends GetxController {
 
   void loadCategoryProducts(String categoryId) async {
     isLoadingProducts.value = true;
+    products.clear();
+
+    // Get the category name for the current categoryId
+    final category = categories.firstWhere(
+      (c) => c['id'] == categoryId,
+      orElse: () => {'name': ''},
+    );
+    final categoryName = category['name'] ?? '';
+
     try {
       final response = await _apiProvider.get(
         ApiConstants.products,
@@ -121,32 +111,59 @@ class CategoryController extends GetxController {
       final data = response.data['data'] ?? response.data;
       if (data is List) {
         products.value = data
-            .map((p) => <String, dynamic>{
-                  'id': p['id'].toString(),
-                  'name': p['name'] ?? '',
-                  'price': _toDouble(
-                    (p['sale_price'] != null &&
-                            p['sale_price'].toString() != '0.00' &&
-                            p['sale_price'].toString() != '0')
-                        ? p['sale_price']
-                        : p['price'],
-                  ),
-                  'originalPrice': (p['sale_price'] != null &&
+            .map(
+              (p) => <String, dynamic>{
+                'id': p['id'].toString(),
+                'name': p['name'] ?? '',
+                'categoryName': (p['category'] is Map)
+                    ? (p['category']['name']?.toString() ?? categoryName)
+                    : (p['category_name']?.toString() ?? categoryName),
+                'price': _toDouble(
+                  (p['sale_price'] != null &&
                           p['sale_price'].toString() != '0.00' &&
                           p['sale_price'].toString() != '0')
-                      ? _toDouble(p['price'])
-                      : null,
-                  'rating': _toDouble(p['rating']),
-                  'image': p['primary_image'],
-                  'vendorName': p['vendor'] != null
-                      ? p['vendor']['business_name'] ?? ''
-                      : '',
-                })
+                      ? p['sale_price']
+                      : p['price'],
+                ),
+                'originalPrice':
+                    (p['sale_price'] != null &&
+                        p['sale_price'].toString() != '0.00' &&
+                        p['sale_price'].toString() != '0')
+                    ? _toDouble(p['price'])
+                    : null,
+                'rating': _toDouble(p['rating']),
+                'image': p['primary_image'],
+                'vendorName': p['vendor'] != null
+                    ? p['vendor']['business_name'] ?? ''
+                    : '',
+              },
+            )
             .toList()
             .cast<Map<String, dynamic>>();
+        isLoadingProducts.value = false;
+        return;
       }
     } catch (_) {}
+
+    // Fallback to mock products if API fails
+    _loadMockProducts(categoryId, categoryName);
     isLoadingProducts.value = false;
+  }
+
+  void _loadMockProducts(String categoryId, String categoryName) {
+    products.value = List.generate(
+      6,
+      (index) => {
+        'id': 'p-$categoryId-$index',
+        'name': '$categoryName Product ${index + 1}',
+        'categoryName': categoryName,
+        'price': 29.99 + (index * 10),
+        'originalPrice': 39.99 + (index * 10),
+        'rating': 4.0 + (index % 2 == 0 ? 0.5 : 0.2),
+        'image': null,
+        'vendorName': 'SmartBuy Vendor',
+      },
+    );
   }
 
   // --- Search ---
@@ -181,45 +198,51 @@ class CategoryController extends GetxController {
 
       if (data['products'] != null) {
         searchResults.value = (data['products'] as List)
-            .map((p) => <String, dynamic>{
-                  'id': p['id'].toString(),
-                  'name': p['name'] ?? '',
-                  'price': _toDouble(
-                    (p['sale_price'] != null &&
-                            p['sale_price'].toString() != '0.00' &&
-                            p['sale_price'].toString() != '0')
-                        ? p['sale_price']
-                        : p['price'],
-                  ),
-                  'originalPrice': (p['sale_price'] != null &&
+            .map(
+              (p) => <String, dynamic>{
+                'id': p['id'].toString(),
+                'name': p['name'] ?? '',
+                'price': _toDouble(
+                  (p['sale_price'] != null &&
                           p['sale_price'].toString() != '0.00' &&
                           p['sale_price'].toString() != '0')
-                      ? _toDouble(p['price'])
-                      : null,
-                  'rating': _toDouble(p['rating']),
-                  'image': p['primary_image'],
-                  'vendorName': p['vendor'] != null
-                      ? p['vendor']['business_name'] ?? ''
-                      : '',
-                  'categoryName': p['category'] != null
-                      ? p['category']['name'] ?? ''
-                      : '',
-                })
+                      ? p['sale_price']
+                      : p['price'],
+                ),
+                'originalPrice':
+                    (p['sale_price'] != null &&
+                        p['sale_price'].toString() != '0.00' &&
+                        p['sale_price'].toString() != '0')
+                    ? _toDouble(p['price'])
+                    : null,
+                'rating': _toDouble(p['rating']),
+                'image': p['primary_image'],
+                'vendorName': p['vendor'] != null
+                    ? p['vendor']['business_name'] ?? ''
+                    : '',
+                'categoryName': p['category'] != null
+                    ? p['category']['name'] ?? ''
+                    : '',
+              },
+            )
             .toList()
             .cast<Map<String, dynamic>>();
       }
 
       if (data['suggestions'] != null) {
-        searchSuggestions.value =
-            List<String>.from(data['suggestions'] ?? []);
+        searchSuggestions.value = List<String>.from(data['suggestions'] ?? []);
       }
     } catch (_) {
       // Fallback: filter products locally
       final lowerQuery = query.toLowerCase();
       searchResults.value = products
-          .where((p) =>
-              p['name'].toString().toLowerCase().contains(lowerQuery) ||
-              (p['vendorName'] ?? '').toString().toLowerCase().contains(lowerQuery))
+          .where(
+            (p) =>
+                p['name'].toString().toLowerCase().contains(lowerQuery) ||
+                (p['vendorName'] ?? '').toString().toLowerCase().contains(
+                  lowerQuery,
+                ),
+          )
           .toList();
     }
     isSearching.value = false;
@@ -256,8 +279,8 @@ class CategoryController extends GetxController {
     }
   }
 
-  void onSubcategoryTapped(String subcategoryId) {
-    loadCategoryProducts(subcategoryId);
+  void onSubcategoryTapped(Map<String, dynamic> subcategory) {
+    Get.toNamed(Routes.CATEGORY_LIST, arguments: subcategory['name']);
   }
 
   void onProductTapped(String productId) {
@@ -266,7 +289,8 @@ class CategoryController extends GetxController {
 
   void onViewAllTapped() {
     if (categories.isNotEmpty) {
-      loadCategoryProducts(categories[selectedCategoryIndex.value]['id']);
+      final categoryName = categories[selectedCategoryIndex.value]['name'];
+      Get.toNamed(Routes.CATEGORY_LIST, arguments: categoryName);
     }
   }
 
@@ -329,29 +353,15 @@ class CategoryController extends GetxController {
     }
   }
 
-  int _getCategoryColor(String name) {
-    switch (name.toLowerCase()) {
-      case 'electronics':
-        return 0xFF6C5CE7;
-      case 'fashion':
-        return 0xFFEF8D32;
-      case 'home':
-        return 0xFF00B894;
-      case 'beauty':
-        return 0xFFFF6B9D;
-      case 'groceries':
-        return 0xFF00CEC9;
-      case 'toys':
-        return 0xFFE17055;
-      case 'sports':
-        return 0xFF0984E3;
-      default:
-        return 0xFF636E72;
-    }
-  }
-
   int _getSubcategoryColor(int index) {
-    const colors = [0xFF4ECDC4, 0xFF95E1D3, 0xFF6C5CE7, 0xFF2D3436, 0xFFFF6B6B, 0xFF4834D4];
+    const colors = [
+      0xFF4ECDC4,
+      0xFF95E1D3,
+      0xFF6C5CE7,
+      0xFF2D3436,
+      0xFFFF6B6B,
+      0xFF4834D4,
+    ];
     return colors[index % colors.length];
   }
 
@@ -359,11 +369,142 @@ class CategoryController extends GetxController {
 
   void _loadMockCategories() {
     categories.value = [
-      {'id': '1', 'name': 'Electronics', 'icon': Icons.devices, 'color': 0xFF6C5CE7, 'childrenCount': 6, 'productsCount': 0},
-      {'id': '2', 'name': 'Fashion', 'icon': Icons.checkroom, 'color': 0xFFEF8D32, 'childrenCount': 4, 'productsCount': 0},
-      {'id': '3', 'name': 'Home', 'icon': Icons.home, 'color': 0xFF00B894, 'childrenCount': 4, 'productsCount': 0},
-      {'id': '4', 'name': 'Beauty', 'icon': Icons.face, 'color': 0xFFFF6B9D, 'childrenCount': 4, 'productsCount': 0},
-      {'id': '5', 'name': 'Sports', 'icon': Icons.sports_basketball, 'color': 0xFF0984E3, 'childrenCount': 4, 'productsCount': 0},
+      {
+        'id': '1',
+        'name': 'Fashion',
+        'icon': Icons.checkroom,
+        'color': 0xFFEF8D32,
+        'childrenCount': 8,
+        'productsCount': 0,
+      },
+      {
+        'id': '2',
+        'name': 'Electronics',
+        'icon': Icons.devices,
+        'color': 0xFF6C5CE7,
+        'childrenCount': 6,
+        'productsCount': 0,
+      },
+      {
+        'id': '3',
+        'name': 'Home',
+        'icon': Icons.home,
+        'color': 0xFF00B894,
+        'childrenCount': 5,
+        'productsCount': 0,
+      },
+      {
+        'id': '4',
+        'name': 'Beauty',
+        'icon': Icons.face,
+        'color': 0xFFFF6B9D,
+        'childrenCount': 4,
+        'productsCount': 0,
+      },
+      {
+        'id': '5',
+        'name': 'Grocery',
+        'icon': Icons.local_grocery_store,
+        'color': 0xFF00CEC9,
+        'childrenCount': 7,
+        'productsCount': 0,
+      },
+      {
+        'id': '6',
+        'name': 'Sports',
+        'icon': Icons.sports_soccer,
+        'color': 0xFFE17055,
+        'childrenCount': 6,
+        'productsCount': 0,
+      },
+      {
+        'id': '7',
+        'name': 'Toys',
+        'icon': Icons.toys,
+        'color': 0xFFFD79A8,
+        'childrenCount': 5,
+        'productsCount': 0,
+      },
+      {
+        'id': '8',
+        'name': 'Books',
+        'icon': Icons.menu_book,
+        'color': 0xFF0984E3,
+        'childrenCount': 6,
+        'productsCount': 0,
+      },
+      {
+        'id': '9',
+        'name': 'Automotive',
+        'icon': Icons.directions_car,
+        'color': 0xFF2D3436,
+        'childrenCount': 4,
+        'productsCount': 0,
+      },
+      {
+        'id': '10',
+        'name': 'Health',
+        'icon': Icons.local_hospital,
+        'color': 0xFFE84393,
+        'childrenCount': 5,
+        'productsCount': 0,
+      },
+      {
+        'id': '11',
+        'name': 'Jewelry',
+        'icon': Icons.diamond,
+        'color': 0xFFFDCB6E,
+        'childrenCount': 4,
+        'productsCount': 0,
+      },
+      {
+        'id': '12',
+        'name': 'Baby',
+        'icon': Icons.child_care,
+        'color': 0xFF81ECEC,
+        'childrenCount': 5,
+        'productsCount': 0,
+      },
+      {
+        'id': '13',
+        'name': 'Furniture',
+        'icon': Icons.chair,
+        'color': 0xFF636E72,
+        'childrenCount': 6,
+        'productsCount': 0,
+      },
+      {
+        'id': '14',
+        'name': 'Mobiles',
+        'icon': Icons.smartphone,
+        'color': 0xFF6C5CE7,
+        'childrenCount': 6,
+        'productsCount': 0,
+      },
+      {
+        'id': '15',
+        'name': 'Laptops',
+        'icon': Icons.laptop,
+        'color': 0xFF0984E3,
+        'childrenCount': 5,
+        'productsCount': 0,
+      },
+      {
+        'id': '16',
+        'name': 'Shoes',
+        'icon': Icons.shopping_bag,
+        'color': 0xFFE17055,
+        'childrenCount': 6,
+        'productsCount': 0,
+      },
+      {
+        'id': '17',
+        'name': 'Others',
+        'icon': Icons.category,
+        'color': 0xFFB2BEC3,
+        'childrenCount': 3,
+        'productsCount': 0,
+      },
     ];
     if (categories.isNotEmpty) {
       _loadMockSubcategories('1');
@@ -374,18 +515,66 @@ class CategoryController extends GetxController {
     switch (categoryId) {
       case '1':
         subcategories.value = [
-          {'id': '1-1', 'name': 'Mobiles', 'subtitle': 'Phones & Tablets', 'icon': Icons.phone_android, 'color': 0xFF4ECDC4},
-          {'id': '1-2', 'name': 'Laptops', 'subtitle': 'Computing', 'icon': Icons.laptop, 'color': 0xFF95E1D3},
-          {'id': '1-3', 'name': 'Audio', 'subtitle': 'Headphones & Speakers', 'icon': Icons.headphones, 'color': 0xFF6C5CE7},
-          {'id': '1-4', 'name': 'Cameras', 'subtitle': 'Photography', 'icon': Icons.camera_alt, 'color': 0xFF2D3436},
+          {
+            'id': '1-1',
+            'name': 'Mobiles',
+            'subtitle': 'Phones & Tablets',
+            'icon': Icons.phone_android,
+            'color': 0xFF4ECDC4,
+          },
+          {
+            'id': '1-2',
+            'name': 'Laptops',
+            'subtitle': 'Computing',
+            'icon': Icons.laptop,
+            'color': 0xFF95E1D3,
+          },
+          {
+            'id': '1-3',
+            'name': 'Audio',
+            'subtitle': 'Headphones & Speakers',
+            'icon': Icons.headphones,
+            'color': 0xFF6C5CE7,
+          },
+          {
+            'id': '1-4',
+            'name': 'Cameras',
+            'subtitle': 'Photography',
+            'icon': Icons.camera_alt,
+            'color': 0xFF2D3436,
+          },
         ];
         break;
       case '2':
         subcategories.value = [
-          {'id': '2-1', 'name': "Men's Clothing", 'subtitle': 'Shirts, Pants', 'icon': Icons.checkroom, 'color': 0xFF4ECDC4},
-          {'id': '2-2', 'name': "Women's Clothing", 'subtitle': 'Dresses, Tops', 'icon': Icons.woman, 'color': 0xFF95E1D3},
-          {'id': '2-3', 'name': 'Shoes', 'subtitle': 'Footwear', 'icon': Icons.directions_run, 'color': 0xFF6C5CE7},
-          {'id': '2-4', 'name': 'Accessories', 'subtitle': 'Bags, Jewelry', 'icon': Icons.shopping_bag, 'color': 0xFF2D3436},
+          {
+            'id': '2-1',
+            'name': "Men's Clothing",
+            'subtitle': 'Shirts, Pants',
+            'icon': Icons.checkroom,
+            'color': 0xFF4ECDC4,
+          },
+          {
+            'id': '2-2',
+            'name': "Women's Clothing",
+            'subtitle': 'Dresses, Tops',
+            'icon': Icons.woman,
+            'color': 0xFF95E1D3,
+          },
+          {
+            'id': '2-3',
+            'name': 'Shoes',
+            'subtitle': 'Footwear',
+            'icon': Icons.directions_run,
+            'color': 0xFF6C5CE7,
+          },
+          {
+            'id': '2-4',
+            'name': 'Accessories',
+            'subtitle': 'Bags, Jewelry',
+            'icon': Icons.shopping_bag,
+            'color': 0xFF2D3436,
+          },
         ];
         break;
       default:

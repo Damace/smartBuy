@@ -1,8 +1,14 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/constants/api_constants.dart';
+import '../../data/providers/api_provider.dart';
 
 class NotificationController extends GetxController {
+  final ApiProvider _apiProvider = ApiProvider();
+  
   final RxList<Map<String, dynamic>> notifications = <Map<String, dynamic>>[].obs;
   final RxInt unreadCount = 0.obs;
+  final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
@@ -10,52 +16,59 @@ class NotificationController extends GetxController {
     loadNotifications();
   }
 
-  void loadNotifications() {
-    // Mock data - replace with API call
-    notifications.value = [
-      {
-        'id': '1',
-        'title': 'Order Shipped',
-        'message': 'Your order #12345 has been shipped and is on the way',
-        'time': '2 hours ago',
-        'isRead': false,
-        'type': 'order',
-      },
-      {
-        'id': '2',
-        'title': 'Special Offer',
-        'message': 'Get 25% off on your next purchase. Use code: SAVE25',
-        'time': '5 hours ago',
-        'isRead': false,
-        'type': 'promo',
-      },
-      {
-        'id': '3',
-        'title': 'Payment Confirmed',
-        'message': 'Your payment of \$199.00 has been received',
-        'time': '1 day ago',
-        'isRead': true,
-        'type': 'payment',
-      },
-    ];
-    _updateUnreadCount();
+  Future<void> loadNotifications() async {
+    isLoading.value = true;
+    try {
+      final response = await _apiProvider.get(ApiConstants.notifications);
+      final data = response.data['data'] ?? response.data;
+      
+      if (data is List) {
+        notifications.assignAll(data.map((n) => <String, dynamic>{
+          'id': n['id'].toString(),
+          'title': n['title'] ?? '',
+          'message': n['message'] ?? n['body'] ?? '',
+          'time': n['created_at_human'] ?? n['time'] ?? '',
+          'isRead': n['read_at'] != null || n['is_read'] == true,
+          'type': n['type'] ?? 'info',
+        }).toList());
+      }
+      _updateUnreadCount();
+    } catch (e) {
+      debugPrint("Error loading notifications: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void markAsRead(String notificationId) {
+  Future<void> markAsRead(String notificationId) async {
     final index = notifications.indexWhere((n) => n['id'] == notificationId);
-    if (index != -1) {
-      notifications[index]['isRead'] = true;
+    if (index != -1 && notifications[index]['isRead'] == false) {
+      try {
+        await _apiProvider.post(
+          ApiConstants.markNotificationRead.replaceAll('{id}', notificationId),
+        );
+        notifications[index]['isRead'] = true;
+        notifications.refresh();
+        _updateUnreadCount();
+      } catch (e) {
+        debugPrint("Error marking notification as read: $e");
+      }
+    }
+  }
+
+  Future<void> markAllAsRead() async {
+    if (unreadCount.value == 0) return;
+    
+    try {
+      await _apiProvider.post(ApiConstants.markAllNotificationsRead);
+      for (var notification in notifications) {
+        notification['isRead'] = true;
+      }
       notifications.refresh();
       _updateUnreadCount();
+    } catch (e) {
+      debugPrint("Error marking all notifications as read: $e");
     }
-  }
-
-  void markAllAsRead() {
-    for (var notification in notifications) {
-      notification['isRead'] = true;
-    }
-    notifications.refresh();
-    _updateUnreadCount();
   }
 
   void _updateUnreadCount() {

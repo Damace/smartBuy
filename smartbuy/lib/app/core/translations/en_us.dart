@@ -251,13 +251,18 @@ const Map<String, String> enUS = {
 
   // Profile
   'profile': 'Profile',
+  'my_orders': 'My Orders',
   'orders': 'Orders',
   'wishlist': 'Wishlist',
   'addresses': 'Addresses',
   'payment_methods': 'Payment Methods',
+  'account_settings': 'Account Settings',
+  'personal_information': 'Personal Information',
+  'saved_addresses': 'Saved Addresses',
   'help_support': 'Help & Support',
   'about': 'About',
   'logout': 'Logout',
+  'logout_confirmation': 'Are you sure you want to logout?',
 
   // Cart
   'cart': 'Cart',

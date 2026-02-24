@@ -71,7 +71,7 @@ class MainNavigationView extends GetView<MainNavigationController> {
                 // Spacer for center button
                 const BottomNavigationBarItem(
                   icon: SizedBox(height: 24),
-                  label: '',
+                  label: 'Notification',
                 ),
                 BottomNavigationBarItem(
                   icon: Obx(
@@ -114,7 +114,7 @@ class MainNavigationView extends GetView<MainNavigationController> {
               ],
             ),
           ),
-          Positioned(top: -22, child: _centerButton()),
+          Positioned(top: -20, child: _centerButton()),
         ],
       ),
     );

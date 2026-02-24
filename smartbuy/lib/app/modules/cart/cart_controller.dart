@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/constants/api_constants.dart';
+import '../../core/constants/cart_count.dart';
 import '../../data/models/cart_item_model.dart';
 import '../../data/models/product_model.dart';
+import '../../data/providers/api_provider.dart';
 import '../../routes/app_pages.dart';
 
 class CartController extends GetxController {
+  final ApiProvider _apiProvider = ApiProvider();
+
   final RxList<CartItemModel> cartItems = <CartItemModel>[].obs;
   final RxList<ProductModel> savedForLater = <ProductModel>[].obs;
   final couponController = TextEditingController();
@@ -25,231 +30,218 @@ class CartController extends GetxController {
     super.onClose();
   }
 
-  void loadCartItems() {
-    // Mock data - replace with API call
-    cartItems.value = [
-      CartItemModel(
-        id: 1,
-        productId: 1,
-        product: ProductModel(
-          id: 1,
-          name: 'Elite Wireless ANC',
-          description: 'Premium wireless headphones with active noise cancellation',
-          price: 349.00,
-          discountPrice: null,
-          stock: 50,
-          image: 'headphones',
-          categoryId: 1,
-          categoryName: 'Electronics',
-          rating: 4.8,
-          reviewsCount: 128,
-          isFeatured: true,
-          isNewArrival: false,
-          isBestSeller: true,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-        quantity: 1,
-        price: 349.00,
-        discountPrice: null,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      CartItemModel(
-        id: 2,
-        productId: 2,
-        product: ProductModel(
-          id: 2,
-          name: 'Mechanical Keyboard K2',
-          description: 'RGB mechanical gaming keyboard',
-          price: 99.00,
-          discountPrice: null,
-          stock: 30,
-          image: 'keyboard',
-          categoryId: 1,
-          categoryName: 'Electronics',
-          rating: 4.6,
-          reviewsCount: 89,
-          isFeatured: false,
-          isNewArrival: true,
-          isBestSeller: false,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-        quantity: 1,
-        price: 99.00,
-        discountPrice: null,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      CartItemModel(
-        id: 3,
-        productId: 3,
-        product: ProductModel(
-          id: 3,
-          name: 'Ergonomic Wireless Mouse',
-          description: 'Comfortable wireless mouse for productivity',
-          price: 59.00,
-          discountPrice: null,
-          stock: 100,
-          image: 'mouse',
-          categoryId: 1,
-          categoryName: 'Electronics',
-          rating: 4.4,
-          reviewsCount: 56,
-          isFeatured: false,
-          isNewArrival: false,
-          isBestSeller: false,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-        quantity: 2,
-        price: 59.00,
-        discountPrice: null,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-    ];
-  }
+  // ─── Load ────────────────────────────────────────────────────────────────────
 
-  void loadSavedForLater() {
-    // Mock data - replace with API call
-    savedForLater.value = [
-      ProductModel(
-        id: 4,
-        name: 'Pro Watch Series 7',
-        description: 'Advanced smartwatch with health tracking',
-        price: 399.00,
-        discountPrice: null,
-        stock: 25,
-        image: 'watch',
-        categoryId: 1,
-        categoryName: 'Electronics',
-        rating: 4.7,
-        reviewsCount: 234,
-        isFeatured: true,
-        isNewArrival: true,
-        isBestSeller: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      ProductModel(
-        id: 5,
-        name: 'Bluetooth Speaker Mini',
-        description: 'Portable wireless speaker with premium sound',
-        price: 79.00,
-        discountPrice: null,
-        stock: 60,
-        image: 'speaker',
-        categoryId: 1,
-        categoryName: 'Electronics',
-        rating: 4.5,
-        reviewsCount: 145,
-        isFeatured: false,
-        isNewArrival: false,
-        isBestSeller: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-    ];
-  }
-
-  void incrementQuantity(int itemId) {
-    final index = cartItems.indexWhere((item) => item.id == itemId);
-    if (index != -1) {
-      final item = cartItems[index];
-      cartItems[index] = item.copyWith(quantity: item.quantity + 1);
+  Future<void> loadCartItems() async {
+    isLoading.value = true;
+    try {
+      final response = await _apiProvider.get(ApiConstants.cart);
+      final List raw = response.data['cart'] ?? [];
+      cartItems.value = raw.map((c) => _cartItemFromJson(c)).toList();
+      globalCartCount.value = response.data['total_items'] ?? cartItems.length;
+    } catch (_) {
+      cartItems.value = [];
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  void decrementQuantity(int itemId) {
-    final index = cartItems.indexWhere((item) => item.id == itemId);
-    if (index != -1) {
-      final item = cartItems[index];
-      if (item.quantity > 1) {
-        cartItems[index] = item.copyWith(quantity: item.quantity - 1);
-      }
+  Future<void> loadSavedForLater() async {
+    try {
+      final response = await _apiProvider.get(ApiConstants.buyerWishlist);
+      final data = response.data;
+      final List raw = data['wishlist'] ?? data['data'] ?? [];
+      savedForLater.value = raw.map<ProductModel>((w) {
+        final p = w['product'] ?? w;
+        return ProductModel(
+          id: _toInt(p['id']),
+          name: p['name'] ?? '',
+          description: p['description'] ?? '',
+          price: _toDouble(
+            (p['sale_price'] != null &&
+                    p['sale_price'].toString() != '0.00' &&
+                    p['sale_price'].toString() != '0')
+                ? p['sale_price']
+                : p['price'],
+          ),
+          stock: p['stock'] ?? 0,
+          image: p['primary_image'] ?? p['image'],
+          category: '',
+          categoryName: p['vendor']?['business_name'],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      }).toList();
+    } catch (_) {
+      savedForLater.value = [];
     }
   }
 
-  void removeItem(int itemId) {
-    cartItems.removeWhere((item) => item.id == itemId);
-    Get.snackbar(
-      'removed'.tr,
-      'item_removed_from_cart'.tr,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+  // ─── Quantity ────────────────────────────────────────────────────────────────
+
+  Future<void> incrementQuantity(int itemId) async {
+    final index = cartItems.indexWhere((item) => item.id == itemId);
+    if (index == -1) return;
+    final item = cartItems[index];
+    final newQty = item.quantity + 1;
+
+    cartItems[index] = item.copyWith(quantity: newQty); // optimistic
+    try {
+      await _apiProvider.put(
+        ApiConstants.updateCartItem.replaceAll('{id}', '$itemId'),
+        data: {'quantity': newQty},
+      );
+    } catch (e) {
+      cartItems[index] = item; // revert
+      _showError(e);
+    }
   }
 
-  void saveForLater(CartItemModel item) {
-    if (item.product != null) {
-      savedForLater.add(item.product!);
-      cartItems.removeWhere((cartItem) => cartItem.id == item.id);
+  Future<void> decrementQuantity(int itemId) async {
+    final index = cartItems.indexWhere((item) => item.id == itemId);
+    if (index == -1) return;
+    final item = cartItems[index];
+
+    if (item.quantity <= 1) {
+      removeItem(itemId);
+      return;
+    }
+
+    final newQty = item.quantity - 1;
+    cartItems[index] = item.copyWith(quantity: newQty); // optimistic
+    try {
+      await _apiProvider.put(
+        ApiConstants.updateCartItem.replaceAll('{id}', '$itemId'),
+        data: {'quantity': newQty},
+      );
+    } catch (e) {
+      cartItems[index] = item; // revert
+      _showError(e);
+    }
+  }
+
+  // ─── Remove ──────────────────────────────────────────────────────────────────
+
+  Future<void> removeItem(int itemId) async {
+    final index = cartItems.indexWhere((item) => item.id == itemId);
+    if (index == -1) return;
+    final item = cartItems.removeAt(index); // optimistic
+
+    try {
+      await _apiProvider.delete(
+        ApiConstants.removeFromCart.replaceAll('{id}', '$itemId'),
+      );
+      Get.snackbar(
+        'removed'.tr,
+        'item_removed_from_cart'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      cartItems.insert(index, item); // revert
+      _showError(e);
+    }
+  }
+
+  // ─── Save for later ──────────────────────────────────────────────────────────
+
+  Future<void> saveForLater(CartItemModel item) async {
+    if (item.product == null) return;
+
+    // Optimistic update
+    cartItems.removeWhere((c) => c.id == item.id);
+    savedForLater.add(item.product!);
+
+    try {
+      await Future.wait([
+        _apiProvider.post(
+          ApiConstants.buyerWishlist,
+          data: {'product_id': item.productId},
+        ),
+        _apiProvider.delete(
+          ApiConstants.removeFromCart.replaceAll('{id}', '${item.id}'),
+        ),
+      ]);
       Get.snackbar(
         'item_saved'.tr,
         'item_saved_for_later'.tr,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
+    } catch (e) {
+      // Revert
+      savedForLater.removeWhere((p) => p.id == item.product!.id);
+      cartItems.add(item);
+      _showError(e);
     }
   }
 
-  void moveToCart(ProductModel product) {
-    // Create a new cart item from the saved product
-    final newCartItem = CartItemModel(
-      id: DateTime.now().millisecondsSinceEpoch,
-      productId: product.id,
-      product: product,
-      quantity: 1,
-      price: product.price,
-      discountPrice: product.discountPrice,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+  Future<void> moveToCart(ProductModel product) async {
+    savedForLater.removeWhere((p) => p.id == product.id); // optimistic
 
-    cartItems.add(newCartItem);
-    savedForLater.removeWhere((p) => p.id == product.id);
-    Get.snackbar(
-      'item_added'.tr,
-      'item_moved_to_cart'.tr,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+    try {
+      final response = await _apiProvider.post(
+        ApiConstants.addToCart,
+        data: {'product_id': product.id, 'quantity': 1},
+      );
+      // Best-effort remove from wishlist
+      try {
+        await _apiProvider.delete(
+          ApiConstants.buyerWishlist,
+          data: {'product_id': product.id},
+        );
+      } catch (_) {}
+
+      final itemData = response.data['item'];
+      if (itemData != null) {
+        cartItems.add(CartItemModel(
+          id: _toInt(itemData['id']),
+          productId: product.id,
+          product: product,
+          quantity: 1,
+          price: product.price,
+          discountPrice: product.discountPrice,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ));
+      } else {
+        await loadCartItems();
+      }
+      Get.snackbar(
+        'item_added'.tr,
+        'item_moved_to_cart'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      savedForLater.add(product); // revert
+      _showError(e);
+    }
   }
 
-  void applyCoupon() {
+  // ─── Coupon ──────────────────────────────────────────────────────────────────
+
+  Future<void> applyCoupon() async {
     final code = couponController.text.trim();
     if (code.isEmpty) {
-      Get.snackbar(
-        'error'.tr,
-        'enter_coupon_code'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-      );
+      Get.snackbar('error'.tr, 'enter_coupon_code'.tr,
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
-
-    // Mock coupon validation - replace with API call
-    if (code.toUpperCase() == 'SAVE10') {
+    try {
+      final response = await _apiProvider.post(
+        ApiConstants.applyCoupon,
+        data: {'code': code, 'subtotal': subtotal},
+      );
+      final data = response.data;
       appliedCoupon.value = code;
-      discount.value = subtotal * 0.10; // 10% discount
-      Get.snackbar(
-        'success'.tr,
-        'coupon_applied'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.primary,
-        colorText: Get.theme.colorScheme.onPrimary,
-      );
-    } else {
-      Get.snackbar(
-        'error'.tr,
-        'invalid_coupon'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-      );
+      discount.value =
+          _toDouble(data['discount'] ?? data['discount_amount'] ?? 0);
+      Get.snackbar('success'.tr, data['message'] ?? 'coupon_applied'.tr,
+          snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar('error'.tr, e.toString().replaceAll('Exception: ', ''),
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
@@ -259,32 +251,84 @@ class CartController extends GetxController {
     couponController.clear();
   }
 
+  Future<void> clearCart() async {
+    try {
+      await _apiProvider.delete(ApiConstants.clearCart);
+      cartItems.clear();
+      appliedCoupon.value = '';
+      discount.value = 0.0;
+    } catch (_) {}
+  }
+
+  // ─── Checkout ────────────────────────────────────────────────────────────────
+
   void proceedToCheckout() {
     if (cartItems.isEmpty) {
-      Get.snackbar(
-        'error'.tr,
-        'cart_is_empty'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('error'.tr, 'cart_is_empty'.tr,
+          snackPosition: SnackPosition.BOTTOM);
       return;
     }
-    // Navigate to checkout screen
     Get.toNamed(Routes.BUYER_CHECKOUT);
   }
 
-  double get subtotal {
-    return cartItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+  // ─── Computed ────────────────────────────────────────────────────────────────
+
+  double get subtotal =>
+      cartItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+
+  double get shipping => 0.0;
+
+  double get total => subtotal + shipping - discount.value;
+
+  int get cartItemCount =>
+      cartItems.fold(0, (sum, item) => sum + item.quantity);
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+  CartItemModel _cartItemFromJson(Map<String, dynamic> c) {
+    final product = ProductModel(
+      id: _toInt(c['product_id']),
+      name: c['name'] ?? '',
+      description: '',
+      price: _toDouble(c['price']),
+      stock: c['max_quantity'] ?? 99,
+      image: c['image'],
+      category: '',
+      categoryName: c['vendor_name'],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    return CartItemModel(
+      id: _toInt(c['id']),
+      productId: product.id,
+      product: product,
+      quantity: c['quantity'] is int ? c['quantity'] : 1,
+      price: _toDouble(c['price']),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
   }
 
-  double get shipping {
-    return 0.0; // Free shipping
+  double _toDouble(dynamic v) {
+    if (v == null) return 0.0;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0.0;
+    return 0.0;
   }
 
-  double get total {
-    return subtotal + shipping - discount.value;
+  int _toInt(dynamic v) {
+    if (v is int) return v;
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
   }
 
-  int get cartItemCount {
-    return cartItems.fold(0, (sum, item) => sum + item.quantity);
+  void _showError(Object e) {
+    Get.snackbar(
+      'error'.tr,
+      e.toString().replaceAll('Exception: ', ''),
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 3),
+    );
   }
 }

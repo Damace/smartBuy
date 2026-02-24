@@ -1,3 +1,6 @@
+import 'package:SmartBuy/app/core/constants/api_constants.dart';
+import 'package:SmartBuy/app/modules/home/home_controller.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'profile_controller.dart';
@@ -61,8 +64,31 @@ class ProfileView extends GetView<ProfileController> {
             // Footer
             _buildFooter(context),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 10),
+
+            _buildMostSells(context),
+            SizedBox(height: 70),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInitialsAvatar() {
+    final name = controller.userName.value;
+    final parts = name.trim().split(' ');
+    final initials = parts.length >= 2
+        ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
+        : name.isNotEmpty
+        ? name[0].toUpperCase()
+        : '?';
+    return Center(
+      child: Text(
+        initials,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -97,15 +123,21 @@ class ProfileView extends GetView<ProfileController> {
               ),
               child: Obx(
                 () => controller.profileImageUrl.value.isEmpty
-                    ? const Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.white,
-                      )
+                    ? _buildInitialsAvatar()
                     : ClipOval(
-                        child: Image.network(
-                          controller.profileImageUrl.value,
+                        child: CachedNetworkImage(
+                          imageUrl: controller.profileImageUrl.value,
                           fit: BoxFit.cover,
+                          width: 100,
+                          height: 100,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) =>
+                              _buildInitialsAvatar(),
                         ),
                       ),
               ),
@@ -128,11 +160,7 @@ class ProfileView extends GetView<ProfileController> {
                       width: 3,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.edit,
-                    size: 16,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.edit, size: 16, color: Colors.white),
                 ),
               ),
             ),
@@ -145,9 +173,9 @@ class ProfileView extends GetView<ProfileController> {
           () => Text(
             controller.userName.value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                ),
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -178,10 +206,10 @@ class ProfileView extends GetView<ProfileController> {
           () => Text(
             controller.userEmail.value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Get.isDarkMode
-                      ? AppTheme.darkTextSecondary
-                      : AppTheme.textSecondary,
-                ),
+              color: Get.isDarkMode
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
+            ),
           ),
         ),
       ],
@@ -228,6 +256,10 @@ class ProfileView extends GetView<ProfileController> {
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppTheme.primaryColor, // Border color
+              width: 1.5, // Border thickness
+            ),
             boxShadow: Get.isDarkMode
                 ? []
                 : [
@@ -247,18 +279,14 @@ class ProfileView extends GetView<ProfileController> {
                   color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  color: AppTheme.primaryColor,
-                  size: 24,
-                ),
+                child: Icon(icon, color: AppTheme.primaryColor, size: 24),
               ),
               const SizedBox(height: 12),
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -290,9 +318,9 @@ class ProfileView extends GetView<ProfileController> {
         children: [
           Text(
             'account_settings'.tr,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           _buildSettingsItem(
@@ -352,19 +380,15 @@ class ProfileView extends GetView<ProfileController> {
                 color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 20,
-              ),
+              child: Icon(icon, color: iconColor, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
               ),
             ),
             Icon(
@@ -400,10 +424,7 @@ class ProfileView extends GetView<ProfileController> {
             const SizedBox(width: 8),
             Text(
               'logout'.tr,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -417,10 +438,7 @@ class ProfileView extends GetView<ProfileController> {
         title: Text('logout'.tr),
         content: Text('logout_confirmation'.tr),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('cancel'.tr),
-          ),
+          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
           TextButton(
             onPressed: () {
               Get.back();
@@ -440,12 +458,139 @@ class ProfileView extends GetView<ProfileController> {
     return Text(
       'SmartBuy ${AppConstants.appVersion} • Crafted with care',
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Get.isDarkMode
-                ? AppTheme.darkTextSecondary
-                : AppTheme.textSecondary,
-            fontSize: 12,
-          ),
+        color: Get.isDarkMode
+            ? AppTheme.darkTextSecondary
+            : AppTheme.textSecondary,
+        fontSize: 12,
+      ),
       textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildMostSells(BuildContext context) {
+    HomeController home_controller = Get.put(HomeController());
+    return Column(
+      children: [
+        Container(
+          color: const Color.fromARGB(255, 110, 199, 8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recomended for you',
+                  // 'electronics'.tr,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                TextButton(
+                  onPressed: home_controller.onSeeAllNewArrivals,
+                  child: Text(
+                    'see_all'.tr,
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 250, 248, 245),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Obx(
+          () => SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: home_controller.recommendedProducts.length,
+              itemBuilder: (context, index) {
+                final product = home_controller.recommendedProducts[index];
+                return _buildNewArrivalCard(context, product);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNewArrivalCard(
+    BuildContext context,
+    Map<String, dynamic> product,
+  ) {
+    final hasDiscount = product['originalPrice'] != null;
+    HomeController home_controller = Get.put(HomeController());
+
+    return GestureDetector(
+      onTap: () => home_controller.onProductTapped(product['id']),
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Get.isDarkMode
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.15),
+          ),
+        ),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.grey[100],
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            child: _buildProduct(product['image'], 100, 50),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProduct(String? imagePath, double height, double iconSize) {
+    if (imagePath != null &&
+        imagePath != 'default' &&
+        imagePath.contains('/')) {
+      return Image.network(
+        '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/$imagePath',
+        width: double.infinity,
+
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => SizedBox(
+          height: height,
+          child: Center(
+            child: Icon(
+              Icons.image_not_supported,
+              size: iconSize,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+    }
+    return SizedBox(
+      height: height,
+      child: Center(
+        child: Icon(
+          Icons.shopping_bag,
+          size: iconSize,
+          color: AppTheme.primaryColor,
+        ),
+      ),
     );
   }
 }

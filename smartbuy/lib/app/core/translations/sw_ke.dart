@@ -251,13 +251,18 @@ const Map<String, String> swKE = {
 
   // Profile
   'profile': 'Wasifu',
+  'my_orders': 'Maagizo Yangu',
   'orders': 'Maagizo',
   'wishlist': 'Orodha ya Matakwa',
   'addresses': 'Anwani',
   'payment_methods': 'Njia za Malipo',
+  'account_settings': 'Mipangilio ya Akaunti',
+  'personal_information': 'Taarifa Binafsi',
+  'saved_addresses': 'Anwani Zilizohifadhiwa',
   'help_support': 'Msaada na Usaidizi',
   'about': 'Kuhusu',
   'logout': 'Toka',
+  'logout_confirmation': 'Una uhakika unataka kutoka?',
 
   // Cart
   'cart': 'Kikapu',

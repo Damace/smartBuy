@@ -13,7 +13,10 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
+<<<<<<< HEAD
       const VendorProfileView(),
+=======
+>>>>>>> claude/festive-gould
       const VendorOrdersView(),
       const VendorProductsView(),
     ];
@@ -49,12 +52,15 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
           unselectedLabelStyle: const TextStyle(fontSize: 12),
           items: [
             BottomNavigationBarItem(
+<<<<<<< HEAD
               icon: const Icon(Icons.person_outline),
               activeIcon: const Icon(Icons.person),
               label: 'vendor_profile'.tr,
             ),
 
             BottomNavigationBarItem(
+=======
+>>>>>>> claude/festive-gould
               icon: const Icon(Icons.shopping_bag_outlined),
               activeIcon: const Icon(Icons.shopping_bag),
               label: 'vendor_orders'.tr,
