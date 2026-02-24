@@ -75,8 +75,8 @@ class ProfileView extends GetView<ProfileController> {
     final initials = parts.length >= 2
         ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
         : name.isNotEmpty
-            ? name[0].toUpperCase()
-            : '?';
+        ? name[0].toUpperCase()
+        : '?';
     return Center(
       child: Text(
         initials,
@@ -155,11 +155,7 @@ class ProfileView extends GetView<ProfileController> {
                       width: 3,
                     ),
                   ),
-                  child: const Icon(
-                    Icons.edit,
-                    size: 16,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.edit, size: 16, color: Colors.white),
                 ),
               ),
             ),
@@ -172,9 +168,9 @@ class ProfileView extends GetView<ProfileController> {
           () => Text(
             controller.userName.value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22,
-                ),
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -205,10 +201,10 @@ class ProfileView extends GetView<ProfileController> {
           () => Text(
             controller.userEmail.value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Get.isDarkMode
-                      ? AppTheme.darkTextSecondary
-                      : AppTheme.textSecondary,
-                ),
+              color: Get.isDarkMode
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
+            ),
           ),
         ),
       ],
@@ -255,6 +251,10 @@ class ProfileView extends GetView<ProfileController> {
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppTheme.primaryColor, // Border color
+              width: 1.5, // Border thickness
+            ),
             boxShadow: Get.isDarkMode
                 ? []
                 : [
@@ -274,18 +274,14 @@ class ProfileView extends GetView<ProfileController> {
                   color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  color: AppTheme.primaryColor,
-                  size: 24,
-                ),
+                child: Icon(icon, color: AppTheme.primaryColor, size: 24),
               ),
               const SizedBox(height: 12),
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -317,9 +313,9 @@ class ProfileView extends GetView<ProfileController> {
         children: [
           Text(
             'account_settings'.tr,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           _buildSettingsItem(
@@ -379,19 +375,15 @@ class ProfileView extends GetView<ProfileController> {
                 color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 20,
-              ),
+              child: Icon(icon, color: iconColor, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
               ),
             ),
             Icon(
@@ -427,10 +419,7 @@ class ProfileView extends GetView<ProfileController> {
             const SizedBox(width: 8),
             Text(
               'logout'.tr,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -444,10 +433,7 @@ class ProfileView extends GetView<ProfileController> {
         title: Text('logout'.tr),
         content: Text('logout_confirmation'.tr),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('cancel'.tr),
-          ),
+          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
           TextButton(
             onPressed: () {
               Get.back();
@@ -467,11 +453,11 @@ class ProfileView extends GetView<ProfileController> {
     return Text(
       'SmartBuy ${AppConstants.appVersion} • Crafted with care',
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Get.isDarkMode
-                ? AppTheme.darkTextSecondary
-                : AppTheme.textSecondary,
-            fontSize: 12,
-          ),
+        color: Get.isDarkMode
+            ? AppTheme.darkTextSecondary
+            : AppTheme.textSecondary,
+        fontSize: 12,
+      ),
       textAlign: TextAlign.center,
     );
   }

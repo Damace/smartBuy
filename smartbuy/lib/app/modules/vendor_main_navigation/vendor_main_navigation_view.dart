@@ -13,9 +13,9 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      const VendorProfileView(),
       const VendorOrdersView(),
       const VendorProductsView(),
+      const VendorProfileView(),
     ];
 
     return Scaffold(
@@ -49,12 +49,6 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
           unselectedLabelStyle: const TextStyle(fontSize: 12),
           items: [
             BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline),
-              activeIcon: const Icon(Icons.person),
-              label: 'vendor_profile'.tr,
-            ),
-
-            BottomNavigationBarItem(
               icon: const Icon(Icons.shopping_bag_outlined),
               activeIcon: const Icon(Icons.shopping_bag),
               label: 'vendor_orders'.tr,
@@ -63,6 +57,11 @@ class VendorMainNavigationView extends GetView<VendorMainNavigationController> {
               icon: const Icon(Icons.inventory_2_outlined),
               activeIcon: const Icon(Icons.inventory_2),
               label: 'vendor_products'.tr,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: 'vendor_profile'.tr,
             ),
           ],
         ),

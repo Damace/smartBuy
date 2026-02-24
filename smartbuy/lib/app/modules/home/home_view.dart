@@ -39,8 +39,10 @@ class HomeView extends GetView<HomeController> {
 
                   Container(
                     width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: Get.isDarkMode
+                          ? AppTheme.darkCardColor
+                          : Colors.white,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(16),
                         topRight: Radius.circular(16),

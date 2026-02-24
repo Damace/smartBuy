@@ -59,9 +59,8 @@ class CartView extends GetView<CartController> {
                       const SizedBox(height: 16),
 
                       // Coupon code section
-                      _buildCouponSection(context),
-
-                      const SizedBox(height: 16),
+                      //   _buildCouponSection(context),
+                      // const SizedBox(height: 16),
 
                       // Saved for later section
                       if (controller.savedForLater.isNotEmpty) ...[
@@ -104,10 +103,9 @@ class CartView extends GetView<CartController> {
           const SizedBox(height: 24),
           Text(
             'cart_is_empty'.tr,
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(fontWeight: FontWeight.w600),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           Text(
@@ -168,10 +166,9 @@ class CartView extends GetView<CartController> {
               children: [
                 Text(
                   product.name,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -207,10 +204,9 @@ class CartView extends GetView<CartController> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         item.quantity.toString(),
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     _buildQuantityButton(
@@ -266,74 +262,83 @@ class CartView extends GetView<CartController> {
   // ─── Coupon ──────────────────────────────────────────────────────────────────
 
   Widget _buildCouponSection(BuildContext context) {
-    return Obx(() => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller.couponController,
-                    enabled: controller.appliedCoupon.value.isEmpty,
-                    decoration: InputDecoration(
-                      hintText: 'coupon_code'.tr,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+    return Obx(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller.couponController,
+                  enabled: controller.appliedCoupon.value.isEmpty,
+                  decoration: InputDecoration(
+                    hintText: 'coupon_code'.tr,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                controller.appliedCoupon.value.isEmpty
-                    ? ElevatedButton(
-                        onPressed: controller.applyCoupon,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+              ),
+              const SizedBox(width: 12),
+              controller.appliedCoupon.value.isEmpty
+                  ? ElevatedButton(
+                      onPressed: controller.applyCoupon,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
                         ),
-                        child: Text('apply'.tr),
-                      )
-                    : OutlinedButton(
-                        onPressed: controller.removeCoupon,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          foregroundColor: AppTheme.errorColor,
-                          side: const BorderSide(color: AppTheme.errorColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text('remove'.tr),
                       ),
+                      child: Text('apply'.tr),
+                    )
+                  : OutlinedButton(
+                      onPressed: controller.removeCoupon,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        foregroundColor: AppTheme.errorColor,
+                        side: const BorderSide(color: AppTheme.errorColor),
+                      ),
+                      child: Text('remove'.tr),
+                    ),
+            ],
+          ),
+          if (controller.appliedCoupon.value.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(
+                  Icons.check_circle,
+                  size: 14,
+                  color: AppTheme.successColor,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${'coupon'.tr}: ${controller.appliedCoupon.value}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.successColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
-            if (controller.appliedCoupon.value.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(Icons.check_circle,
-                      size: 14, color: AppTheme.successColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${'coupon'.tr}: ${controller.appliedCoupon.value}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.successColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ],
-        ));
+        ],
+      ),
+    );
   }
 
   // ─── Saved for later ─────────────────────────────────────────────────────────
@@ -344,10 +349,9 @@ class CartView extends GetView<CartController> {
       children: [
         Text(
           'saved_for_later'.tr,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -396,10 +400,9 @@ class CartView extends GetView<CartController> {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 product.name,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -438,42 +441,44 @@ class CartView extends GetView<CartController> {
                 ),
               ],
       ),
-      child: Obx(() => Column(
-            children: [
-              _buildSummaryRow(
-                context,
-                'subtotal'.tr,
-                '\$${controller.subtotal.toStringAsFixed(2)}',
-                false,
-              ),
+      child: Obx(
+        () => Column(
+          children: [
+            _buildSummaryRow(
+              context,
+              'subtotal'.tr,
+              '\$${controller.subtotal.toStringAsFixed(2)}',
+              false,
+            ),
+            const SizedBox(height: 12),
+            _buildSummaryRow(
+              context,
+              'shipping'.tr,
+              controller.shipping == 0
+                  ? 'free'.tr
+                  : '\$${controller.shipping.toStringAsFixed(2)}',
+              false,
+            ),
+            if (controller.discount.value > 0) ...[
               const SizedBox(height: 12),
               _buildSummaryRow(
                 context,
-                'shipping'.tr,
-                controller.shipping == 0
-                    ? 'free'.tr
-                    : '\$${controller.shipping.toStringAsFixed(2)}',
+                'discount'.tr,
+                '-\$${controller.discount.value.toStringAsFixed(2)}',
                 false,
-              ),
-              if (controller.discount.value > 0) ...[
-                const SizedBox(height: 12),
-                _buildSummaryRow(
-                  context,
-                  'discount'.tr,
-                  '-\$${controller.discount.value.toStringAsFixed(2)}',
-                  false,
-                  color: AppTheme.successColor,
-                ),
-              ],
-              const Divider(height: 24),
-              _buildSummaryRow(
-                context,
-                'total'.tr,
-                '\$${controller.total.toStringAsFixed(2)}',
-                true,
+                color: AppTheme.successColor,
               ),
             ],
-          )),
+            const Divider(height: 24),
+            _buildSummaryRow(
+              context,
+              'total'.tr,
+              '\$${controller.total.toStringAsFixed(2)}',
+              true,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -674,10 +679,9 @@ class CartView extends GetView<CartController> {
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyLarge
-                    ?.copyWith(fontWeight: FontWeight.w500),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
               ),
             ),
             Icon(
