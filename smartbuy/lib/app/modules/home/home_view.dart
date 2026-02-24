@@ -52,9 +52,9 @@ class HomeView extends GetView<HomeController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildCategoriesSection(context),
-                        const SizedBox(height: 24),
+                        //const SizedBox(height: 3),
                         _buildMostSells(context),
-                        const SizedBox(height: 24),
+                        //const SizedBox(height: 24),
                         _buildNewArrivalSection(context),
                       ],
                     ),

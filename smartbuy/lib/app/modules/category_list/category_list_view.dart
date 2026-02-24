@@ -48,14 +48,15 @@ class CategoryListView extends GetView<CategoryListController> {
   Widget _buildFilters() {
     return SizedBox(
       height: 40,
-      child: Obx(
-        () => ListView.builder(
+      child: Obx(() {
+        final selected = controller.selectedFilter.value;
+        return ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: controller.filters.length,
           itemBuilder: (context, index) {
             final filter = controller.filters[index];
-            final isSelected = controller.selectedFilter.value == filter;
+            final isSelected = selected == filter;
 
             return Padding(
               padding: const EdgeInsets.only(right: 8),
@@ -67,8 +68,8 @@ class CategoryListView extends GetView<CategoryListController> {
               ),
             );
           },
-        ),
-      ),
+        );
+      }),
     );
   }
 

@@ -1,3 +1,5 @@
+import 'package:SmartBuy/app/core/constants/api_constants.dart';
+import 'package:SmartBuy/app/modules/home/home_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -62,7 +64,10 @@ class ProfileView extends GetView<ProfileController> {
             // Footer
             _buildFooter(context),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 10),
+
+            _buildMostSells(context),
+            SizedBox(height: 70),
           ],
         ),
       ),
@@ -459,6 +464,133 @@ class ProfileView extends GetView<ProfileController> {
         fontSize: 12,
       ),
       textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildMostSells(BuildContext context) {
+    HomeController home_controller = Get.put(HomeController());
+    return Column(
+      children: [
+        Container(
+          color: const Color.fromARGB(255, 110, 199, 8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recomended for you',
+                  // 'electronics'.tr,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                TextButton(
+                  onPressed: home_controller.onSeeAllNewArrivals,
+                  child: Text(
+                    'see_all'.tr,
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 250, 248, 245),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Obx(
+          () => SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: home_controller.recommendedProducts.length,
+              itemBuilder: (context, index) {
+                final product = home_controller.recommendedProducts[index];
+                return _buildNewArrivalCard(context, product);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNewArrivalCard(
+    BuildContext context,
+    Map<String, dynamic> product,
+  ) {
+    final hasDiscount = product['originalPrice'] != null;
+    HomeController home_controller = Get.put(HomeController());
+
+    return GestureDetector(
+      onTap: () => home_controller.onProductTapped(product['id']),
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Get.isDarkMode
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.15),
+          ),
+        ),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.grey[100],
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            child: _buildProduct(product['image'], 100, 50),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProduct(String? imagePath, double height, double iconSize) {
+    if (imagePath != null &&
+        imagePath != 'default' &&
+        imagePath.contains('/')) {
+      return Image.network(
+        '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/$imagePath',
+        width: double.infinity,
+
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => SizedBox(
+          height: height,
+          child: Center(
+            child: Icon(
+              Icons.image_not_supported,
+              size: iconSize,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+    }
+    return SizedBox(
+      height: height,
+      child: Center(
+        child: Icon(
+          Icons.shopping_bag,
+          size: iconSize,
+          color: AppTheme.primaryColor,
+        ),
+      ),
     );
   }
 }
