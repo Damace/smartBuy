@@ -399,10 +399,9 @@ class HomeView extends GetView<HomeController> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               'vendor_products'.tr,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 12),
@@ -432,9 +431,8 @@ class HomeView extends GetView<HomeController> {
                       Expanded(
                         child: Text(
                           vendor['vendorName'] ?? '',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w600),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -537,9 +535,9 @@ class HomeView extends GetView<HomeController> {
                       const SizedBox(width: 2),
                       Text(
                         '${product['rating']}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontSize: 11,
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(fontSize: 11),
                       ),
                     ],
                   ),
@@ -549,10 +547,11 @@ class HomeView extends GetView<HomeController> {
                       Flexible(
                         child: Text(
                           '\$${product['price'].toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryColor,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
                         ),
                       ),
                       if (hasDiscount) ...[
@@ -560,13 +559,14 @@ class HomeView extends GetView<HomeController> {
                         Flexible(
                           child: Text(
                             '\$${product['originalPrice'].toStringAsFixed(2)}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              decoration: TextDecoration.lineThrough,
-                              color: Get.isDarkMode
-                                  ? AppTheme.darkTextSecondary
-                                  : AppTheme.textSecondary,
-                              fontSize: 11,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Get.isDarkMode
+                                      ? AppTheme.darkTextSecondary
+                                      : AppTheme.textSecondary,
+                                  fontSize: 11,
+                                ),
                           ),
                         ),
                       ],
@@ -665,7 +665,11 @@ class HomeView extends GetView<HomeController> {
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
                     ),
-                    child: _buildProductImage(product['image'], imageHeight, 60),
+                    child: _buildProductImage(
+                      product['image'],
+                      imageHeight,
+                      60,
+                    ),
                   ),
                 ),
                 if (product['badge'] != null)
@@ -693,6 +697,7 @@ class HomeView extends GetView<HomeController> {
                   ),
               ],
             ),
+
             Padding(
               padding: const EdgeInsets.all(4),
               child: Column(
@@ -723,9 +728,7 @@ class HomeView extends GetView<HomeController> {
                           Expanded(
                             child: Text(
                               product['vendorName'],
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     fontSize: 11,
                                     color: Get.isDarkMode
@@ -800,7 +803,8 @@ class HomeView extends GetView<HomeController> {
                       ),
                       const SizedBox(width: 8),
                       GestureDetector(
-                        onTap: () => controller.onAddToCartTapped(product['id']),
+                        onTap: () =>
+                            controller.onAddToCartTapped(product['id']),
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(

@@ -8,7 +8,8 @@ class HomeController extends GetxController {
   final RxList<Map<String, dynamic>> recommendedProducts =
       <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> banners = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> vendorProducts = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> vendorProducts =
+      <Map<String, dynamic>>[].obs;
   final RxInt currentBannerIndex = 0.obs;
   final RxInt notificationCount = 2.obs;
   final RxInt cartCount = 2.obs;
@@ -56,12 +57,14 @@ class HomeController extends GetxController {
       final List<dynamic> data = response.data['data'] ?? response.data;
       if (data.isNotEmpty) {
         categories.value = data
-            .map((c) => <String, dynamic>{
-                  'id': c['id'].toString(),
-                  'name': c['name'] ?? '',
-                  'icon': (c['icon'] ?? c['name'] ?? '').toString().toLowerCase(),
-                  'color': _getCategoryColor(c['name'] ?? ''),
-                })
+            .map(
+              (c) => <String, dynamic>{
+                'id': c['id'].toString(),
+                'name': c['name'] ?? '',
+                'icon': (c['icon'] ?? c['name'] ?? '').toString().toLowerCase(),
+                'color': _getCategoryColor(c['name'] ?? ''),
+              },
+            )
             .toList()
             .cast<Map<String, dynamic>>();
         return;
@@ -78,27 +81,31 @@ class HomeController extends GetxController {
       final data = response.data['data'] ?? response.data;
       if (data is List && data.isNotEmpty) {
         recommendedProducts.value = data
-            .map((p) => <String, dynamic>{
-                  'id': p['id'].toString(),
-                  'name': p['name'] ?? '',
-                  'price': (p['sale_price'] != null &&
-                          p['sale_price'].toString() != '0.00' &&
-                          p['sale_price'].toString() != '0')
-                      ? _toDouble(p['sale_price'])
-                      : _toDouble(p['price']),
-                  'originalPrice': (p['sale_price'] != null &&
-                          p['sale_price'].toString() != '0.00' &&
-                          p['sale_price'].toString() != '0')
-                      ? _toDouble(p['price'])
-                      : null,
-                  'rating': _toDouble(p['rating']),
-                  'ratingCount': p['total_reviews'] ?? 0,
-                  'image': p['primary_image'] ?? 'default',
-                  'badge': p['is_featured'] == true ? 'Hot Sale' : null,
-                  'vendorName': p['vendor'] != null
-                      ? p['vendor']['business_name'] ?? ''
-                      : '',
-                })
+            .map(
+              (p) => <String, dynamic>{
+                'id': p['id'].toString(),
+                'name': p['name'] ?? '',
+                'price':
+                    (p['sale_price'] != null &&
+                        p['sale_price'].toString() != '0.00' &&
+                        p['sale_price'].toString() != '0')
+                    ? _toDouble(p['sale_price'])
+                    : _toDouble(p['price']),
+                'originalPrice':
+                    (p['sale_price'] != null &&
+                        p['sale_price'].toString() != '0.00' &&
+                        p['sale_price'].toString() != '0')
+                    ? _toDouble(p['price'])
+                    : null,
+                'rating': _toDouble(p['rating']),
+                'ratingCount': p['total_reviews'] ?? 0,
+                'image': p['primary_image'] ?? 'default',
+                'badge': p['is_featured'] == true ? 'Hot Sale' : null,
+                'vendorName': p['vendor'] != null
+                    ? p['vendor']['business_name'] ?? ''
+                    : '',
+              },
+            )
             .toList()
             .cast<Map<String, dynamic>>();
         isLoadingProducts.value = false;
@@ -106,7 +113,7 @@ class HomeController extends GetxController {
       }
     } catch (_) {}
     // Fallback to mock data
-    _loadMockProducts();
+    // _loadMockProducts();
     isLoadingProducts.value = false;
   }
 
@@ -115,6 +122,8 @@ class HomeController extends GetxController {
     try {
       final response = await _apiProvider.get(ApiConstants.products);
       final data = response.data['data'] ?? response.data;
+
+      print(data);
       if (data is List && data.isNotEmpty) {
         // Group products by vendor
         final Map<String, Map<String, dynamic>> vendorMap = {};
@@ -135,12 +144,14 @@ class HomeController extends GetxController {
           (vendorMap[vendorId]!['products'] as List<Map<String, dynamic>>).add({
             'id': p['id'].toString(),
             'name': p['name'] ?? '',
-            'price': (p['sale_price'] != null &&
+            'price':
+                (p['sale_price'] != null &&
                     p['sale_price'].toString() != '0.00' &&
                     p['sale_price'].toString() != '0')
                 ? _toDouble(p['sale_price'])
                 : _toDouble(p['price']),
-            'originalPrice': (p['sale_price'] != null &&
+            'originalPrice':
+                (p['sale_price'] != null &&
                     p['sale_price'].toString() != '0.00' &&
                     p['sale_price'].toString() != '0')
                 ? _toDouble(p['price'])
@@ -160,37 +171,77 @@ class HomeController extends GetxController {
       }
     } catch (_) {}
     // Fallback mock
-    _loadMockVendorProducts();
+    // _loadMockVendorProducts();
     isLoadingVendorProducts.value = false;
   }
 
-  void _loadMockVendorProducts() {
-    vendorProducts.value = [
-      {
-        'vendorId': '1',
-        'vendorName': 'TechZone Electronics',
-        'products': [
-          {'id': '1', 'name': 'Wireless Pro Headphones', 'price': 199.00, 'originalPrice': null, 'image': 'headphones', 'rating': 4.5, 'vendorName': 'TechZone Electronics'},
-          {'id': '5', 'name': 'Smart Watch Pro', 'price': 299.00, 'originalPrice': 349.00, 'image': 'default', 'rating': 4.3, 'vendorName': 'TechZone Electronics'},
-        ],
-      },
-      {
-        'vendorId': '2',
-        'vendorName': 'Fashion Hub',
-        'products': [
-          {'id': '2', 'name': 'Premium Leather Jacket', 'price': 250.00, 'originalPrice': null, 'image': 'jacket', 'rating': 4.8, 'vendorName': 'Fashion Hub'},
-          {'id': '4', 'name': 'Ultra Light Running Shoes', 'price': 100.00, 'originalPrice': 140.00, 'image': 'shoes', 'rating': 4.7, 'vendorName': 'Fashion Hub'},
-        ],
-      },
-      {
-        'vendorId': '3',
-        'vendorName': 'Home Essentials',
-        'products': [
-          {'id': '3', 'name': 'Barista Coffee Maker', 'price': 85.00, 'originalPrice': null, 'image': 'coffee', 'rating': 4.2, 'vendorName': 'Home Essentials'},
-        ],
-      },
-    ];
-  }
+  // void _loadMockVendorProducts() {
+  //   vendorProducts.value = [
+  //     {
+  //       'vendorId': '1',
+  //       'vendorName': 'TechZone Electronics',
+  //       'products': [
+  //         {
+  //           'id': '1',
+  //           'name': 'Wireless Pro Headphones',
+  //           'price': 199.00,
+  //           'originalPrice': null,
+  //           'image': 'headphones',
+  //           'rating': 4.5,
+  //           'vendorName': 'TechZone Electronics',
+  //         },
+  //         {
+  //           'id': '5',
+  //           'name': 'Smart Watch Pro',
+  //           'price': 299.00,
+  //           'originalPrice': 349.00,
+  //           'image': 'default',
+  //           'rating': 4.3,
+  //           'vendorName': 'TechZone Electronics',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       'vendorId': '2',
+  //       'vendorName': 'Fashion Hub',
+  //       'products': [
+  //         {
+  //           'id': '2',
+  //           'name': 'Premium Leather Jacket',
+  //           'price': 250.00,
+  //           'originalPrice': null,
+  //           'image': 'jacket',
+  //           'rating': 4.8,
+  //           'vendorName': 'Fashion Hub',
+  //         },
+  //         {
+  //           'id': '4',
+  //           'name': 'Ultra Light Running Shoes',
+  //           'price': 100.00,
+  //           'originalPrice': 140.00,
+  //           'image': 'shoes',
+  //           'rating': 4.7,
+  //           'vendorName': 'Fashion Hub',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       'vendorId': '3',
+  //       'vendorName': 'Home Essentials',
+  //       'products': [
+  //         {
+  //           'id': '3',
+  //           'name': 'Barista Coffee Maker',
+  //           'price': 85.00,
+  //           'originalPrice': null,
+  //           'image': 'coffee',
+  //           'rating': 4.2,
+  //           'vendorName': 'Home Essentials',
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // }
 
   double _toDouble(dynamic value) {
     if (value == null) return 0.0;
@@ -231,90 +282,90 @@ class HomeController extends GetxController {
     ];
   }
 
-  void _loadMockProducts() {
-    recommendedProducts.value = [
-      {
-        'id': '1',
-        'name': 'Wireless Pro Headphones',
-        'price': 199.00,
-        'originalPrice': null,
-        'rating': 4.5,
-        'ratingCount': 234,
-        'image': 'headphones',
-        'badge': 'Hot Sale',
-      },
-      {
-        'id': '2',
-        'name': 'Premium Leather Jacket',
-        'price': 250.00,
-        'originalPrice': null,
-        'rating': 4.8,
-        'ratingCount': 1483,
-        'image': 'jacket',
-        'badge': null,
-      },
-      {
-        'id': '3',
-        'name': 'Barista Coffee Maker',
-        'price': 85.00,
-        'originalPrice': null,
-        'rating': 4.2,
-        'ratingCount': 12,
-        'image': 'coffee',
-        'badge': null,
-      },
-      {
-        'id': '4',
-        'name': 'Ultra Light Running Shoes',
-        'price': 100.00,
-        'originalPrice': 140.00,
-        'rating': 4.7,
-        'ratingCount': 856,
-        'image': 'shoes',
-        'badge': 'Hot Sale',
-      },
-      {
-        'id': '5',
-        'name': 'Wireless Pro Headphones',
-        'price': 199.00,
-        'originalPrice': null,
-        'rating': 4.5,
-        'ratingCount': 234,
-        'image': 'headphones',
-        'badge': 'Hot Sale',
-      },
-      {
-        'id': '6',
-        'name': 'Premium Leather Jacket',
-        'price': 250.00,
-        'originalPrice': null,
-        'rating': 4.8,
-        'ratingCount': 1483,
-        'image': 'jacket',
-        'badge': null,
-      },
-      {
-        'id': '7',
-        'name': 'Barista Coffee Maker',
-        'price': 85.00,
-        'originalPrice': null,
-        'rating': 4.2,
-        'ratingCount': 12,
-        'image': 'coffee',
-        'badge': null,
-      },
-      {
-        'id': '8',
-        'name': 'Ultra Light Running Shoes',
-        'price': 100.00,
-        'originalPrice': 140.00,
-        'rating': 4.7,
-        'ratingCount': 856,
-        'image': 'shoes',
-        'badge': 'Hot Sale',
-      },
-    ];
-  }
+  // void _loadMockProducts() {
+  //   recommendedProducts.value = [
+  //     {
+  //       'id': '1',
+  //       'name': 'Wireless Pro Headphones',
+  //       'price': 199.00,
+  //       'originalPrice': null,
+  //       'rating': 4.5,
+  //       'ratingCount': 234,
+  //       'image': 'headphones',
+  //       'badge': 'Hot Sale',
+  //     },
+  //     {
+  //       'id': '2',
+  //       'name': 'Premium Leather Jacket',
+  //       'price': 250.00,
+  //       'originalPrice': null,
+  //       'rating': 4.8,
+  //       'ratingCount': 1483,
+  //       'image': 'jacket',
+  //       'badge': null,
+  //     },
+  //     {
+  //       'id': '3',
+  //       'name': 'Barista Coffee Maker',
+  //       'price': 85.00,
+  //       'originalPrice': null,
+  //       'rating': 4.2,
+  //       'ratingCount': 12,
+  //       'image': 'coffee',
+  //       'badge': null,
+  //     },
+  //     {
+  //       'id': '4',
+  //       'name': 'Ultra Light Running Shoes',
+  //       'price': 100.00,
+  //       'originalPrice': 140.00,
+  //       'rating': 4.7,
+  //       'ratingCount': 856,
+  //       'image': 'shoes',
+  //       'badge': 'Hot Sale',
+  //     },
+  //     {
+  //       'id': '5',
+  //       'name': 'Wireless Pro Headphones',
+  //       'price': 199.00,
+  //       'originalPrice': null,
+  //       'rating': 4.5,
+  //       'ratingCount': 234,
+  //       'image': 'headphones',
+  //       'badge': 'Hot Sale',
+  //     },
+  //     {
+  //       'id': '6',
+  //       'name': 'Premium Leather Jacket',
+  //       'price': 250.00,
+  //       'originalPrice': null,
+  //       'rating': 4.8,
+  //       'ratingCount': 1483,
+  //       'image': 'jacket',
+  //       'badge': null,
+  //     },
+  //     {
+  //       'id': '7',
+  //       'name': 'Barista Coffee Maker',
+  //       'price': 85.00,
+  //       'originalPrice': null,
+  //       'rating': 4.2,
+  //       'ratingCount': 12,
+  //       'image': 'coffee',
+  //       'badge': null,
+  //     },
+  //     {
+  //       'id': '8',
+  //       'name': 'Ultra Light Running Shoes',
+  //       'price': 100.00,
+  //       'originalPrice': 140.00,
+  //       'rating': 4.7,
+  //       'ratingCount': 856,
+  //       'image': 'shoes',
+  //       'badge': 'Hot Sale',
+  //     },
+  //   ];
+  // }
 
   void onCategoryTapped(String categoryId) {
     // Navigate to category tab via MainNavigationController
@@ -417,10 +468,7 @@ class HomeController extends GetxController {
     try {
       final response = await _apiProvider.post(
         ApiConstants.addToCart,
-        data: {
-          'product_id': int.tryParse(productId) ?? 0,
-          'quantity': 1,
-        },
+        data: {'product_id': int.tryParse(productId) ?? 0, 'quantity': 1},
       );
       cartCount.value = response.data['cart_count'] ?? (cartCount.value + 1);
       Get.snackbar(
