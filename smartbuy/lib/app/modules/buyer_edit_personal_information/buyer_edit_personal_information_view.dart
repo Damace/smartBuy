@@ -15,51 +15,117 @@ class BuyerEditPersonalInformationView
           : AppTheme.backgroundColor,
       appBar: AppBar(
         title: Text('edit_personal_information'.tr),
+        actions: [
+          Obx(
+            () => IconButton(
+              icon: controller.isLoading.value
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh),
+              tooltip: 'refresh'.tr,
+              onPressed:
+                  controller.isLoading.value ? null : controller.refreshProfile,
+            ),
+          ),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Profile Photo
-              _buildProfilePhoto(),
-              const SizedBox(height: 24),
+        return RefreshIndicator(
+          onRefresh: controller.refreshProfile,
+          color: AppTheme.primaryColor,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Server source badge
+                _buildDataSourceBadge(),
+                const SizedBox(height: 16),
 
-              // Full Name
-              _buildTextField(
-                label: 'full_name'.tr,
-                controller: controller.fullNameController,
-              ),
-              const SizedBox(height: 16),
+                // Profile Photo
+                _buildProfilePhoto(),
+                const SizedBox(height: 24),
 
-              // Email Address
-              _buildEmailField(),
-              const SizedBox(height: 16),
+                // Full Name
+                _buildTextField(
+                  label: 'full_name'.tr,
+                  controller: controller.fullNameController,
+                ),
+                const SizedBox(height: 16),
 
-              // Phone Number
-              _buildPhoneNumberField(),
-              const SizedBox(height: 16),
+                // Email Address
+                _buildEmailField(),
+                const SizedBox(height: 16),
 
-              // Gender
-              _buildGenderSection(),
-              const SizedBox(height: 16),
+                // Phone Number
+                _buildPhoneNumberField(),
+                const SizedBox(height: 16),
 
-              // Buyer Account Badge
-              _buildBuyerAccountBadge(),
-              const SizedBox(height: 24),
+                // Gender
+                _buildGenderSection(),
+                const SizedBox(height: 16),
 
-              // Update Profile Button
-              _buildUpdateButton(),
-            ],
+                // Buyer Account Badge
+                _buildBuyerAccountBadge(),
+                const SizedBox(height: 24),
+
+                // Update Profile Button
+                _buildUpdateButton(),
+              ],
+            ),
           ),
         );
       }),
     );
+  }
+
+  Widget _buildDataSourceBadge() {
+    return Obx(() {
+      final fromServer = controller.isFromServer.value;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: fromServer
+              ? Colors.green.withValues(alpha: 0.1)
+              : Colors.orange.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: fromServer
+                ? Colors.green.withValues(alpha: 0.4)
+                : Colors.orange.withValues(alpha: 0.4),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              fromServer ? Icons.cloud_done_outlined : Icons.storage_outlined,
+              size: 14,
+              color: fromServer ? Colors.green.shade600 : Colors.orange.shade700,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              fromServer ? 'data_from_server'.tr : 'data_from_cache'.tr,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: fromServer
+                    ? Colors.green.shade600
+                    : Colors.orange.shade700,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildProfilePhoto() {

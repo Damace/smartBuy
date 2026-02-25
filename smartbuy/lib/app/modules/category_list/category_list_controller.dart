@@ -62,16 +62,25 @@ class CategoryListController extends GetxController {
           tempProducts.add({
             'id': p['id'].toString(),
             'name': p['name'] ?? '',
+            'description': p['description'] ?? p['short_description'] ?? '',
             'price':
                 (p['sale_price'] != null &&
                     p['sale_price'].toString() != '0.00' &&
                     p['sale_price'].toString() != '0')
                 ? _toDouble(p['sale_price'])
                 : _toDouble(p['price']),
+            'original_price':
+                (p['sale_price'] != null &&
+                    p['sale_price'].toString() != '0.00' &&
+                    p['sale_price'].toString() != '0')
+                ? _toDouble(p['price'])
+                : null,
             'image': p['primary_image'] ?? p['image'] ?? '',
             'rating': _toDouble(p['rating']),
+            'rating_count': p['total_reviews'] ?? 0,
             'category': pCategory,
             'vendor_name': p['vendor']?['business_name'] ?? '',
+            'in_stock': (p['quantity'] ?? p['stock'] ?? 1) > 0,
           });
         }
 
@@ -136,6 +145,10 @@ class CategoryListController extends GetxController {
     isGrid.value = !isGrid.value;
   }
 
+  void onProductTapped(String productId) {
+    Get.toNamed('/product-details', arguments: {'id': productId});
+  }
+
   Future<void> addToCart(String productId) async {
     try {
       final response = await _apiProvider.post(
@@ -145,14 +158,14 @@ class CategoryListController extends GetxController {
       globalCartCount.value =
           response.data['cart_count'] ?? (globalCartCount.value + 1);
       Get.snackbar(
-        'Cart',
-        'Item added to cart',
+        'cart'.tr,
+        'item_added'.tr,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
     } catch (e) {
       Get.snackbar(
-        'Error',
+        'error'.tr,
         e.toString().replaceAll('Exception: ', ''),
         snackPosition: SnackPosition.BOTTOM,
       );

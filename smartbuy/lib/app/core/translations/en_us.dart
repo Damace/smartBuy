@@ -434,6 +434,11 @@ const Map<String, String> enUS = {
   'out_of_stock': 'Out of Stock',
   'drafts': 'Drafts',
   'no_products_found': 'No products found',
+  'no_products_in_category': 'No products available in',
+  'search_in': 'Search in',
+  'list_view': 'List view',
+  'grid_view': 'Grid view',
+  'filter': 'Filter',
   'add_product': 'Add Product',
   'edit_product': 'Edit Product',
   'editing': 'Editing',
@@ -911,6 +916,9 @@ const Map<String, String> enUS = {
   'no_connection_body': 'Make sure Wi-Fi or mobile data is turned on, then try again.',
   'retry_connection': 'Retry',
   'retrying': 'Retrying...',
+  'refresh': 'Refresh',
+  'data_from_server': 'Data loaded from server',
+  'data_from_cache': 'Showing cached data',
 
   // Network Connection
   'smartbuy': 'SmartBuy',

@@ -203,14 +203,57 @@ class ProfileView extends GetView<ProfileController> {
 
         // Email
         Obx(
-          () => Text(
-            controller.userEmail.value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Get.isDarkMode
-                  ? AppTheme.darkTextSecondary
-                  : AppTheme.textSecondary,
-            ),
+          () => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.email_outlined,
+                size: 14,
+                color: Get.isDarkMode
+                    ? AppTheme.darkTextSecondary
+                    : AppTheme.textSecondary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                controller.userEmail.value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Get.isDarkMode
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary,
+                ),
+              ),
+            ],
           ),
+        ),
+        const SizedBox(height: 4),
+
+        // Phone
+        Obx(
+          () => controller.userPhone.value.isNotEmpty
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.phone_outlined,
+                      size: 14,
+                      color: Get.isDarkMode
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      controller.countryCode.value.isNotEmpty
+                          ? '${controller.countryCode.value} ${controller.userPhone.value}'
+                          : controller.userPhone.value,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Get.isDarkMode
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                )
+              : const SizedBox.shrink(),
         ),
       ],
     );

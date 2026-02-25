@@ -28,6 +28,7 @@ class BuyerEditPersonalInformationController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isSaving = false.obs;
   final RxBool isUploadingPhoto = false.obs;
+  final RxBool isFromServer = false.obs;
 
   // Country codes
   final List<String> countryCodes = [
@@ -64,15 +65,19 @@ class BuyerEditPersonalInformationController extends GetxController {
     super.onClose();
   }
 
-  Future<void> fetchProfile() async {
-    isLoading.value = true;
+  Future<void> fetchProfile({bool silent = false}) async {
+    if (!silent) isLoading.value = true;
     try {
       final response = await _apiProvider.get(ApiConstants.buyerProfile);
-      final buyer = response.data['buyer'] as Map<String, dynamic>;
 
-      fullNameController.text = buyer['name'] ?? '';
-      emailController.text = buyer['email'] ?? '';
-      phoneController.text = buyer['phone'] ?? '';
+      final data = response.data;
+      if (data is! Map) throw Exception('Invalid response format');
+      final buyer = data['buyer'];
+      if (buyer is! Map) throw Exception('Buyer data not found');
+
+      fullNameController.text = buyer['name']?.toString() ?? '';
+      emailController.text = buyer['email']?.toString() ?? '';
+      phoneController.text = buyer['phone']?.toString() ?? '';
 
       final code = buyer['country_code']?.toString() ?? '';
       selectedCountryCode.value =
@@ -85,14 +90,20 @@ class BuyerEditPersonalInformationController extends GetxController {
       isEmailVerified.value = buyer['email_verified'] == true;
       profilePhotoUrl.value = buyer['profile_photo']?.toString() ?? '';
       isBuyerAccount.value = buyer['status']?.toString() == 'active';
+      isFromServer.value = true;
 
       // Keep local storage in sync with server data
-      _saveToStorage(buyer);
+      _saveToStorage(Map<String, dynamic>.from(buyer));
     } catch (e) {
+      isFromServer.value = false;
       _loadFromStorage();
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> refreshProfile() async {
+    await fetchProfile(silent: true);
   }
 
   void _loadFromStorage() {

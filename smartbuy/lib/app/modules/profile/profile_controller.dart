@@ -1,80 +1,109 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/constants/app_constants.dart';
+import '../../data/providers/api_provider.dart';
 import '../../routes/app_pages.dart';
 
 class ProfileController extends GetxController {
   final storage = GetStorage();
-  final RxString userName = 'Alex Johnson'.obs;
-  final RxString userEmail = 'alex.johnson@example.com'.obs;
-  final RxString userPhone = '+1 234 567 8900'.obs;
-  final RxString membershipStatus = 'GOLD MEMBER'.obs;
+  final ApiProvider _apiProvider = ApiProvider();
+
+  final RxString userName = ''.obs;
+  final RxString userEmail = ''.obs;
+  final RxString userPhone = ''.obs;
+  final RxString countryCode = ''.obs;
+  final RxString membershipStatus = 'BUYER'.obs;
   final RxString profileImageUrl = ''.obs;
+  final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadUserData();
+    // Show stored data immediately, then refresh from server
+    _loadFromStorage();
+    _fetchFromServer();
   }
 
-  void loadUserData() {
-    // Load user data from storage
-    userName.value = storage.read('userName') ?? 'Alex Johnson';
-    userEmail.value = storage.read('userEmail') ?? 'alex.johnson@example.com';
-    userPhone.value = storage.read('userPhone') ?? '+1 234 567 8900';
-    membershipStatus.value = storage.read('membershipStatus') ?? 'GOLD MEMBER';
-    profileImageUrl.value = storage.read('profileImageUrl') ?? '';
+  // ── Load cached data ─────────────────────────────────────────────────────────
+
+  void _loadFromStorage() {
+    final userData = storage.read(AppConstants.storageKeyUser);
+    if (userData is Map) {
+      userName.value = userData['name']?.toString() ?? '';
+      userEmail.value = userData['email']?.toString() ?? '';
+      userPhone.value = userData['phone']?.toString() ?? '';
+      countryCode.value = userData['country_code']?.toString() ?? '';
+      profileImageUrl.value =
+          (userData['profile_photo'] ?? userData['avatar_url'])?.toString() ??
+              '';
+      final status = userData['status']?.toString() ?? '';
+      membershipStatus.value =
+          status == 'active' ? 'BUYER' : status.toUpperCase();
+    }
   }
 
-  void editProfile() {
-    Get.toNamed(Routes.BUYER_EDIT_PERSONAL_INFORMATION);
+  // ── Fetch live from server ───────────────────────────────────────────────────
+
+  Future<void> _fetchFromServer() async {
+    isLoading.value = true;
+    try {
+      final response = await _apiProvider.get(ApiConstants.buyerProfile);
+      final buyer = response.data['buyer'] as Map<String, dynamic>;
+
+      userName.value = buyer['name']?.toString() ?? userName.value;
+      userEmail.value = buyer['email']?.toString() ?? userEmail.value;
+      userPhone.value = buyer['phone']?.toString() ?? userPhone.value;
+      countryCode.value =
+          buyer['country_code']?.toString() ?? countryCode.value;
+      profileImageUrl.value =
+          buyer['profile_photo']?.toString() ?? profileImageUrl.value;
+
+      final status = buyer['status']?.toString() ?? '';
+      membershipStatus.value =
+          status == 'active' ? 'BUYER' : status.toUpperCase();
+
+      // Keep storage in sync
+      final existing =
+          storage.read(AppConstants.storageKeyUser) as Map? ?? {};
+      storage.write(AppConstants.storageKeyUser, {...existing, ...buyer});
+    } catch (_) {
+      // Silently fall back to cached data already shown
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void navigateToOrders() {
-    Get.toNamed(Routes.BUYER_ORDERS);
+  // Called when returning from edit profile screen to refresh data
+  Future<void> refreshProfile() async {
+    _loadFromStorage();
+    await _fetchFromServer();
   }
 
-  void navigateToWishlist() {
-    Get.toNamed(Routes.WISHLIST);
-  }
+  // ── Actions ──────────────────────────────────────────────────────────────────
 
-  void navigateToMessages() {
-    Get.toNamed(Routes.BUYER_MESSAGES_INBOX);
-  }
+  void editProfile() => Get.toNamed(Routes.BUYER_EDIT_PERSONAL_INFORMATION)
+      ?.then((_) => refreshProfile());
 
-  void navigateToCoupons() {
-    // Navigate to coupons screen
-    print('Navigate to coupons');
-  }
+  void navigateToOrders() => Get.toNamed(Routes.BUYER_ORDERS);
+  void navigateToWishlist() => Get.toNamed(Routes.WISHLIST);
+  void navigateToMessages() => Get.toNamed(Routes.BUYER_MESSAGES_INBOX);
 
-  void navigateToHelpCenter() {
-    // Navigate to help center
-    print('Navigate to help center');
-  }
+  void navigateToPersonalInfo() =>
+      Get.toNamed(Routes.BUYER_EDIT_PERSONAL_INFORMATION)
+          ?.then((_) => refreshProfile());
 
-  void navigateToPersonalInfo() {
-    Get.toNamed(Routes.BUYER_EDIT_PERSONAL_INFORMATION);
-  }
+  void navigateToAddresses() => Get.toNamed(Routes.BUYER_SAVED_ADDRESS);
+  void navigateToPaymentMethods() => Get.toNamed(Routes.BUYER_SAVED_PAYMENT);
+  void navigateToNotificationPreferences() =>
+      Get.toNamed(Routes.BUYER_NOTIFICATION_PREFERENCES);
 
-  void navigateToAddresses() {
-    Get.toNamed(Routes.BUYER_SAVED_ADDRESS);
-  }
-
-  void navigateToPaymentMethods() {
-    Get.toNamed(Routes.BUYER_SAVED_PAYMENT);
-  }
-
-  void navigateToNotificationPreferences() {
-    Get.toNamed(Routes.BUYER_NOTIFICATION_PREFERENCES);
-  }
+  void navigateToCoupons() {}
+  void navigateToHelpCenter() {}
 
   void performLogout() {
     storage.remove(AppConstants.storageKeyToken);
-    storage.remove('userName');
-    storage.remove('userEmail');
-    storage.remove('userPhone');
-    storage.remove('membershipStatus');
-    storage.remove('profileImageUrl');
+    storage.remove(AppConstants.storageKeyUser);
     Get.offAllNamed(Routes.LOGIN);
   }
 }
