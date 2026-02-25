@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/app_constants.dart';
@@ -14,10 +15,12 @@ import '../../../core/utils/helpers.dart';
 import '../../../data/providers/api_provider.dart';
 import '../../../routes/app_pages.dart';
 
-class LoginController extends GetxController
-    with GetSingleTickerProviderStateMixin {
-  late TabController tabController;
+// Storage keys for biometric credential cache
+const _kBioEmail = 'biometric_email';
+const _kBioPassword = 'biometric_password';
+const _kBioUserType = 'biometric_user_type'; // 'buyer' | 'vendor'
 
+class LoginController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -25,26 +28,31 @@ class LoginController extends GetxController
   final RxBool isLoading = false.obs;
   final RxBool isGoogleLoading = false.obs;
   final RxBool isAppleLoading = false.obs;
-  final RxInt currentTab = 0.obs;
+  final RxBool isBiometricAvailable = false.obs;
+  final RxBool isBiometricLoading = false.obs;
 
   final ApiProvider _apiProvider = ApiProvider();
   final GetStorage _storage = GetStorage();
+  final LocalAuthentication _localAuth = LocalAuthentication();
 
   @override
   void onInit() {
     super.onInit();
+    _checkBiometrics();
+  }
 
-    tabController = TabController(length: 2, vsync: this);
-
-    tabController.addListener(() {
-      if (!tabController.indexIsChanging) {
-        currentTab.value = tabController.index;
-
-        if (tabController.index == 1) {
-          goToVendorLogin();
-        }
+  Future<void> _checkBiometrics() async {
+    try {
+      final canCheck = await _localAuth.canCheckBiometrics;
+      final isSupported = await _localAuth.isDeviceSupported();
+      if (canCheck && isSupported) {
+        final types = await _localAuth.getAvailableBiometrics();
+        isBiometricAvailable.value = types.isNotEmpty &&
+            _storage.read(_kBioEmail) != null;
       }
-    });
+    } catch (_) {
+      isBiometricAvailable.value = false;
+    }
   }
 
   void togglePasswordVisibility() {
@@ -53,32 +61,99 @@ class LoginController extends GetxController
 
   Future<void> login() async {
     if (!_validateForm()) return;
-
     isLoading.value = true;
 
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
     try {
-      final response = await _apiProvider.post(
-        ApiConstants.login,
-        data: {
-          'email': emailController.text.trim(),
-          'password': passwordController.text,
-        },
-      );
-
-      _storage.write(AppConstants.storageKeyToken, response.data['token']);
-      _storage.write(AppConstants.storageKeyUser, response.data['buyer']);
-
-      Helpers.showSuccessSheet(
-        'You\'re all set to continue shopping for the best deals.',
-        title: 'Login Successful!',
-        onClose: () => Get.offAllNamed(Routes.LOADING_SCREEN),
-      );
-    } catch (e) {
-      // ----------------------------------------------------------------------------
-
-      Helpers.showError(Helpers.parseErrorMessage(e));
-      //Helpers.showErrorSheet(Helpers.parseErrorMessage(e));
+      // Try buyer login first
+      await _loginAsBuyer(email, password);
+    } catch (buyerError) {
+      // Buyer login failed — try vendor login
+      try {
+        await _loginAsVendor(email, password);
+      } catch (vendorError) {
+        // Both failed — show the buyer error (more likely what the user expects)
+        Helpers.showError(Helpers.parseErrorMessage(buyerError));
+      }
     } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> _loginAsBuyer(String email, String password) async {
+    final response = await _apiProvider.post(
+      ApiConstants.login,
+      data: {'email': email, 'password': password},
+    );
+
+    _storage.write(AppConstants.storageKeyToken, response.data['token']);
+    _storage.write(AppConstants.storageKeyUser, response.data['buyer']);
+    _saveBiometricCredentials(email, password, 'buyer');
+
+    Helpers.showSuccessSheet(
+      'You\'re all set to continue shopping for the best deals.',
+      title: 'Login Successful!',
+      onClose: () => Get.offAllNamed(Routes.LOADING_SCREEN),
+    );
+  }
+
+  Future<void> _loginAsVendor(String email, String password) async {
+    final response = await _apiProvider.post(
+      ApiConstants.vendorLogin,
+      data: {'email': email, 'password': password},
+    );
+
+    _storage.write(AppConstants.storageKeyToken, response.data['token']);
+    _storage.write(AppConstants.storageKeyUser, response.data['vendor']);
+    _saveBiometricCredentials(email, password, 'vendor');
+
+    Helpers.showSuccess('login_successful'.tr);
+    Get.offAllNamed(Routes.VENDOR_HOME);
+  }
+
+  void _saveBiometricCredentials(
+      String email, String password, String userType) {
+    _storage.write(_kBioEmail, email);
+    _storage.write(_kBioPassword, password);
+    _storage.write(_kBioUserType, userType);
+    // Re-check so fingerprint button appears after first login
+    _checkBiometrics();
+  }
+
+  Future<void> loginWithBiometrics() async {
+    final storedEmail = _storage.read<String>(_kBioEmail);
+    final storedPassword = _storage.read<String>(_kBioPassword);
+    final storedUserType = _storage.read<String>(_kBioUserType);
+
+    if (storedEmail == null || storedPassword == null) {
+      Helpers.showError('biometric_no_credentials'.tr);
+      return;
+    }
+
+    isBiometricLoading.value = true;
+    try {
+      final authenticated = await _localAuth.authenticate(
+        localizedReason: 'biometric_reason'.tr,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+
+      if (!authenticated) return;
+
+      isLoading.value = true;
+      if (storedUserType == 'vendor') {
+        await _loginAsVendor(storedEmail, storedPassword);
+      } else {
+        await _loginAsBuyer(storedEmail, storedPassword);
+      }
+    } catch (e) {
+      Helpers.showError(Helpers.parseErrorMessage(e));
+    } finally {
+      isBiometricLoading.value = false;
       isLoading.value = false;
     }
   }
@@ -88,26 +163,19 @@ class LoginController extends GetxController
       Helpers.showError('field_required'.tr);
       return false;
     }
-
     if (passwordController.text.trim().isEmpty) {
       Helpers.showError('field_required'.tr);
       return false;
     }
-
     if (passwordController.text.length < 6) {
       Helpers.showError('password_too_short'.tr);
       return false;
     }
-
     return true;
   }
 
   void goToRegister() {
     Get.toNamed(Routes.REGISTER);
-  }
-
-  void goToVendorLogin() {
-    Get.toNamed(Routes.VENDOR_LOGIN);
   }
 
   Future<void> loginWithGoogle() async {
@@ -119,7 +187,6 @@ class LoginController extends GetxController
       final googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        // User cancelled
         isGoogleLoading.value = false;
         return;
       }
@@ -160,7 +227,6 @@ class LoginController extends GetxController
     isAppleLoading.value = true;
 
     try {
-      // Generate nonce for security
       final rawNonce = _generateNonce();
       final nonce = sha256.convert(utf8.encode(rawNonce)).toString();
 
@@ -199,7 +265,6 @@ class LoginController extends GetxController
     } catch (e) {
       if (e is SignInWithAppleAuthorizationException) {
         if (e.code == AuthorizationErrorCode.canceled) {
-          // User cancelled
           isAppleLoading.value = false;
           return;
         }
@@ -222,7 +287,6 @@ class LoginController extends GetxController
 
   @override
   void onClose() {
-    tabController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.onClose();

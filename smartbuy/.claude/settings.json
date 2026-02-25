@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Read(//c/xampp/htdocs/sb/app/Models/**)",
-      "Read(//c/xampp/htdocs/sb/routes/**)"
+      "Read(//c/xampp/htdocs/sb/routes/**)",
+      "Read(//c/Users/Bedastuce/.claude/projects/e--smartBuy-smartbuy--claude-worktrees-festive-gould/**)",
+      "Bash(xargs grep -l \"login\")",
+      "Bash(flutter pub get)"
     ],
     "additionalDirectories": [
       "C:\\xampp\\htdocs\\sb\\app\\Models",

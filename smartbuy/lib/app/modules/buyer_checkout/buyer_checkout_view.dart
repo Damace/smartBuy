@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/themes/app_theme.dart';
 import 'buyer_checkout_controller.dart';
 
@@ -33,12 +34,7 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
             const SizedBox(height: 24),
 
             // Delivery Address Section
-            _buildDeliveryAddress(),
-
-            const SizedBox(height: 24),
-
-            // Delivery Speed Section
-            _buildDeliverySpeed(),
+            _buildDeliveryAddress(context),
 
             const SizedBox(height: 24),
 
@@ -102,7 +98,9 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
             shape: BoxShape.circle,
             color: isCompleted
                 ? AppTheme.primaryColor
-                : (Get.isDarkMode ? AppTheme.darkCardColor : Colors.grey.shade300),
+                : (Get.isDarkMode
+                    ? AppTheme.darkCardColor
+                    : Colors.grey.shade300),
           ),
           child: Center(
             child: isCompleted
@@ -110,7 +108,9 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                 : Text(
                     '${step + 1}',
                     style: TextStyle(
-                      color: Get.isDarkMode ? Colors.white : Colors.grey.shade600,
+                      color: Get.isDarkMode
+                          ? Colors.white
+                          : Colors.grey.shade600,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -131,7 +131,7 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
     );
   }
 
-  Widget _buildDeliveryAddress() {
+  Widget _buildDeliveryAddress(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
@@ -149,7 +149,7 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                 ),
               ),
               TextButton(
-                onPressed: controller.changeAddress,
+                onPressed: () => _showAddressSheet(context),
                 child: Text(
                   'change'.tr,
                   style: TextStyle(
@@ -162,10 +162,10 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
           ),
           const SizedBox(height: 12),
           Obx(() {
-            final address = controller.deliveryAddress;
+            final isLoading = controller.isLoadingAddresses;
+            final address = controller.selectedAddress.value;
 
-            // Show loading spinner while async address fetch completes
-            if (address.isEmpty) {
+            if (isLoading && address == null) {
               return Container(
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 decoration: BoxDecoration(
@@ -179,6 +179,37 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                 ),
                 child: const Center(
                   child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
+            }
+
+            if (address == null) {
+              return GestureDetector(
+                onTap: () => _showAddressSheet(context),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color:
+                        Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppTheme.primaryColor.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.add_location_alt,
+                          color: AppTheme.primaryColor),
+                      const SizedBox(width: 12),
+                      Text(
+                        'add_address'.tr,
+                        style: TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }
@@ -226,21 +257,15 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          [
-                            address['address'],
-                            address['city'],
-                            address['state'],
-                            address['zipCode'],
-                          ]
-                              .where((v) =>
-                                  v != null && v.toString().isNotEmpty)
-                              .join(', '),
+                          address['address']?.toString() ?? '',
                           style: TextStyle(
                             fontSize: 12,
                             color: Get.isDarkMode
                                 ? Colors.white70
                                 : AppTheme.textSecondary,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -254,114 +279,180 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
     );
   }
 
-  Widget _buildDeliverySpeed() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'delivery_speed'.tr,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Get.isDarkMode ? Colors.white : AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Obx(() => Row(
-                children: [
-                  Expanded(
-                    child: _buildDeliverySpeedOption(
-                      'free',
-                      'free'.tr,
-                      '5-8 business days',
-                      '\$0',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildDeliverySpeedOption(
-                      'express',
-                      'express'.tr,
-                      '1-2 business days',
-                      '\$9.99',
-                    ),
-                  ),
-                ],
-              )),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDeliverySpeedOption(
-    String value,
-    String title,
-    String subtitle,
-    String price,
-  ) {
-    final isSelected = controller.selectedDeliverySpeed.value == value;
-
-    return GestureDetector(
-      onTap: () => controller.selectDeliverySpeed(value),
-      child: Container(
-        padding: const EdgeInsets.all(16),
+  void _showAddressSheet(BuildContext context) {
+    Get.bottomSheet(
+      Container(
         decoration: BoxDecoration(
-          color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? AppTheme.primaryColor
-                : (Get.isDarkMode
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.grey.withValues(alpha: 0.2)),
-            width: isSelected ? 2 : 1,
-          ),
+          color: Get.isDarkMode ? AppTheme.darkBackgroundColor : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                Icon(
-                  isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  color: isSelected
-                      ? AppTheme.primaryColor
-                      : (Get.isDarkMode ? Colors.white60 : Colors.grey),
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Get.isDarkMode ? Colors.white : AppTheme.textPrimary,
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'select_address'.tr,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Get.isDarkMode ? Colors.white : AppTheme.textPrimary,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 11,
-                color: Get.isDarkMode ? Colors.white60 : AppTheme.textSecondary,
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Get.back(),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              price,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
-              ),
+            const Divider(height: 1),
+            Flexible(
+              child: Obx(() {
+                final addresses = controller.addresses;
+                if (controller.isLoadingAddresses) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (addresses.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(
+                      'no_addresses'.tr,
+                      style: TextStyle(
+                        color: Get.isDarkMode
+                            ? Colors.white60
+                            : AppTheme.textSecondary,
+                      ),
+                    ),
+                  );
+                }
+                return ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  itemCount: addresses.length,
+                  separatorBuilder: (_, i) => const SizedBox(height: 8),
+                  itemBuilder: (_, i) {
+                    final addr = addresses[i];
+                    final isSelected =
+                        controller.selectedAddress.value?['id'] == addr['id'];
+                    return GestureDetector(
+                      onTap: () {
+                        controller.selectAddress(addr);
+                        Get.back();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppTheme.primaryColor.withValues(alpha: 0.08)
+                              : (Get.isDarkMode
+                                  ? AppTheme.darkCardColor
+                                  : Colors.grey.shade50),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppTheme.primaryColor
+                                : (Get.isDarkMode
+                                    ? Colors.white.withValues(alpha: 0.1)
+                                    : Colors.grey.withValues(alpha: 0.2)),
+                            width: isSelected ? 2 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                              color: isSelected
+                                  ? AppTheme.primaryColor
+                                  : Colors.grey,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        addr['name']?.toString() ?? '',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          color: Get.isDarkMode
+                                              ? Colors.white
+                                              : AppTheme.textPrimary,
+                                        ),
+                                      ),
+                                      if (addr['isDefault'] == true) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.primaryColor
+                                                .withValues(alpha: 0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            'default'.tr,
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: AppTheme.primaryColor,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    addr['address']?.toString() ?? '',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Get.isDarkMode
+                                          ? Colors.white70
+                                          : AppTheme.textSecondary,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }),
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
+      isScrollControlled: true,
     );
   }
 
@@ -395,75 +486,130 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
             ],
           ),
           const SizedBox(height: 12),
-          Obx(() => Column(
-                children: controller.cartItems.map((item) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Get.isDarkMode
-                              ? Colors.white.withValues(alpha: 0.1)
-                              : Colors.grey.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.headphones,
-                              color: AppTheme.primaryColor,
-                              size: 30,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item['name'],
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    color: Get.isDarkMode ? Colors.white : AppTheme.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'qty_count'.trParams({'count': '${item['quantity']}'}),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Get.isDarkMode ? Colors.white70 : AppTheme.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            '\$${item['price'].toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: AppTheme.primaryColor,
-                            ),
-                          ),
-                        ],
+          Obx(() {
+            final items = controller.cartItems;
+            if (items.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color:
+                      Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Get.isDarkMode
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.grey.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'cart_empty'.tr,
+                    style: TextStyle(
+                      color: Get.isDarkMode
+                          ? Colors.white60
+                          : AppTheme.textSecondary,
+                    ),
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: items.map((item) {
+                final product = item.product;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Get.isDarkMode
+                          ? AppTheme.darkCardColor
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Get.isDarkMode
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.grey.withValues(alpha: 0.2),
                       ),
                     ),
-                  );
-                }).toList(),
-              )),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: _buildProductImage(product?.image, 60, 60),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product?.name ?? '',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: Get.isDarkMode
+                                      ? Colors.white
+                                      : AppTheme.textPrimary,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'qty_count'.trParams(
+                                    {'count': '${item.quantity}'}),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Get.isDarkMode
+                                      ? Colors.white70
+                                      : AppTheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '\$${item.totalPrice.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProductImage(String? imagePath, double width, double height) {
+    if (imagePath != null && imagePath.contains('/')) {
+      return Image.network(
+        '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/$imagePath',
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, err, stack) => _imagePlaceholder(width, height),
+      );
+    }
+    return _imagePlaceholder(width, height);
+  }
+
+  Widget _imagePlaceholder(double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      color: Get.isDarkMode ? AppTheme.darkBackgroundColor : Colors.grey[100],
+      child: Icon(
+        Icons.shopping_bag,
+        size: width * 0.5,
+        color: AppTheme.primaryColor,
       ),
     );
   }
@@ -480,14 +626,16 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
               _buildPriceRow('estimated_tax'.tr, controller.estimatedTax.value),
               if (controller.discount.value > 0) ...[
                 const SizedBox(height: 8),
-                _buildPriceRow('discount'.tr, -controller.discount.value, isDiscount: true),
+                _buildPriceRow('discount'.tr, -controller.discount.value,
+                    isDiscount: true),
               ],
             ],
           )),
     );
   }
 
-  Widget _buildPriceRow(String label, double amount, {bool isDiscount = false}) {
+  Widget _buildPriceRow(String label, double amount,
+      {bool isDiscount = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -495,7 +643,8 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Get.isDarkMode ? Colors.white70 : AppTheme.textSecondary,
+            color:
+                Get.isDarkMode ? Colors.white70 : AppTheme.textSecondary,
           ),
         ),
         Text(
@@ -523,7 +672,8 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
               decoration: InputDecoration(
                 hintText: 'promo_code'.tr,
                 filled: true,
-                fillColor: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                fillColor:
+                    Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
@@ -542,36 +692,40 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+                  borderSide:
+                      BorderSide(color: AppTheme.primaryColor, width: 2),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 16),
               ),
             ),
           ),
           const SizedBox(width: 12),
           Obx(() => ElevatedButton(
-            onPressed: controller.isApplyingPromo.value
-                ? null
-                : controller.applyPromoCode,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: controller.isApplyingPromo.value
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Text('apply'.tr),
-          )),
+                onPressed: controller.isApplyingPromo.value
+                    ? null
+                    : controller.applyPromoCode,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: controller.isApplyingPromo.value
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text('apply'.tr),
+              )),
         ],
       ),
     );
@@ -598,7 +752,8 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Get.isDarkMode ? Colors.white : AppTheme.textPrimary,
+                    color:
+                        Get.isDarkMode ? Colors.white : AppTheme.textPrimary,
                   ),
                 ),
                 Obx(() => Text(
@@ -614,39 +769,38 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
           ),
           const SizedBox(height: 16),
           Obx(() => SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: controller.isPlacingOrder.value
-                  ? null
-                  : controller.placeOrder,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: controller.isPlacingOrder.value
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      ),
-                    )
-                  : Text(
-                      'pay_and_place_order'.tr,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: controller.isPlacingOrder.value
+                      ? null
+                      : controller.placeOrder,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-            ),
-          )),
+                  ),
+                  child: controller.isPlacingOrder.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'pay_and_place_order'.tr,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                ),
+              )),
         ],
       ),
     );

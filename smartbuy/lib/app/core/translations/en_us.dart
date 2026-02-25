@@ -40,6 +40,10 @@ const Map<String, String> enUS = {
   'register_now': 'Register Now',
   'google': 'Google',
   'apple': 'Apple',
+  'biometric_login': 'Login with fingerprint',
+  'biometric_reason': 'Verify your identity to log in',
+  'biometric_no_credentials': 'No saved credentials for biometric login. Please log in with email and password first.',
+  'login_successful': 'Login Successful!',
 
   // Registration
   'join_smartbuy': 'Join SmartBuy',

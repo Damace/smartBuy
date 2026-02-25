@@ -40,6 +40,10 @@ const Map<String, String> swKE = {
   'register_now': 'Jisajili Sasa',
   'google': 'Google',
   'apple': 'Apple',
+  'biometric_login': 'Ingia kwa alama ya kidole',
+  'biometric_reason': 'Thibitisha utambulisho wako ili uingie',
+  'biometric_no_credentials': 'Hakuna vitambulisho vilivyohifadhiwa. Tafadhali ingia kwa barua pepe na nenosiri kwanza.',
+  'login_successful': 'Umeingia kikamilifu!',
 
   // Registration
   'join_smartbuy': 'Jiunge na SmartBuy',
