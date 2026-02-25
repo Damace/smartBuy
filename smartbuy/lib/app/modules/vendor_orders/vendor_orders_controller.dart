@@ -20,6 +20,11 @@ class VendorOrdersController extends GetxController {
   // Orders list
   final RxList<Map<String, dynamic>> orders = <Map<String, dynamic>>[].obs;
 
+  // Published products
+  final RxBool isLoadingProducts = false.obs;
+  final RxList<Map<String, dynamic>> publishedProducts =
+      <Map<String, dynamic>>[].obs;
+
   // Status counts
   final RxInt pendingCount = 0.obs;
   final RxInt processingCount = 0.obs;
@@ -48,6 +53,7 @@ class VendorOrdersController extends GetxController {
   void onInit() {
     super.onInit();
     fetchOrders();
+    fetchPublishedProducts();
   }
 
   Future<void> fetchOrders() async {
@@ -93,6 +99,82 @@ class VendorOrdersController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> fetchPublishedProducts() async {
+    isLoadingProducts.value = true;
+    try {
+      final response = await _apiProvider.get(ApiConstants.vendorProducts);
+      final data = response.data['data'] ?? response.data;
+      if (data is List) {
+        publishedProducts.value = data
+            .where((p) {
+              final status = p['status']?.toString() ?? '';
+              final qty = p['quantity'];
+              final q = qty is int ? qty : int.tryParse(qty.toString()) ?? 0;
+              return status != 'draft' && status != 'pending' && q > 0;
+            })
+            .map((p) {
+              final images = p['images'] as List? ?? [];
+              final primary = images.isNotEmpty
+                  ? images.firstWhere(
+                      (i) => i['is_primary'] == true,
+                      orElse: () => images.first,
+                    )
+                  : null;
+              return <String, dynamic>{
+                'id': p['id'].toString(),
+                'name': p['name'] ?? '',
+                'price': (p['price'] is String
+                        ? double.tryParse(p['price'])
+                        : p['price'] ?? 0)
+                    .toDouble(),
+                'stock': p['quantity'] ?? 0,
+                'image': primary?['image_path'] ?? '',
+                'category': p['category']?['name'] ?? '',
+                'sku': p['sku'] ?? '',
+              };
+            })
+            .toList()
+            .cast<Map<String, dynamic>>();
+      }
+    } catch (e) {
+      _loadMockPublishedProducts();
+    } finally {
+      isLoadingProducts.value = false;
+    }
+  }
+
+  void _loadMockPublishedProducts() {
+    publishedProducts.value = [
+      {
+        'id': 'prod_001',
+        'name': 'Organic Wildflower Honey',
+        'price': 24.99,
+        'stock': 42,
+        'image': '',
+        'category': 'Food',
+        'sku': 'SKU-001',
+      },
+      {
+        'id': 'prod_004',
+        'name': 'Glass Water Bottle 1L',
+        'price': 15.50,
+        'stock': 156,
+        'image': '',
+        'category': 'Kitchen',
+        'sku': 'SKU-004',
+      },
+      {
+        'id': 'prod_005',
+        'name': 'Minimalist Desk Lamp',
+        'price': 45.00,
+        'stock': 8,
+        'image': '',
+        'category': 'Home',
+        'sku': 'SKU-005',
+      },
+    ];
   }
 
   String _formatTimestamp(DateTime? dateTime) {

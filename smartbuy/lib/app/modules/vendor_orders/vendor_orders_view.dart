@@ -8,148 +8,329 @@ class VendorOrdersView extends GetView<VendorOrdersController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Get.isDarkMode
-          ? AppTheme.darkBackgroundColor
-          : AppTheme.backgroundColor,
-      appBar: AppBar(
-        title: Text('orders'.tr),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => controller.fetchOrders(),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: Get.isDarkMode
+            ? AppTheme.darkBackgroundColor
+            : AppTheme.backgroundColor,
+        appBar: AppBar(
+          title: Text('orders'.tr),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                controller.fetchOrders();
+                controller.fetchPublishedProducts();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {
+                Get.snackbar(
+                  'notifications'.tr,
+                  'feature_coming_soon'.tr,
+                  snackPosition: SnackPosition.BOTTOM,
+                  duration: const Duration(seconds: 2),
+                );
+              },
+            ),
+          ],
+          bottom: TabBar(
+            labelColor: AppTheme.primaryColor,
+            unselectedLabelColor: Get.isDarkMode
+                ? AppTheme.darkTextSecondary
+                : AppTheme.textSecondary,
+            indicatorColor: AppTheme.primaryColor,
+            tabs: [
+              Tab(text: 'orders'.tr),
+              Tab(text: 'published_products'.tr),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              Get.snackbar(
-                'notifications'.tr,
-                'feature_coming_soon'.tr,
-                snackPosition: SnackPosition.BOTTOM,
-                duration: const Duration(seconds: 2),
-              );
-            },
-          ),
-        ],
+        ),
+        body: TabBarView(
+          children: [
+            _buildOrdersTab(),
+            _buildPublishedProductsTab(),
+          ],
+        ),
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    );
+  }
 
-        return RefreshIndicator(
-          onRefresh: () => controller.fetchOrders(),
-          child: Column(
-            children: [
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextField(
-                  controller: controller.searchController,
-                  onChanged: controller.onSearchChanged,
-                  decoration: InputDecoration(
-                    hintText: 'search_sku_order_id'.tr,
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Get.isDarkMode
-                          ? AppTheme.darkTextSecondary
-                          : AppTheme.textSecondary,
-                    ),
-                    filled: true,
-                    fillColor: Get.isDarkMode
-                        ? AppTheme.darkCardColor
-                        : Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+  Widget _buildOrdersTab() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      return RefreshIndicator(
+        onRefresh: () => controller.fetchOrders(),
+        child: Column(
+          children: [
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: controller.searchController,
+                onChanged: controller.onSearchChanged,
+                decoration: InputDecoration(
+                  hintText: 'search_sku_order_id'.tr,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Get.isDarkMode
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.textSecondary,
+                  ),
+                  filled: true,
+                  fillColor: Get.isDarkMode
+                      ? AppTheme.darkCardColor
+                      : Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
                   ),
                 ),
               ),
+            ),
 
-              // Filter Tabs with counts
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Obx(
-                  () => SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+            // Filter Chips with counts
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Obx(() {
+                final pending = controller.pendingCount.value;
+                final processing = controller.processingCount.value;
+                final shipped = controller.shippedCount.value;
+                final completed = controller.completedCount.value;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildFilterChip(
+                          'pending', '${'pending'.tr} ($pending)'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('processing',
+                          '${'processing'.tr} ($processing)'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip(
+                          'shipped', '${'shipped'.tr} ($shipped)'),
+                      const SizedBox(width: 8),
+                      _buildFilterChip('completed',
+                          '${'completed'.tr} ($completed)'),
+                    ],
+                  ),
+                );
+              }),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Orders List
+            Expanded(
+              child: Obx(() {
+                final orders = controller.filteredOrders;
+
+                if (orders.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildFilterChip('pending',
-                            '${'pending'.tr} (${controller.pendingCount.value})'),
-                        const SizedBox(width: 8),
-                        _buildFilterChip('processing',
-                            '${'processing'.tr} (${controller.processingCount.value})'),
-                        const SizedBox(width: 8),
-                        _buildFilterChip('shipped',
-                            '${'shipped'.tr} (${controller.shippedCount.value})'),
-                        const SizedBox(width: 8),
-                        _buildFilterChip('completed',
-                            '${'completed'.tr} (${controller.completedCount.value})'),
+                        Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 64,
+                          color: Get.isDarkMode
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'no_orders_found'.tr,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Get.isDarkMode
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ),
-              ),
+                  );
+                }
 
-              const SizedBox(height: 16),
-
-              // Orders List
-              Expanded(
-                child: Obx(
-                  () {
-                    final orders = controller.filteredOrders;
-
-                    if (orders.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.shopping_bag_outlined,
-                              size: 64,
-                              color: Get.isDarkMode
-                                  ? AppTheme.darkTextSecondary
-                                  : AppTheme.textSecondary
-                                      .withValues(alpha: 0.5),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'no_orders_found'.tr,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Get.isDarkMode
-                                    ? AppTheme.darkTextSecondary
-                                    : AppTheme.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: orders.length,
+                  itemBuilder: (context, index) {
+                    final order = orders[index];
+                    if (order['isPriority'] == true) {
+                      return _buildPriorityOrderCard(order);
                     }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: orders.length,
-                      itemBuilder: (context, index) {
-                        final order = orders[index];
-                        if (order['isPriority'] == true) {
-                          return _buildPriorityOrderCard(order);
-                        }
-                        return _buildOrderCard(order);
-                      },
-                    );
+                    return _buildOrderCard(order);
                   },
+                );
+              }),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildPublishedProductsTab() {
+    return Obx(() {
+      if (controller.isLoadingProducts.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      final products = controller.publishedProducts;
+
+      if (products.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.inventory_2_outlined,
+                size: 64,
+                color: Get.isDarkMode
+                    ? AppTheme.darkTextSecondary
+                    : AppTheme.textSecondary.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'no_published_products'.tr,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Get.isDarkMode
+                      ? AppTheme.darkTextSecondary
+                      : AppTheme.textSecondary,
                 ),
               ),
             ],
           ),
         );
-      }),
+      }
+
+      return RefreshIndicator(
+        onRefresh: () => controller.fetchPublishedProducts(),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: products.length,
+          itemBuilder: (context, index) =>
+              _buildPublishedProductCard(products[index]),
+        ),
+      );
+    });
+  }
+
+  Widget _buildPublishedProductCard(Map<String, dynamic> product) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: Get.isDarkMode
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Row(
+        children: [
+          // Product image
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: Get.isDarkMode
+                  ? Colors.grey.shade800
+                  : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: (product['image'] as String).isNotEmpty
+                  ? Image.network(
+                      product['image'],
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, e) =>
+                          const Icon(Icons.image, size: 32),
+                    )
+                  : const Icon(Icons.image, size: 32),
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Product details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product['name'] ?? '',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  product['category'] ?? '',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Get.isDarkMode
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '\$${(product['price'] as double).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.successColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${'stock'.tr}: ${product['stock']}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppTheme.successColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
