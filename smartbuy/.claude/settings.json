@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/xampp/htdocs/sb/app/Models/**)",
+      "Read(//c/xampp/htdocs/sb/routes/**)"
+    ],
+    "additionalDirectories": [
+      "C:\\xampp\\htdocs\\sb\\app\\Models",
+      "C:\\xampp\\htdocs\\sb\\app\\Http\\Controllers\\Api"
+    ]
+  }
+}

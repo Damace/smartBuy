@@ -3,6 +3,7 @@ import '../../core/constants/api_constants.dart';
 import '../../core/constants/cart_count.dart';
 import '../../data/providers/api_provider.dart';
 import '../../routes/app_pages.dart';
+import '../cart/cart_controller.dart';
 
 class HomeController extends GetxController {
   final RxList<Map<String, dynamic>> categories =
@@ -19,6 +20,13 @@ class HomeController extends GetxController {
   final RxBool isLoadingProducts = false.obs;
   final RxBool isLoadingVendorProducts = false.obs;
 
+  // Wishlist reactive state: product IDs currently in wishlist
+  final RxList<String> wishlistedIds = <String>[].obs;
+  // Maps product_id -> wishlist_item_id (needed for DELETE)
+  final Map<String, String> _wishlistItemMap = {};
+  // Product IDs whose cart-add is in-flight (prevents double-tap)
+  final RxList<String> cartAddingIds = <String>[].obs;
+
   final ApiProvider _apiProvider = ApiProvider();
 
   @override
@@ -28,6 +36,7 @@ class HomeController extends GetxController {
     loadRecommendedProducts();
     loadVendorProducts();
     loadCartCount();
+    loadWishlist();
     _loadMockCategories();
   }
 
@@ -277,26 +286,57 @@ class HomeController extends GetxController {
     }
   }
 
-  void onWishlistTapped(String productId) async {
+  void loadWishlist() async {
     try {
-      await _apiProvider.post(
-        ApiConstants.buyerWishlist,
-        data: {'product_id': int.tryParse(productId) ?? 0},
-      );
-      Get.snackbar(
-        'wishlist'.tr,
-        'item_saved'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
+      final response = await _apiProvider.get(ApiConstants.buyerWishlist);
+      final items = (response.data['wishlist'] as List? ?? []);
+      _wishlistItemMap.clear();
+      for (final item in items) {
+        final pid = item['product_id']?.toString() ?? '';
+        final wid = item['id']?.toString() ?? '';
+        if (pid.isNotEmpty && wid.isNotEmpty) {
+          _wishlistItemMap[pid] = wid;
+        }
+      }
+      wishlistedIds.value = _wishlistItemMap.keys.toList();
+    } catch (_) {}
+  }
+
+  void onWishlistTapped(String productId) async {
+    final isWishlisted = wishlistedIds.contains(productId);
+
+    // Optimistic UI update
+    if (isWishlisted) {
+      wishlistedIds.remove(productId);
+    } else {
+      wishlistedIds.add(productId);
+    }
+
+    try {
+      if (isWishlisted) {
+        final itemId = _wishlistItemMap[productId];
+        if (itemId != null) {
+          await _apiProvider.delete('${ApiConstants.buyerWishlist}/$itemId');
+          _wishlistItemMap.remove(productId);
+        }
+      } else {
+        final response = await _apiProvider.post(
+          ApiConstants.buyerWishlist,
+          data: {'product_id': int.tryParse(productId) ?? 0},
+        );
+        final itemId = response.data['item']?['id']?.toString();
+        if (itemId != null) _wishlistItemMap[productId] = itemId;
+      }
     } catch (e) {
-      // 409 means already in wishlist
-      final message = e.toString().contains('already')
-          ? 'already_in_wishlist'.tr
-          : 'wishlist_error'.tr;
+      // Revert optimistic update on failure
+      if (isWishlisted) {
+        wishlistedIds.add(productId);
+      } else {
+        wishlistedIds.remove(productId);
+      }
       Get.snackbar(
         'wishlist'.tr,
-        message,
+        'wishlist_error'.tr,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
@@ -304,6 +344,8 @@ class HomeController extends GetxController {
   }
 
   void onAddToCartTapped(String productId) async {
+    if (cartAddingIds.contains(productId)) return;
+    cartAddingIds.add(productId);
     try {
       final response = await _apiProvider.post(
         ApiConstants.addToCart,
@@ -311,6 +353,10 @@ class HomeController extends GetxController {
       );
       globalCartCount.value =
           response.data['cart_count'] ?? (globalCartCount.value + 1);
+      // Sync cart view if it is already loaded
+      try {
+        Get.find<CartController>().loadCartItems();
+      } catch (_) {}
       Get.snackbar(
         'cart'.tr,
         'item_added'.tr,
@@ -324,6 +370,8 @@ class HomeController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2),
       );
+    } finally {
+      cartAddingIds.remove(productId);
     }
   }
 }

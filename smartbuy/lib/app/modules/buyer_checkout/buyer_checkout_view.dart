@@ -163,6 +163,26 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
           const SizedBox(height: 12),
           Obx(() {
             final address = controller.deliveryAddress;
+
+            // Show loading spinner while async address fetch completes
+            if (address.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                decoration: BoxDecoration(
+                  color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Get.isDarkMode
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.grey.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
+            }
+
             return Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -195,19 +215,31 @@ class BuyerCheckoutView extends GetView<BuyerCheckoutController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          address['name'],
+                          address['name']?.toString() ?? '',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
-                            color: Get.isDarkMode ? Colors.white : AppTheme.textPrimary,
+                            color: Get.isDarkMode
+                                ? Colors.white
+                                : AppTheme.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${address['address']}, ${address['city']}, ${address['state']} ${address['zipCode']}',
+                          [
+                            address['address'],
+                            address['city'],
+                            address['state'],
+                            address['zipCode'],
+                          ]
+                              .where((v) =>
+                                  v != null && v.toString().isNotEmpty)
+                              .join(', '),
                           style: TextStyle(
                             fontSize: 12,
-                            color: Get.isDarkMode ? Colors.white70 : AppTheme.textSecondary,
+                            color: Get.isDarkMode
+                                ? Colors.white70
+                                : AppTheme.textSecondary,
                           ),
                         ),
                       ],

@@ -818,7 +818,8 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ),
                 ),
-                if (product['badge'] != null)
+                // Discount % badge — top-left, red background
+                if (hasDiscount || product['badge'] != null)
                   Positioned(
                     top: 8,
                     left: 8,
@@ -828,11 +829,13 @@ class HomeView extends GetView<HomeController> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.errorColor,
+                        color: Colors.red,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        product['badge'],
+                        hasDiscount
+                            ? '-${(((product['originalPrice'] as double) - (product['price'] as double)) / (product['originalPrice'] as double) * 100).round()}%'
+                            : product['badge'],
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -841,6 +844,42 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
                   ),
+                // Wishlist heart — top-right overlay on image
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Obx(() {
+                    final isWishlisted =
+                        controller.wishlistedIds.contains(product['id']);
+                    return GestureDetector(
+                      onTap: () =>
+                          controller.onWishlistTapped(product['id']),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          isWishlisted
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          size: 18,
+                          color: isWishlisted
+                              ? Colors.red
+                              : Colors.grey.shade600,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
               ],
             ),
 
@@ -937,33 +976,37 @@ class HomeView extends GetView<HomeController> {
                           ],
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => controller.onWishlistTapped(product['id']),
-                        child: Icon(
-                          Icons.favorite_border,
-                          size: 20,
-                          color: Get.isDarkMode
-                              ? AppTheme.darkTextSecondary
-                              : AppTheme.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () =>
-                            controller.onAddToCartTapped(product['id']),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor,
-                            borderRadius: BorderRadius.circular(6),
+                      Obx(() {
+                        final isAdding = controller.cartAddingIds
+                            .contains(product['id']);
+                        return GestureDetector(
+                          onTap: isAdding
+                              ? null
+                              : () => controller
+                                  .onAddToCartTapped(product['id']),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: isAdding
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.add_shopping_cart,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
                           ),
-                          child: const Icon(
-                            Icons.add_shopping_cart,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                        );
+                      }),
                     ],
                   ),
                 ],
