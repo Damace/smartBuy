@@ -31,14 +31,25 @@ class VendorProductsController extends GetxController {
         products.value = data.map((p) {
           final images = p['images'] as List? ?? [];
           final primaryImage = images.isNotEmpty
-              ? images.firstWhere((i) => i['is_primary'] == true, orElse: () => images.first)
+              ? images.firstWhere(
+                  (i) => i['is_primary'] == true,
+                  orElse: () => images.first,
+                )
               : null;
           return <String, dynamic>{
             'id': p['id'].toString(),
             'name': p['name'] ?? '',
-            'price': (p['price'] is String ? double.tryParse(p['price']) : p['price'] ?? 0).toDouble(),
+            'price': (p['price'] is String
+                    ? double.tryParse(p['price']) ?? 0.0
+                    : (p['price'] ?? 0))
+                .toDouble(),
             'stock': p['quantity'] ?? 0,
-            'status': _mapStatus(p['status'], p['quantity']),
+            'status': _mapStatus(
+              p['status'],
+              p['approval_status'],
+              p['quantity'],
+            ),
+            'is_published': _isPublished(p['status'], p['approval_status']),
             'image': primaryImage?['image_path'] ?? 'default',
             'images': images,
             'video_path': p['video_path'],
@@ -52,27 +63,29 @@ class VendorProductsController extends GetxController {
         }).toList().cast<Map<String, dynamic>>();
       }
     } catch (e) {
-      _loadMockProducts();
+      products.clear();
+      Helpers.showError(Helpers.parseErrorMessage(e));
     } finally {
       isLoading.value = false;
     }
   }
 
-  String _mapStatus(String? status, dynamic quantity) {
-    if (status == 'draft' || status == 'pending') return 'draft';
-    final qty = quantity is int ? quantity : int.tryParse(quantity.toString()) ?? 0;
-    if (qty <= 0) return 'out_of_stock';
-    return 'in_stock';
+  /// Returns true when the product is live (active + approved by admin).
+  bool _isPublished(String? status, String? approvalStatus) {
+    return status == 'active' && approvalStatus == 'approved';
   }
 
-  void _loadMockProducts() {
-    products.value = [
-      {'id': 'prod_001', 'name': 'Organic Wildflower Honey', 'price': 24.99, 'stock': 42, 'status': 'in_stock', 'image': 'honey'},
-      {'id': 'prod_002', 'name': 'Pro Wireless Headphones', 'price': 89.00, 'stock': 0, 'status': 'out_of_stock', 'image': 'headphones'},
-      {'id': 'prod_003', 'name': 'Smartwatch Series 7', 'price': 199.00, 'stock': 0, 'status': 'draft', 'image': 'watch'},
-      {'id': 'prod_004', 'name': 'Glass Water Bottle 1L', 'price': 15.50, 'stock': 156, 'status': 'in_stock', 'image': 'bottle'},
-      {'id': 'prod_005', 'name': 'Minimalist Desk Lamp', 'price': 45.00, 'stock': 8, 'status': 'in_stock', 'image': 'lamp'},
-    ];
+  /// Maps backend fields to one of: 'in_stock', 'out_of_stock', 'draft'.
+  ///   'in_stock'     → active + approved + quantity > 0
+  ///   'out_of_stock' → active + approved + quantity == 0
+  ///   'draft'        → anything not yet live (draft/inactive/pending/rejected)
+  String _mapStatus(
+      String? status, String? approvalStatus, dynamic quantity) {
+    if (!_isPublished(status, approvalStatus)) return 'draft';
+    final qty = quantity is int
+        ? quantity
+        : int.tryParse(quantity?.toString() ?? '0') ?? 0;
+    return qty > 0 ? 'in_stock' : 'out_of_stock';
   }
 
   // Filtered products based on selected filter and search

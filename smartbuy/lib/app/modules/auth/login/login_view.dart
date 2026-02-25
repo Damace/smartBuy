@@ -120,33 +120,37 @@ class LoginView extends GetView<LoginController> {
               ),
               const SizedBox(height: 24),
 
-              // Login Button + Fingerprint Button (side by side)
-              Obx(() {
-                final loading = controller.isLoading.value ||
-                    controller.isBiometricLoading.value;
-                return Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: loading ? null : controller.login,
-                        child: loading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
-                                ),
-                              )
-                            : Text('login'.tr),
-                      ),
+              // Login Button
+              Obx(() => SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : controller.login,
+                      child: controller.isLoading.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white),
+                              ),
+                            )
+                          : Text('login'.tr),
                     ),
-                    if (controller.isBiometricAvailable.value) ...[
-                      const SizedBox(width: 12),
-                      _BiometricButton(controller: controller),
-                    ],
-                  ],
+                  )),
+
+              // Fingerprint Login (shown below login button when available)
+              Obx(() {
+                if (!controller.isBiometricAvailable.value) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Center(
+                    child: _BiometricButton(controller: controller),
+                  ),
                 );
               }),
               const SizedBox(height: 24),
@@ -252,33 +256,53 @@ class _BiometricButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'biometric_login'.tr,
-      child: InkWell(
-        onTap: controller.isBiometricLoading.value
-            ? null
-            : controller.loginWithBiometrics,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            border: Border.all(color: AppTheme.borderColor),
-            borderRadius: BorderRadius.circular(12),
-            color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
-          ),
-          child: Obx(() => controller.isBiometricLoading.value
-              ? const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Icon(
-                  Icons.fingerprint,
-                  size: 28,
-                  color: AppTheme.primaryColor,
-                )),
+    return Obx(() {
+      final loading = controller.isBiometricLoading.value;
+      return GestureDetector(
+        onTap: loading ? null : controller.loginWithBiometrics,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                border: Border.all(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                  width: 1.5,
+                ),
+              ),
+              child: loading
+                  ? const Padding(
+                      padding: EdgeInsets.all(18),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            AppTheme.primaryColor),
+                      ),
+                    )
+                  : Icon(
+                      Icons.fingerprint,
+                      size: 34,
+                      color: AppTheme.primaryColor,
+                    ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'biometric_login'.tr,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppTheme.primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
-      ),
-    );
+      );
+    });
   }
 }

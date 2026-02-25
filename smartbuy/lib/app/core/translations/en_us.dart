@@ -453,6 +453,8 @@ const Map<String, String> enUS = {
   'in_stock_count': 'in stock',
   'out_of_stock_label': 'OUT OF STOCK',
   'draft_status': 'Draft status',
+  'draft_label': 'Draft',
+  'published_status': 'Published',
   'feature_coming_soon': 'This feature is coming soon',
 
   // Add Product

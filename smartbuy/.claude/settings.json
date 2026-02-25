@@ -5,7 +5,8 @@
       "Read(//c/xampp/htdocs/sb/routes/**)",
       "Read(//c/Users/Bedastuce/.claude/projects/e--smartBuy-smartbuy--claude-worktrees-festive-gould/**)",
       "Bash(xargs grep -l \"login\")",
-      "Bash(flutter pub get)"
+      "Bash(flutter pub get)",
+      "Bash(xargs grep -l \"vendor.*product\\\\|products\")"
     ],
     "additionalDirectories": [
       "C:\\xampp\\htdocs\\sb\\app\\Models",

@@ -346,26 +346,32 @@ class VendorProductsView extends GetView<VendorProductsController> {
     );
   }
 
+  /// Renders status badges for a product.
+  ///
+  /// Draft     → single grey "Draft" badge.
+  /// Published → blue "Published" badge + green/red stock badge side by side.
   Widget _buildStatusBadge(String status, dynamic stock) {
-    Color color;
-    String label;
-    switch (status) {
-      case 'in_stock':
-        color = AppTheme.successColor;
-        label = '$stock ${'in_stock_count'.tr}';
-        break;
-      case 'out_of_stock':
-        color = Colors.red;
-        label = 'out_of_stock_label'.tr;
-        break;
-      case 'draft':
-        color = Colors.grey;
-        label = 'draft_status'.tr;
-        break;
-      default:
-        color = Colors.grey;
-        label = status;
+    if (status == 'draft') {
+      return _pill('draft_label'.tr, Colors.grey);
     }
+
+    final stockColor =
+        status == 'in_stock' ? AppTheme.successColor : Colors.red;
+    final stockLabel = status == 'in_stock'
+        ? '$stock ${'in_stock_count'.tr}'
+        : 'out_of_stock_label'.tr;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _pill('published_status'.tr, AppTheme.primaryColor),
+        const SizedBox(width: 4),
+        _pill(stockLabel, stockColor),
+      ],
+    );
+  }
+
+  Widget _pill(String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(

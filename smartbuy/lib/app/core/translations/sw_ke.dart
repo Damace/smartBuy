@@ -457,6 +457,8 @@ const Map<String, String> swKE = {
   'in_stock_count': 'ipo ghala',
   'out_of_stock_label': 'HAIPO GHALA',
   'draft_status': 'Hali ya rasimu',
+  'draft_label': 'Rasimu',
+  'published_status': 'Imechapishwa',
   'feature_coming_soon': 'Kipengele hiki kinakuja hivi karibuni',
 
   // Add Product
