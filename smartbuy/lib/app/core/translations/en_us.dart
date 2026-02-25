@@ -901,6 +901,17 @@ const Map<String, String> enUS = {
   'notification_changes_info': 'Your changes will take effect on any device. Changes can take up to 10 minutes.',
   'notification_preferences_saved': 'Notification preferences saved successfully',
 
+  // Loading Screen Steps
+  'step_checking_connection': 'Checking network connection',
+  'step_loading_categories': 'Loading categories',
+  'step_loading_products': 'Loading products',
+  'step_loading_banners': 'Loading offers & banners',
+  'preparing_your_experience': 'Preparing your experience...',
+  'no_connection_title': 'No Internet Connection',
+  'no_connection_body': 'Make sure Wi-Fi or mobile data is turned on, then try again.',
+  'retry_connection': 'Retry',
+  'retrying': 'Retrying...',
+
   // Network Connection
   'smartbuy': 'SmartBuy',
   'whoops_no_connection': 'Whoops! No Connection',

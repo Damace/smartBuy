@@ -16,6 +16,10 @@ class VendorProductsView extends GetView<VendorProductsController> {
       appBar: AppBar(
         title: Text('my_products'.tr),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: controller.fetchProducts,
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
@@ -81,34 +85,33 @@ class VendorProductsView extends GetView<VendorProductsController> {
           // Filter Tabs
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Obx(
-              () => SingleChildScrollView(
+            child: Obx(() {
+              final selected = controller.selectedFilter.value;
+              final all = controller.allCount;
+              final published = controller.publishedCount;
+              final inStock = controller.inStockCount;
+              final outOfStock = controller.outOfStockCount;
+              final drafts = controller.draftsCount;
+              return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterChip('all', 'all'.tr, controller.allCount),
+                    _buildFilterChip('all', 'all'.tr, all, selected),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                      'in_stock',
-                      'in_stock'.tr,
-                      controller.inStockCount,
-                    ),
+                        'published', 'published_products'.tr, published, selected),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                      'out_of_stock',
-                      'out_of_stock'.tr,
-                      controller.outOfStockCount,
-                    ),
+                        'in_stock', 'in_stock'.tr, inStock, selected),
                     const SizedBox(width: 8),
                     _buildFilterChip(
-                      'drafts',
-                      'drafts'.tr,
-                      controller.draftsCount,
-                    ),
+                        'out_of_stock', 'out_of_stock'.tr, outOfStock, selected),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('drafts', 'drafts'.tr, drafts, selected),
                   ],
                 ),
-              ),
-            ),
+              );
+            }),
           ),
 
           const SizedBox(height: 16),
@@ -116,6 +119,10 @@ class VendorProductsView extends GetView<VendorProductsController> {
           // Products List
           Expanded(
             child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
               final products = controller.filteredProducts;
 
               if (products.isEmpty) {
@@ -145,13 +152,15 @@ class VendorProductsView extends GetView<VendorProductsController> {
                 );
               }
 
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return _buildProductCard(context, product);
-                },
+              return RefreshIndicator(
+                onRefresh: controller.fetchProducts,
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return _buildProductCard(context, products[index]);
+                  },
+                ),
               );
             }),
           ),
@@ -165,9 +174,9 @@ class VendorProductsView extends GetView<VendorProductsController> {
     );
   }
 
-  Widget _buildFilterChip(String value, String label, int count) {
-    final isSelected = controller.selectedFilter.value == value;
-
+  Widget _buildFilterChip(
+      String value, String label, int count, String selected) {
+    final isSelected = selected == value;
     return GestureDetector(
       onTap: () => controller.changeFilter(value),
       child: Container(
@@ -176,27 +185,27 @@ class VendorProductsView extends GetView<VendorProductsController> {
           color: isSelected
               ? AppTheme.primaryColor
               : Get.isDarkMode
-              ? AppTheme.darkCardColor
-              : Colors.white,
+                  ? AppTheme.darkCardColor
+                  : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? AppTheme.primaryColor
                 : Get.isDarkMode
-                ? AppTheme.darkCardColor
-                : Colors.grey.shade300,
+                    ? AppTheme.darkCardColor
+                    : Colors.grey.shade300,
           ),
         ),
         child: Text(
-          label,
+          '$label ($count)',
           style: TextStyle(
             color: isSelected
                 ? Colors.white
                 : Get.isDarkMode
-                ? AppTheme.darkTextPrimary
-                : AppTheme.textPrimary,
+                    ? AppTheme.darkTextPrimary
+                    : AppTheme.textPrimary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            fontSize: 14,
+            fontSize: 13,
           ),
         ),
       ),
@@ -204,6 +213,10 @@ class VendorProductsView extends GetView<VendorProductsController> {
   }
 
   Widget _buildProductCard(BuildContext context, Map<String, dynamic> product) {
+    final imageUrl = product['image'] != null && product['image'] != 'default'
+        ? '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/${product['image']}'
+        : null;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -223,92 +236,86 @@ class VendorProductsView extends GetView<VendorProductsController> {
       child: Row(
         children: [
           // Product Image
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: product['image'] != null && product['image'] != 'default'
-                  ? InkWell(
-                      onTap: () {
-                        showProductBottomSheet(context);
-                      },
-                      child: Image.network(
-                        '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/${product['image']}',
+          GestureDetector(
+            onTap: () => _showProductBottomSheet(context, product),
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: imageUrl != null
+                    ? Image.network(
+                        imageUrl,
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Icon(
-                          _getProductIcon(product['image']),
+                          Icons.inventory_2,
                           color: AppTheme.primaryColor,
                           size: 28,
                         ),
+                      )
+                    : Icon(
+                        Icons.inventory_2,
+                        color: AppTheme.primaryColor,
+                        size: 28,
                       ),
-                    )
-                  : Icon(
-                      _getProductIcon(product['image'] ?? ''),
-                      color: AppTheme.primaryColor,
-                      size: 28,
-                    ),
+              ),
             ),
           ),
           const SizedBox(width: 12),
 
           // Product Info
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product['name'],
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Get.isDarkMode
-                        ? AppTheme.darkTextPrimary
-                        : AppTheme.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Text(
-                      '\$${product['price'].toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryColor,
-                      ),
+            child: GestureDetector(
+              onTap: () => _showProductBottomSheet(context, product),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product['name'] ?? '',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Get.isDarkMode
+                          ? AppTheme.darkTextPrimary
+                          : AppTheme.textPrimary,
                     ),
-                    const SizedBox(width: 8),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  if ((product['category'] as String? ?? '').isNotEmpty)
                     Text(
-                      '•',
+                      product['category'],
                       style: TextStyle(
+                        fontSize: 12,
                         color: Get.isDarkMode
                             ? AppTheme.darkTextSecondary
                             : AppTheme.textSecondary,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _getStatusText(product['status'], product['stock']),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _getStatusColor(product['status']),
-                        fontWeight: product['status'] == 'out_of_stock'
-                            ? FontWeight.w600
-                            : FontWeight.normal,
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        '\$${(product['price'] as double).toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryColor,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 8),
+                      _buildStatusBadge(product['status'], product['stock']),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -326,7 +333,7 @@ class VendorProductsView extends GetView<VendorProductsController> {
               const SizedBox(width: 8),
               IconButton(
                 icon: const Icon(Icons.delete_outline),
-                color: AppTheme.primaryColor,
+                color: Colors.red,
                 iconSize: 20,
                 onPressed: () => controller.deleteProduct(product),
                 padding: EdgeInsets.zero,
@@ -339,215 +346,256 @@ class VendorProductsView extends GetView<VendorProductsController> {
     );
   }
 
-  IconData _getProductIcon(String imageName) {
-    switch (imageName) {
-      case 'honey':
-        return Icons.water_drop;
-      case 'headphones':
-        return Icons.headphones;
-      case 'watch':
-        return Icons.watch;
-      case 'bottle':
-        return Icons.local_drink;
-      case 'lamp':
-        return Icons.lightbulb_outline;
-      default:
-        return Icons.inventory_2;
-    }
-  }
-
-  String _getStatusText(String status, int stock) {
+  Widget _buildStatusBadge(String status, dynamic stock) {
+    Color color;
+    String label;
     switch (status) {
       case 'in_stock':
-        return '$stock ${'in_stock_count'.tr}';
+        color = AppTheme.successColor;
+        label = '$stock ${'in_stock_count'.tr}';
+        break;
       case 'out_of_stock':
-        return 'out_of_stock_label'.tr;
+        color = Colors.red;
+        label = 'out_of_stock_label'.tr;
+        break;
       case 'draft':
-        return 'draft_status'.tr;
+        color = Colors.grey;
+        label = 'draft_status'.tr;
+        break;
       default:
-        return '';
+        color = Colors.grey;
+        label = status;
     }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'in_stock':
-        return Get.isDarkMode
-            ? AppTheme.darkTextSecondary
-            : AppTheme.textSecondary;
-      case 'out_of_stock':
-        return Colors.red;
-      case 'draft':
-        return Get.isDarkMode
-            ? AppTheme.darkTextSecondary
-            : AppTheme.textSecondary;
-      default:
-        return Get.isDarkMode
-            ? AppTheme.darkTextSecondary
-            : AppTheme.textSecondary;
-    }
-  }
+  void _showProductBottomSheet(
+      BuildContext context, Map<String, dynamic> product) {
+    final imageUrl = product['image'] != null && product['image'] != 'default'
+        ? '${ApiConstants.baseUrl.replaceAll('/api', '')}/storage/${product['image']}'
+        : null;
 
-  void showProductBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.85,
+          initialChildSize: 0.75,
           minChildSize: 0.5,
           maxChildSize: 0.95,
-          builder: (_, controller) {
+          builder: (_, scrollController) {
             return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+              decoration: BoxDecoration(
+                color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: SingleChildScrollView(
-                controller: controller,
-                padding: const EdgeInsets.all(16),
+                controller: scrollController,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /// Drag Handle
+                    // Drag Handle
                     Center(
                       child: Container(
                         width: 40,
                         height: 5,
-                        margin: const EdgeInsets.only(bottom: 16),
+                        margin: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
 
-                    /// Product Image + Badge
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.network(
-                            "https://via.placeholder.com/400x250",
-                            height: 220,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                    // Product Image
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: imageUrl != null
+                                ? Image.network(
+                                    imageUrl,
+                                    height: 220,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, e) => Container(
+                                      height: 220,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor
+                                            .withValues(alpha: 0.1),
+                                        borderRadius:
+                                            BorderRadius.circular(16),
+                                      ),
+                                      child: const Icon(
+                                        Icons.inventory_2,
+                                        size: 72,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    height: 220,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primaryColor
+                                          .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.inventory_2,
+                                      size: 72,
+                                      color: AppTheme.primaryColor,
+                                    ),
+                                  ),
                           ),
-                        ),
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              "DRAFT STATUS",
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          // Status badge overlay
+                          Positioned(
+                            top: 12,
+                            right: 12,
+                            child: _buildStatusBadge(
+                              product['status'],
+                              product['stock'],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    /// Product Name
-                    const Text(
-                      "ProductTwo",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        ],
                       ),
                     ),
 
-                    const SizedBox(height: 6),
-
-                    /// Price
-                    Row(
-                      children: const [
-                        Text(
-                          "\$120.00",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.bold,
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Name
+                          Text(
+                            product['name'] ?? '',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Get.isDarkMode
+                                  ? AppTheme.darkTextPrimary
+                                  : AppTheme.textPrimary,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          "Price Fixed",
-                          style: TextStyle(fontSize: 14, color: Colors.orange),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(height: 6),
 
-                    const SizedBox(height: 20),
-
-                    /// Details Grid
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        // ProductInfo(title: "CATEGORY", value: "Fashion"),
-                        // ProductInfo(title: "STOCK QUANTITY", value: "48 Units"),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        // ProductInfo(title: "SKU", value: "PR-009"),
-                        // ProductInfo(title: "VENDOR", value: "John & Co"),
-                      ],
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// Buttons Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                          // Category
+                          if ((product['category'] as String? ?? '')
+                              .isNotEmpty)
+                            Text(
+                              product['category'],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Get.isDarkMode
+                                    ? AppTheme.darkTextSecondary
+                                    : AppTheme.textSecondary,
                               ),
                             ),
-                            onPressed: () {},
-                            child: const Text(
-                              "Edit Product",
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {},
-                          ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(height: 12),
 
-                    const SizedBox(height: 20),
+                          // Price row
+                          Row(
+                            children: [
+                              Text(
+                                '\$${(product['price'] as double).toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if ((product['sale_price'] != null &&
+                                  product['sale_price'].toString() != '0.0' &&
+                                  product['sale_price'].toString() !=
+                                      '0.00')) ...[
+                                const SizedBox(width: 10),
+                                Text(
+                                  'sale_price'.tr,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppTheme.successColor,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Details grid
+                          _buildDetailRow(
+                            'sku_label'.tr,
+                            product['sku']?.toString() ?? '-',
+                          ),
+                          const SizedBox(height: 8),
+                          _buildDetailRow(
+                            'quantity_in_stock'.tr,
+                            '${product['stock']} ${'units'.tr}',
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Action Buttons
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    Get.back();
+                                    controller.editProduct(product);
+                                  },
+                                  icon: const Icon(Icons.edit_outlined,
+                                      size: 18),
+                                  label: Text('edit_product'.tr),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.delete_outline,
+                                      color: Colors.red),
+                                  onPressed: () {
+                                    Get.back();
+                                    controller.deleteProduct(product);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -555,6 +603,33 @@ class VendorProductsView extends GetView<VendorProductsController> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextSecondary
+                : AppTheme.textSecondary,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Get.isDarkMode
+                ? AppTheme.darkTextPrimary
+                : AppTheme.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }

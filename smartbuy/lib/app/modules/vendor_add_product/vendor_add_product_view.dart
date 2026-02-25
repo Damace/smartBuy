@@ -997,7 +997,11 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                   : AppTheme.textSecondary,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          // Uploaded Product Summary
+          _buildProductSummaryCard(),
+          const SizedBox(height: 8),
 
           // Shipping Logistics
           Text(
@@ -1276,11 +1280,11 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
           const SizedBox(height: 40),
 
           // Publish Button
-          SizedBox(
+          Obx(() => SizedBox(
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-              onPressed: controller.nextStep,
+              onPressed: controller.isLoading.value ? null : controller.nextStep,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 foregroundColor: Colors.white,
@@ -1288,17 +1292,167 @@ class VendorAddProductView extends GetView<VendorAddProductController> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text(
-                'review_publish'.tr,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: controller.isLoading.value
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : Text(
+                      'review_publish'.tr,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
-          ),
+          )),
         ],
       ),
     );
+  }
+
+  Widget _buildProductSummaryCard() {
+    return Obx(() => Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? AppTheme.darkCardColor : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppTheme.primaryColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Cover image
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: Get.isDarkMode
+                      ? Colors.grey.shade800
+                      : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: controller.coverImage.value != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          controller.coverImage.value!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Icon(
+                        Icons.image_outlined,
+                        size: 32,
+                        color: Get.isDarkMode
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.textSecondary,
+                      ),
+              ),
+              const SizedBox(width: 12),
+
+              // Product info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.productNameController.text.isNotEmpty
+                          ? controller.productNameController.text
+                          : 'unnamed_product'.tr,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (controller.selectedCategory.value.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        controller.selectedCategory.value,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Get.isDarkMode
+                              ? AppTheme.darkTextSecondary
+                              : AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Text(
+                          '\$${controller.regularPriceController.text}',
+                          style: const TextStyle(
+                            color: AppTheme.primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.successColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '${controller.quantityInStock.value} ${'in_stock_count'.tr}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.successColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          // Uploaded product images strip
+          if (controller.productImages.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 56,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: controller.productImages.length,
+                itemBuilder: (context, index) => Container(
+                  width: 56,
+                  height: 56,
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    color: Get.isDarkMode
+                        ? Colors.grey.shade800
+                        : Colors.grey.shade100,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.file(
+                      controller.productImages[index],
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    ));
   }
 }

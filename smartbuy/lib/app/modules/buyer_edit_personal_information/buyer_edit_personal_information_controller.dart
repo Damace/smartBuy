@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/constants/api_constants.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/utils/helpers.dart';
 import '../../data/providers/api_provider.dart';
 
@@ -30,12 +31,16 @@ class BuyerEditPersonalInformationController extends GetxController {
 
   // Country codes
   final List<String> countryCodes = [
-    '+1',
-    '+44',
-    '+254',
-    '+91',
-    '+86',
-    '+81',
+    '+254', // Kenya
+    '+255', // Tanzania
+    '+256', // Uganda
+    '+250', // Rwanda
+    '+251', // Ethiopia
+    '+1',   // USA/Canada
+    '+44',  // UK
+    '+91',  // India
+    '+27',  // South Africa
+    '+234', // Nigeria
   ];
 
   // Gender options
@@ -63,34 +68,62 @@ class BuyerEditPersonalInformationController extends GetxController {
     isLoading.value = true;
     try {
       final response = await _apiProvider.get(ApiConstants.buyerProfile);
-      final buyer = response.data['buyer'];
+      final buyer = response.data['buyer'] as Map<String, dynamic>;
 
       fullNameController.text = buyer['name'] ?? '';
       emailController.text = buyer['email'] ?? '';
       phoneController.text = buyer['phone'] ?? '';
-      selectedCountryCode.value = buyer['country_code'] ?? '+1';
-      selectedGender.value = buyer['gender'] ?? 'Female';
-      isEmailVerified.value = buyer['email_verified'] ?? false;
-      profilePhotoUrl.value = buyer['profile_photo'] ?? '';
-      isBuyerAccount.value = buyer['status'] == 'active';
+
+      final code = buyer['country_code']?.toString() ?? '';
+      selectedCountryCode.value =
+          countryCodes.contains(code) ? code : countryCodes.first;
+
+      final gender = buyer['gender']?.toString() ?? '';
+      selectedGender.value =
+          genderOptions.contains(gender) ? gender : genderOptions[1];
+
+      isEmailVerified.value = buyer['email_verified'] == true;
+      profilePhotoUrl.value = buyer['profile_photo']?.toString() ?? '';
+      isBuyerAccount.value = buyer['status']?.toString() == 'active';
+
+      // Keep local storage in sync with server data
+      _saveToStorage(buyer);
     } catch (e) {
       _loadFromStorage();
-      Helpers.showError(Helpers.parseErrorMessage(e));
     } finally {
       isLoading.value = false;
     }
   }
 
   void _loadFromStorage() {
-    fullNameController.text = storage.read('fullName') ?? 'Alex Johnson';
-    emailController.text =
-        storage.read('email') ?? 'alex.johnson@example.com';
-    phoneController.text = storage.read('phone') ?? '202-555-0123';
-    selectedCountryCode.value = storage.read('countryCode') ?? '+1';
-    selectedGender.value = storage.read('gender') ?? 'Female';
-    isEmailVerified.value = storage.read('emailVerified') ?? true;
-    isBuyerAccount.value = storage.read('isBuyerAccount') ?? true;
-    profilePhotoUrl.value = storage.read('profilePhoto') ?? '';
+    final userData = storage.read(AppConstants.storageKeyUser);
+    if (userData is Map) {
+      fullNameController.text = userData['name']?.toString() ?? '';
+      emailController.text = userData['email']?.toString() ?? '';
+      phoneController.text = userData['phone']?.toString() ?? '';
+
+      final code = userData['country_code']?.toString() ?? '';
+      selectedCountryCode.value =
+          countryCodes.contains(code) ? code : countryCodes.first;
+
+      final gender = userData['gender']?.toString() ?? '';
+      selectedGender.value =
+          genderOptions.contains(gender) ? gender : genderOptions[1];
+
+      isEmailVerified.value = userData['email_verified'] == true;
+      profilePhotoUrl.value =
+          (userData['profile_photo'] ?? userData['avatar_url'])?.toString() ?? '';
+      isBuyerAccount.value = userData['status']?.toString() == 'active';
+    }
+  }
+
+  void _saveToStorage(Map<String, dynamic> buyer) {
+    final existing =
+        storage.read(AppConstants.storageKeyUser) as Map? ?? {};
+    storage.write(AppConstants.storageKeyUser, {
+      ...existing,
+      ...buyer,
+    });
   }
 
   void setCountryCode(String? code) {
@@ -196,12 +229,14 @@ class BuyerEditPersonalInformationController extends GetxController {
         },
       );
 
-      // Also save to local storage
-      storage.write('fullName', fullNameController.text);
-      storage.write('email', emailController.text);
-      storage.write('phone', phoneController.text);
-      storage.write('countryCode', selectedCountryCode.value);
-      storage.write('gender', selectedGender.value);
+      // Keep local storage in sync
+      _saveToStorage({
+        'name': fullNameController.text,
+        'email': emailController.text,
+        'phone': phoneController.text,
+        'country_code': selectedCountryCode.value,
+        'gender': selectedGender.value,
+      });
 
       Helpers.showSuccess('profile_updated_successfully'.tr);
       Get.back();

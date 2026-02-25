@@ -3,7 +3,7 @@ class ApiConstants {
 
   // Base URL - Will be configured for Laravel backend
   //static const String baseUrl = 'https://smartbuy.sutech.co.tz/api';
-  static const String baseUrl = 'http://192.168.43.158:8000/api';
+  static const String baseUrl = 'http://192.168.1.181:8000/api';
 
   // Auth Endpoints
   static const String login = '/auth/login';

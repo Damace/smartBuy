@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php artisan migrate:*)"
+      "Bash(php artisan migrate:*)",
+      "Bash(\"e:/smartBuy/smartbuy/.claude/worktrees/festive-gould/smartbuy/android/app/src/main/res/drawable-v21/launch_background.xml\":*)"
     ]
   }
 }

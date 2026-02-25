@@ -104,8 +104,8 @@ class AppPages {
       name: _Paths.SPLASH,
       page: () => const SplashView(),
       binding: SplashBinding(),
-      // transition: Transition.fade,
-      // transitionDuration: const Duration(milliseconds: 1000),
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 600),
     ),
     GetPage(
       name: _Paths.ONBOARDING,

@@ -6,7 +6,7 @@ import '../../data/providers/api_provider.dart';
 import '../../routes/app_pages.dart';
 
 class VendorProductsController extends GetxController {
-  final RxString selectedFilter = 'all'.obs;
+  final RxString selectedFilter = 'published'.obs;
   final RxString searchQuery = ''.obs;
   final TextEditingController searchController = TextEditingController();
   final RxBool isLoading = false.obs;
@@ -84,6 +84,9 @@ class VendorProductsController extends GetxController {
         case 'all':
           matchesFilter = true;
           break;
+        case 'published':
+          matchesFilter = product['status'] != 'draft';
+          break;
         case 'in_stock':
           matchesFilter = product['status'] == 'in_stock';
           break;
@@ -111,6 +114,8 @@ class VendorProductsController extends GetxController {
 
   // Get product count by status
   int get allCount => products.length;
+  int get publishedCount =>
+      products.where((p) => p['status'] != 'draft').length;
   int get inStockCount =>
       products.where((p) => p['status'] == 'in_stock').length;
   int get outOfStockCount =>

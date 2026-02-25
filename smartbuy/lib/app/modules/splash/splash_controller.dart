@@ -1,6 +1,6 @@
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import '../../routes/app_pages.dart';
-import '../../core/constants/app_constants.dart';
 import 'package:get_storage/get_storage.dart';
 
 class SplashController extends GetxController {
@@ -14,35 +14,17 @@ class SplashController extends GetxController {
   }
 
   Future<void> _initializeApp() async {
-    // Quick progress animation (total ~800ms for branding visibility)
+    // Remove native splash now that Flutter splash is visible
+    FlutterNativeSplash.remove();
+
+    // Progress animation (~2s total for animations to fully play)
     for (int i = 0; i <= 100; i += 5) {
-      await Future.delayed(const Duration(milliseconds: 8));
+      await Future.delayed(const Duration(milliseconds: 95));
       progress.value = i / 100;
     }
     progress.value = 1.0;
 
-    // Remove native splash screen now that Flutter UI is ready
-    // FlutterNativeSplash.remove();
-
-    // Check if user is logged in
-    final token = storage.read(AppConstants.storageKeyToken);
-    final isFirstTime = storage.read(AppConstants.storageKeyIsFirstTime);
-
-    if (token != null) {
-      // Check user data for type
-      final userData = storage.read(AppConstants.storageKeyUser);
-      final userType = (userData is Map) ? userData['role'] : null;
-      if (userType == 'vendor') {
-        Get.offNamed(Routes.VENDOR_HOME);
-      } else {
-        //Get.offAllNamed(Routes.LOADING_SCREEN);
-        Get.offAllNamed(Routes.HOME);
-      }
-    } else if (isFirstTime != false) {
-      // Get.offNamed(Routes.ONBOARDING); Remind me to edit here
-      Get.offNamed(Routes.LOGIN);
-    } else {
-      Get.offNamed(Routes.LOGIN);
-    }
+    // Hand off to LoadingScreen for connectivity check + API pre-loading
+    Get.offNamed(Routes.LOADING_SCREEN);
   }
 }

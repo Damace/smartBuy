@@ -288,10 +288,15 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
           const SizedBox(height: 12),
-          Obx(
-            () => AnimatedSmoothIndicator(
-              activeIndex: controller.currentBannerIndex.value,
-              count: controller.banners.length,
+          Obx(() {
+            final count = controller.banners.length;
+            if (count == 0) return const SizedBox.shrink();
+            return AnimatedSmoothIndicator(
+              activeIndex: controller.currentBannerIndex.value.clamp(
+                0,
+                count - 1,
+              ),
+              count: count,
               effect: ExpandingDotsEffect(
                 dotHeight: 6,
                 dotWidth: 6,
@@ -300,8 +305,8 @@ class HomeView extends GetView<HomeController> {
                     ? AppTheme.darkTextSecondary.withOpacity(0.3)
                     : Colors.grey.shade300,
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -416,17 +421,44 @@ class HomeView extends GetView<HomeController> {
         width: 72,
         child: Column(
           children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: Color(category['color']).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _getCategoryIcon(category['icon']),
-                color: Color(category['color']),
-                size: 28,
+            // Container(
+            //   width: 72,
+            //   height: 72,
+            //   decoration: BoxDecoration(
+            //     shape: BoxShape.circle,
+            //     color: Color(category['color']).withOpacity(0.15),
+            //     boxShadow: [
+            //       BoxShadow(
+            //         color: Color(category['color']).withOpacity(0.25),
+            //         blurRadius: 25,
+            //         spreadRadius: 5,
+            //         offset: const Offset(0, 10),
+            //       ),
+            //     ],
+            //   ),
+            //   child: Center(
+            //     child: Icon(
+            //       _getCategoryIcon(category['icon']),
+            //       color: Color(category['color']),
+            //       size: 28,
+            //     ),
+            //   ),
+            // ),
+            Card(
+              elevation: 10,
+              shadowColor: Color(category['color']).withOpacity(0.4),
+              shape: const CircleBorder(),
+              color: Color(category['color']).withOpacity(0.12),
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: Center(
+                  child: Icon(
+                    _getCategoryIcon(category['icon']),
+                    color: Color(category['color']),
+                    size: 40,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 8),

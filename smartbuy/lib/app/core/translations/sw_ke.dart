@@ -897,6 +897,17 @@ const Map<String, String> swKE = {
   // Network Connection
   'smartbuy': 'SmartBuy',
   'whoops_no_connection': 'Lo! Hakuna Muunganisho',
+  // Loading Screen Steps
+  'step_checking_connection': 'Kuangalia muunganisho wa mtandao',
+  'step_loading_categories': 'Kupakia makundi',
+  'step_loading_products': 'Kupakia bidhaa',
+  'step_loading_banners': 'Kupakia matangazo na ofa',
+  'preparing_your_experience': 'Inakuandalia uzoefu wako...',
+  'no_connection_title': 'Hakuna Muunganisho wa Mtandao',
+  'no_connection_body': 'Hakikisha Wi-Fi au data ya simu imewashwa, kisha jaribu tena.',
+  'retry_connection': 'Jaribu Tena',
+  'retrying': 'Inajaribu tena...',
+
   'check_internet_settings': 'Tafadhali angalia mipangilio yako ya mtandao na ujaribu tena',
   'retry': 'Jaribu Tena',
   'check_settings': 'Angalia Mipangilio',
