@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../core/themes/app_theme.dart';
 import '../../core/utils/theme_controller.dart';
 import '../../core/utils/helpers.dart';
-import '../../routes/app_pages.dart';
+
 
 class SettingsController extends GetxController {
   final ThemeController themeController = Get.find<ThemeController>();
@@ -22,11 +22,34 @@ class SettingsController extends GetxController {
   }
 
   void openSecurity() {
-    Helpers.showInfo('security'.tr);
+    Helpers.showBottomSheet(
+      icon: Icons.security,
+      iconColor: AppTheme.primaryColor,
+      title: 'security'.tr,
+      message:
+          'Your account is protected with industry-standard encryption.\n\n'
+          '• Change your password regularly\n'
+          '• Enable two-factor authentication for extra protection\n'
+          '• Never share your login credentials with anyone\n'
+          '• Log out from shared or public devices after use',
+      buttonText: 'Got it',
+    );
   }
 
   void openNotifications() {
-    Get.toNamed(Routes.BUYER_NOTIFICATION_PREFERENCES);
+    Helpers.showBottomSheet(
+      icon: Icons.notifications_active,
+      iconColor: AppTheme.primaryColor,
+      title: 'notifications'.tr,
+      message:
+          'Stay up to date with your SmartBuy activity.\n\n'
+          '• Order updates and delivery alerts\n'
+          '• Exclusive deals and flash sale reminders\n'
+          '• Price drop alerts on wishlisted items\n'
+          '• Account activity and security notices\n\n'
+          'You can manage notification preferences in your device settings.',
+      buttonText: 'Got it',
+    );
   }
 
   void showCurrencyPicker() {
@@ -102,15 +125,52 @@ class SettingsController extends GetxController {
   }
 
   void openHelpCenter() {
-    Helpers.showInfo('Opening Help Center...');
+    Helpers.showBottomSheet(
+      icon: Icons.help_center,
+      iconColor: AppTheme.primaryColor,
+      title: 'help_center'.tr,
+      message:
+          'We\'re here to help you 24/7.\n\n'
+          '• Browse our FAQ for quick answers\n'
+          '• Chat with our support team live\n'
+          '• Report an issue with your order or account\n'
+          '• Track refunds and return requests\n\n'
+          'Contact us: support@smartbuy.com\n'
+          'Phone: +1 234 567 890',
+      buttonText: 'Got it',
+    );
   }
 
   void openTermsOfService() {
-    Helpers.showInfo('Opening Terms of Service...');
+    Helpers.showBottomSheet(
+      icon: Icons.description,
+      iconColor: AppTheme.primaryColor,
+      title: 'terms_of_service'.tr,
+      message:
+          'By using SmartBuy, you agree to our Terms of Service.\n\n'
+          '• You must be 18+ to create an account\n'
+          '• All purchases are subject to our return policy\n'
+          '• Misuse of the platform may result in account suspension\n'
+          '• SmartBuy is not liable for vendor product descriptions\n\n'
+          'Full terms are available at smartbuy.com/terms',
+      buttonText: 'Understood',
+    );
   }
 
   void openPrivacyPolicy() {
-    Helpers.showInfo('Opening Privacy Policy...');
+    Helpers.showBottomSheet(
+      icon: Icons.privacy_tip,
+      iconColor: AppTheme.primaryColor,
+      title: 'privacy_policy'.tr,
+      message:
+          'Your privacy matters to us.\n\n'
+          '• We collect only the data needed to serve you\n'
+          '• Your payment info is encrypted and never stored in plain text\n'
+          '• We do not sell your personal data to third parties\n'
+          '• You can request data deletion at any time\n\n'
+          'Full policy available at smartbuy.com/privacy',
+      buttonText: 'Understood',
+    );
   }
 
   Future<void> deactivateAccount() async {
