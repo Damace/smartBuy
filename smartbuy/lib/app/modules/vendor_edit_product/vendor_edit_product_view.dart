@@ -237,27 +237,39 @@ class VendorEditProductView extends GetView<VendorEditProductController> {
           const SizedBox(height: 16),
 
           // Save Changes Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: controller.saveChanges,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          Obx(() {
+            final loading = controller.isLoading.value;
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: loading ? null : controller.saveChanges,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
+                child: loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        'save_changes'.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
-              child: Text(
-                'save_changes'.tr,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -362,27 +374,39 @@ class VendorEditProductView extends GetView<VendorEditProductController> {
           const SizedBox(height: 24),
 
           // Update Inventory Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: controller.updateInventory,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          Obx(() {
+            final loading = controller.isLoading.value;
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: loading ? null : controller.updateInventory,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
+                child: loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        'update_inventory'.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
-              child: Text(
-                'update_inventory'.tr,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -528,27 +552,39 @@ class VendorEditProductView extends GetView<VendorEditProductController> {
           const SizedBox(height: 24),
 
           // Remove & Update Product Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: controller.removeAndUpdateProduct,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          Obx(() {
+            final loading = controller.isLoading.value;
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: loading ? null : controller.removeAndUpdateProduct,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
+                child: loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Text(
+                        'remove_update_product'.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
-              child: Text(
-                'remove_update_product'.tr,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -908,7 +944,7 @@ class VendorEditProductView extends GetView<VendorEditProductController> {
         const SizedBox(height: 8),
         Obx(
           () => GestureDetector(
-            onTap: controller.selectCategory,
+            onTap: controller.categories.isEmpty ? null : controller.selectCategory,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
@@ -923,21 +959,28 @@ class VendorEditProductView extends GetView<VendorEditProductController> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    controller.selectedCategory.value.isEmpty
-                        ? 'select_category'.tr
-                        : controller.selectedCategory.value,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: controller.selectedCategory.value.isEmpty
-                          ? (Get.isDarkMode
-                              ? AppTheme.darkTextSecondary
-                              : AppTheme.textSecondary)
-                          : (Get.isDarkMode
-                              ? AppTheme.darkTextPrimary
-                              : AppTheme.textPrimary),
+                  if (controller.categories.isEmpty)
+                    const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    Text(
+                      controller.selectedCategory.value.isEmpty
+                          ? 'select_category'.tr
+                          : controller.selectedCategory.value,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: controller.selectedCategory.value.isEmpty
+                            ? (Get.isDarkMode
+                                ? AppTheme.darkTextSecondary
+                                : AppTheme.textSecondary)
+                            : (Get.isDarkMode
+                                ? AppTheme.darkTextPrimary
+                                : AppTheme.textPrimary),
+                      ),
                     ),
-                  ),
                   const Icon(Icons.keyboard_arrow_down),
                 ],
               ),

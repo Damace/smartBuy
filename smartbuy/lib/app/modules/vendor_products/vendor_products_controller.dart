@@ -54,7 +54,7 @@ class VendorProductsController extends GetxController {
             'images': images,
             'video_path': p['video_path'],
             'description': p['description'] ?? '',
-            'category': p['category']?['name'] ?? '',
+            'category': p['category']?.toString() ?? '',
             'sale_price': p['sale_price'],
             'sku': p['sku'] ?? '',
             'weight': p['weight'],

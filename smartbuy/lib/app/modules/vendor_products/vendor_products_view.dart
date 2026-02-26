@@ -300,20 +300,16 @@ class VendorProductsView extends GetView<VendorProductsController> {
                       ),
                     ),
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        '\$${(product['price'] as double).toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildStatusBadge(product['status'], product['stock']),
-                    ],
+                  Text(
+                    '\$${(product['price'] as double).toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                    ),
                   ),
+                  const SizedBox(height: 4),
+                  _buildStatusBadge(product['status'], product['stock']),
                 ],
               ),
             ),

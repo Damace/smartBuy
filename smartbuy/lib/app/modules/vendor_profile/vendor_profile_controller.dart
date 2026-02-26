@@ -1,35 +1,96 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import '../../core/constants/api_constants.dart';
+import '../../core/constants/app_constants.dart';
+import '../../data/providers/api_provider.dart';
 import '../../routes/app_pages.dart';
 
 class VendorProfileController extends GetxController {
   final storage = GetStorage();
+  final ApiProvider _apiProvider = ApiProvider();
 
   // Store Information
-  final RxString storeName = 'SmartBuy Official Store'.obs;
+  final RxString storeName = ''.obs;
   final RxString storeLogoUrl = ''.obs;
-  final RxString memberSince = 'April 2022'.obs;
-  final RxBool isTopRated = true.obs;
-  final RxBool isVerified = true.obs;
+  final RxString memberSince = ''.obs;
+  final RxBool isTopRated = false.obs;
+  final RxBool isVerified = false.obs;
+  final RxBool isLoading = false.obs;
 
   // Statistics
-  final RxString totalSales = '\$12,450'.obs;
-  final RxInt activeProducts = 142.obs;
-  final RxDouble rating = 4.8.obs;
+  final RxString totalSales = '—'.obs;
+  final RxInt activeProducts = 0.obs;
+  final RxDouble rating = 0.0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadVendorData();
+    _loadFromStorage();
+    _fetchActiveProductCount();
+  }
+
+  void _loadFromStorage() {
+    final vendor = storage.read(AppConstants.storageKeyUser);
+    if (vendor == null) return;
+
+    storeName.value = vendor['business_name']?.toString() ?? '';
+    isVerified.value = vendor['verification_status'] == 'verified';
+
+    // Format created_at → "MMM YYYY"
+    final createdAt = vendor['created_at']?.toString();
+    if (createdAt != null && createdAt.isNotEmpty) {
+      try {
+        final date = DateTime.parse(createdAt);
+        const months = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ];
+        memberSince.value = '${months[date.month - 1]} ${date.year}';
+      } catch (_) {
+        memberSince.value = createdAt;
+      }
+    }
+
+    // total_sales → formatted currency string
+    final sales = vendor['total_sales'];
+    if (sales != null) {
+      final amount = double.tryParse(sales.toString()) ?? 0.0;
+      totalSales.value = '\$${amount.toStringAsFixed(0)}';
+    }
+
+    // rating
+    final r = vendor['rating'];
+    if (r != null) {
+      rating.value = double.tryParse(r.toString()) ?? 0.0;
+      isTopRated.value = rating.value >= 4.5;
+    }
+  }
+
+  Future<void> _fetchActiveProductCount() async {
+    isLoading.value = true;
+    try {
+      final response = await _apiProvider.get(ApiConstants.vendorProducts);
+      final data = response.data;
+      if (data is Map) {
+        // Laravel paginate returns `total` at top level
+        final total = data['total'];
+        if (total != null) {
+          activeProducts.value =
+              total is int ? total : int.tryParse(total.toString()) ?? 0;
+        } else {
+          final list = data['data'];
+          if (list is List) activeProducts.value = list.length;
+        }
+      }
+    } catch (_) {
+      // Keep default 0
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void loadVendorData() {
-    // Load vendor data from storage
-    storeName.value = storage.read('storeName') ?? 'SmartBuy Official Store';
-    memberSince.value = storage.read('memberSince') ?? 'April 2022';
-    totalSales.value = storage.read('totalSales') ?? '\$12,450';
-    activeProducts.value = storage.read('activeProducts') ?? 142;
-    rating.value = storage.read('rating') ?? 4.8;
+    _loadFromStorage();
   }
 
   void navigateToBusinessProfile() {

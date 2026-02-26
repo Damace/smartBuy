@@ -61,7 +61,7 @@ class VendorEditProductController extends GetxController {
     'Navy Blue',
     'Slate Gray',
     'Black',
-    'White'
+    'White',
   ];
 
   // Shipping Information
@@ -109,16 +109,29 @@ class VendorEditProductController extends GetxController {
       final response = await _apiProvider.get(ApiConstants.categories);
       final data = response.data['data'] ?? response.data;
       if (data is List) {
-        categories.value =
-            data.map<String>((c) => c['name']?.toString() ?? '').toList();
+        categories.value = data
+            .map<String>((c) => c['name']?.toString() ?? '')
+            .toList();
       }
     } catch (_) {
       categories.value = [
-        'Electronics',
         'Fashion',
+        'Electronics',
         'Home',
         'Beauty',
+        'Grocery',
         'Sports',
+        'Toys',
+        'Books',
+        'Automotive',
+        'Health',
+        'Jewelry',
+        'Baby',
+        'Furniture',
+        'Mobiles',
+        'Laptops',
+        'Shoes',
+        'Others',
       ];
     }
   }
@@ -172,34 +185,35 @@ class VendorEditProductController extends GetxController {
       Container(
         decoration: BoxDecoration(
           color: Get.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Obx(() => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'select_category'.tr,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        child: Obx(
+          () => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ...categories.map((cat) => ListTile(
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'select_category'.tr,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ...categories.map(
+                (cat) => ListTile(
                   title: Text(cat),
                   trailing: cat == selectedCategory.value
                       ? const Icon(Icons.check, color: Colors.orange)
@@ -208,10 +222,12 @@ class VendorEditProductController extends GetxController {
                     selectedCategory.value = cat;
                     Get.back();
                   },
-                )),
-            const SizedBox(height: 20),
-          ],
-        )),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -433,10 +449,7 @@ class VendorEditProductController extends GetxController {
           const SizedBox(height: 16),
           Text(
             'delete_product'.tr,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Text(
@@ -477,8 +490,7 @@ class VendorEditProductController extends GetxController {
             child: OutlinedButton(
               onPressed: () => Get.back(),
               style: OutlinedButton.styleFrom(
-                foregroundColor:
-                    Get.isDarkMode ? Colors.white : Colors.black,
+                foregroundColor: Get.isDarkMode ? Colors.white : Colors.black,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

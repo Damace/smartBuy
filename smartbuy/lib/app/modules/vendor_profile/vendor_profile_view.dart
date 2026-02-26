@@ -37,9 +37,9 @@ class VendorProfileView extends GetView<VendorProfileController> {
             // Business Management Section
             Text(
               'business_management'.tr,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             _buildBusinessManagementSection(context),
@@ -48,44 +48,44 @@ class VendorProfileView extends GetView<VendorProfileController> {
             // Operations & Display Section
             Text(
               'operations_display'.tr,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             _buildOperationsSection(context),
             const SizedBox(height: 24),
 
-            // View Store as Buyer Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: controller.viewStoreAsBuyer,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.visibility_outlined, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'view_store_as_buyer'.tr,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
+            // // View Store as Buyer Button
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: ElevatedButton(
+            //     onPressed: controller.viewStoreAsBuyer,
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: AppTheme.primaryColor,
+            //       foregroundColor: Colors.white,
+            //       padding: const EdgeInsets.symmetric(vertical: 16),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //     ),
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.center,
+            //       children: [
+            //         const Icon(Icons.visibility_outlined, size: 20),
+            //         const SizedBox(width: 8),
+            //         Text(
+            //           'view_store_as_buyer'.tr,
+            //           style: const TextStyle(
+            //             fontSize: 16,
+            //             fontWeight: FontWeight.w600,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
 
             // Sign Out Button
             Center(
@@ -153,8 +153,8 @@ class VendorProfileView extends GetView<VendorProfileController> {
                   () => Text(
                     controller.storeName.value,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -185,10 +185,10 @@ class VendorProfileView extends GetView<VendorProfileController> {
                   () => Text(
                     '${'member_since'.tr} ${controller.memberSince.value}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Get.isDarkMode
-                              ? AppTheme.darkTextSecondary
-                              : AppTheme.textSecondary,
-                        ),
+                      color: Get.isDarkMode
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -200,13 +200,14 @@ class VendorProfileView extends GetView<VendorProfileController> {
   }
 
   Widget _buildStatsCards(BuildContext context) {
-    return Row(
+    return Obx(() => Row(
       children: [
         Expanded(
           child: _buildStatCard(
             context,
             title: 'total_sales'.tr,
             value: controller.totalSales.value,
+            isLoading: controller.isLoading.value,
           ),
         ),
         const SizedBox(width: 12),
@@ -215,6 +216,7 @@ class VendorProfileView extends GetView<VendorProfileController> {
             context,
             title: 'active'.tr,
             value: controller.activeProducts.value.toString(),
+            isLoading: controller.isLoading.value,
           ),
         ),
         const SizedBox(width: 12),
@@ -222,12 +224,13 @@ class VendorProfileView extends GetView<VendorProfileController> {
           child: _buildStatCard(
             context,
             title: 'rating'.tr,
-            value: controller.rating.value.toString(),
+            value: controller.rating.value.toStringAsFixed(1),
             showStar: true,
+            isLoading: controller.isLoading.value,
           ),
         ),
       ],
-    );
+    ));
   }
 
   Widget _buildStatCard(
@@ -235,6 +238,7 @@ class VendorProfileView extends GetView<VendorProfileController> {
     required String title,
     required String value,
     bool showStar = false,
+    bool isLoading = false,
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -257,36 +261,43 @@ class VendorProfileView extends GetView<VendorProfileController> {
           Text(
             title.toUpperCase(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Get.isDarkMode
-                      ? AppTheme.darkTextSecondary
-                      : AppTheme.textSecondary,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
-                ),
+              color: Get.isDarkMode
+                  ? AppTheme.darkTextSecondary
+                  : AppTheme.textSecondary,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+          isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        value,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                  overflow: TextOverflow.ellipsis,
+                    ),
+                    if (showStar) ...[
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.star,
+                        color: AppTheme.primaryColor,
+                        size: 16,
+                      ),
+                    ],
+                  ],
                 ),
-              ),
-              if (showStar) ...[
-                const SizedBox(width: 4),
-                const Icon(
-                  Icons.star,
-                  color: AppTheme.primaryColor,
-                  size: 16,
-                ),
-              ],
-            ],
-          ),
         ],
       ),
     );
@@ -411,11 +422,7 @@ class VendorProfileView extends GetView<VendorProfileController> {
                 color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                icon,
-                color: AppTheme.primaryColor,
-                size: 20,
-              ),
+              child: Icon(icon, color: AppTheme.primaryColor, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -425,8 +432,8 @@ class VendorProfileView extends GetView<VendorProfileController> {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -434,7 +441,8 @@ class VendorProfileView extends GetView<VendorProfileController> {
                       Expanded(
                         child: Text(
                           subtitle,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: Get.isDarkMode
                                     ? AppTheme.darkTextSecondary
                                     : AppTheme.textSecondary,
